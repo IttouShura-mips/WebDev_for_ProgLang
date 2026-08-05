@@ -841,6 +841,7 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            text-decoration: none;
             
             opacity: 0;
             transform: translateY(40px) scale(0.96);
@@ -880,110 +881,6 @@
             color: var(--text-muted-teal);
             font-size: 0.95rem;
             margin-bottom: 1.5rem;
-        }
-
-        /* --- Modal Styling --- */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(2, 12, 27, 0.85);
-            backdrop-filter: blur(8px);
-            z-index: 2000;
-            overflow-y: auto;
-            padding: 2rem 1rem;
-        }
-
-        .modal-content {
-            background-color: var(--bg-card);
-            border: 1px solid var(--primary-neon);
-            border-radius: var(--border-radius);
-            max-width: 850px;
-            margin: 2rem auto;
-            padding: 2.5rem;
-            position: relative;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), var(--neon-glow);
-        }
-
-        .close-btn {
-            position: absolute;
-            top: 1.5rem;
-            right: 1.5rem;
-            color: var(--text-muted-teal);
-            font-size: 1.5rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: var(--transition-smooth);
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            background: rgba(2, 12, 27, 0.5);
-        }
-
-        .close-btn:hover {
-            color: var(--primary-neon);
-            background: rgba(13, 245, 227, 0.1);
-        }
-
-        .modal-header {
-            border-bottom: 1px solid var(--border-teal);
-            padding-bottom: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .modal-header h2 {
-            color: var(--primary-neon);
-            font-size: 1.8rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .detail-block {
-            margin-bottom: 2rem;
-        }
-
-        .detail-block h4 {
-            color: var(--primary-neon);
-            font-size: 1.15rem;
-            margin-bottom: 0.8rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            border-bottom: 1px solid rgba(13, 245, 227, 0.15);
-            padding-bottom: 0.4rem;
-        }
-
-        .detail-block ul {
-            list-style-type: none;
-            padding-left: 0;
-        }
-
-        .detail-block ul li {
-            position: relative;
-            padding-left: 1.5rem;
-            color: var(--text-high-contrast);
-            margin-bottom: 0.5rem;
-        }
-
-        .detail-block ul li::before {
-            content: "\f105";
-            font-family: "Font Awesome 6 Free";
-            font-weight: 900;
-            position: absolute;
-            left: 0;
-            color: var(--primary-neon);
-        }
-
-        .modal-footer {
-            margin-top: 2rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid var(--border-teal);
-            text-align: right;
         }
 
         .program-card.hidden {
@@ -1179,15 +1076,6 @@
                 grid-template-columns: 1fr;
             }
 
-            .modal-content {
-                padding: 1.5rem;
-                margin: 1rem auto;
-            }
-
-            .modal-header h2 {
-                font-size: 1.4rem;
-            }
-
             footer .footer-info {
                 flex-direction: column;
                 gap: 2rem;
@@ -1226,14 +1114,6 @@
 
             .school-name h1 {
                 font-size: 1.4rem;
-            }
-
-            .modal-footer {
-                text-align: center;
-            }
-
-            .modal-footer .btn {
-                width: 100%;
             }
 
             footer .icon img {
@@ -1590,123 +1470,115 @@
         <div class="container">
             <div class="programs-grid" id="programsGrid">
                 <!-- 1. BS Computer Science -->
-                <div class="program-card" data-title="Bachelor of Science in Computer Science">
+                <a href="department-description.html#bscs" class="program-card" data-title="Bachelor of Science in Computer Science">
                     <div>
                         <span class="badge-sm"><i class="fa-solid fa-laptop-code"></i> College of Computer Studies</span>
                         <h3>Bachelor of Science in Computer Science</h3>
                         <p>Focuses on computing theories, algorithmic foundations, software development, and modern AI innovations.</p>
                     </div>
-                    <button class="btn btn-secondary btn-block" onclick="openProgramDetails('bscs')">
+                    <span class="btn btn-secondary btn-block">
                         <i class="fa-solid fa-circle-info"></i> View Program Details
-                    </button>
-                </div>
+                    </span>
+                </a>
 
                 <!-- 2. BS Public Administration -->
-                <div class="program-card" data-title="Bachelor of Science in Public Administration">
+                <a href="department-description.html#bspa" class="program-card" data-title="Bachelor of Science in Public Administration">
                     <div>
                         <span class="badge-sm"><i class="fa-solid fa-scale-balanced"></i> College of Arts & Governance</span>
                         <h3>Bachelor of Science in Public Administration</h3>
                         <p>Prepares future public servants with leadership, policy development, and governance skillsets.</p>
                     </div>
-                    <button class="btn btn-secondary btn-block" onclick="openProgramDetails('bspa')">
+                    <span class="btn btn-secondary btn-block">
                         <i class="fa-solid fa-circle-info"></i> View Program Details
-                    </button>
-                </div>
+                    </span>
+                </a>
 
                 <!-- 3. BS Tourism Management -->
-                <div class="program-card" data-title="Bachelor of Science in Tourism Management">
+                <a href="department-description.html#bstm" class="program-card" data-title="Bachelor of Science in Tourism Management">
                     <div>
                         <span class="badge-sm"><i class="fa-solid fa-plane-departure"></i> College of Hospitality & Tourism</span>
                         <h3>Bachelor of Science in Tourism Management</h3>
                         <p>Trains future global managers in sustainable tourism, hospitality operations, and travel management.</p>
                     </div>
-                    <button class="btn btn-secondary btn-block" onclick="openProgramDetails('bstm')">
+                    <span class="btn btn-secondary btn-block">
                         <i class="fa-solid fa-circle-info"></i> View Program Details
-                    </button>
-                </div>
+                    </span>
+                </a>
 
                 <!-- 4. BS Secondary Education -->
-                <div class="program-card" data-title="Bachelor of Secondary Education">
+                <a href="department-description.html#bsed" class="program-card" data-title="Bachelor of Secondary Education">
                     <div>
                         <span class="badge-sm"><i class="fa-solid fa-chalkboard-user"></i> College of Teacher Education</span>
                         <h3>Bachelor of Secondary Education</h3>
                         <p>Equips educators with modern pedagogical methods for high school teaching and curriculum planning.</p>
                     </div>
-                    <button class="btn btn-secondary btn-block" onclick="openProgramDetails('bsed')">
+                    <span class="btn btn-secondary btn-block">
                         <i class="fa-solid fa-circle-info"></i> View Program Details
-                    </button>
-                </div>
+                    </span>
+                </a>
 
                 <!-- 5. BS Technical Vocational Teacher Education -->
-                <div class="program-card" data-title="Bachelor of Technical Vocational Teacher Education">
+                <a href="department-description.html#btvted" class="program-card" data-title="Bachelor of Technical Vocational Teacher Education">
                     <div>
                         <span class="badge-sm"><i class="fa-solid fa-gears"></i> College of Teacher Education</span>
                         <h3>Bachelor of Technical Vocational Teacher Education</h3>
                         <p>Specializes in technical-vocational training, hands-on skill development, and technology teaching.</p>
                     </div>
-                    <button class="btn btn-secondary btn-block" onclick="openProgramDetails('btvted')">
+                    <span class="btn btn-secondary btn-block">
                         <i class="fa-solid fa-circle-info"></i> View Program Details
-                    </button>
-                </div>
+                    </span>
+                </a>
 
                 <!-- 6. BS Elementary Education -->
-                <div class="program-card" data-title="Bachelor of Elementary Education">
+                <a href="department-description.html#beed" class="program-card" data-title="Bachelor of Elementary Education">
                     <div>
                         <span class="badge-sm"><i class="fa-solid fa-child-reaching"></i> College of Teacher Education</span>
                         <h3>Bachelor of Elementary Education</h3>
                         <p>Fosters foundational education skills to guide and nurture young learners in primary education.</p>
                     </div>
-                    <button class="btn btn-secondary btn-block" onclick="openProgramDetails('beed')">
+                    <span class="btn btn-secondary btn-block">
                         <i class="fa-solid fa-circle-info"></i> View Program Details
-                    </button>
-                </div>
+                    </span>
+                </a>
 
                 <!-- 7. BS Business Administration -->
-                <div class="program-card" data-title="Bachelor of Science in Business Administration">
+                <a href="department-description.html#bsba" class="program-card" data-title="Bachelor of Science in Business Administration">
                     <div>
                         <span class="badge-sm"><i class="fa-solid fa-briefcase"></i> College of Business & Management</span>
                         <h3>Bachelor of Science in Business Administration</h3>
                         <p>Develops entrepreneurial mindsets, marketing prowess, financial strategy, and operational skills.</p>
                     </div>
-                    <button class="btn btn-secondary btn-block" onclick="openProgramDetails('bsba')">
+                    <span class="btn btn-secondary btn-block">
                         <i class="fa-solid fa-circle-info"></i> View Program Details
-                    </button>
-                </div>
+                    </span>
+                </a>
 
                 <!-- 8. BS Accountancy -->
-                <div class="program-card" data-title="Bachelor of Science in Accountancy">
+                <a href="department-description.html#bsa" class="program-card" data-title="Bachelor of Science in Accountancy">
                     <div>
                         <span class="badge-sm"><i class="fa-solid fa-calculator"></i> College of Accountancy</span>
                         <h3>Bachelor of Science in Accountancy</h3>
                         <p>Comprehensive training in financial accounting, auditing, taxation, and corporate governance.</p>
                     </div>
-                    <button class="btn btn-secondary btn-block" onclick="openProgramDetails('bsa')">
+                    <span class="btn btn-secondary btn-block">
                         <i class="fa-solid fa-circle-info"></i> View Program Details
-                    </button>
-                </div>
+                    </span>
+                </a>
 
                 <!-- 9. Associate in Computer Technology -->
-                <div class="program-card" data-title="Associate in Computer Technology">
+                <a href="department-description.html#act" class="program-card" data-title="Associate in Computer Technology">
                     <div>
                         <span class="badge-sm"><i class="fa-solid fa-microchip"></i> College of Computer Studies</span>
                         <h3>Associate in Computer Technology</h3>
                         <p>A fast-track 2-year technical program covering hardware servicing, web design, and network support.</p>
                     </div>
-                    <button class="btn btn-secondary btn-block" onclick="openProgramDetails('act')">
+                    <span class="btn btn-secondary btn-block">
                         <i class="fa-solid fa-circle-info"></i> View Program Details
-                    </button>
-                </div>
+                    </span>
+                </a>
             </div>
         </div>
     </section>
-
-    <!-- Program Details Modal Container -->
-    <div id="programModal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="closeProgramModal()"><i class="fa-solid fa-xmark"></i></span>
-            <div id="modalBody"></div>
-        </div>
-    </div>
 
     <!-- Footer -->
     <footer>
@@ -1897,259 +1769,6 @@
         document.querySelectorAll('.program-card').forEach(card => {
             cardObserver.observe(card);
         });
-
-        // Program Detailed Information Database
-        const programData = {
-            bscs: {
-                title: "Bachelor of Science in Computer Science",
-                description: "The BS Computer Science program focuses on algorithmic problem solving, software engineering, intelligent systems, and computational theory designed to produce tech innovators.",
-                objectives: [
-                    "Design and implement complex software solutions.",
-                    "Apply theoretical principles of computing to real-world problems.",
-                    "Develop ethical computational applications adhering to global standards."
-                ],
-                curriculum: [
-                    "Year 1: Programming Fundamentals, Discrete Mathematics, Data Structures",
-                    "Year 2: Object-Oriented Programming, Computer Architecture, Database Systems",
-                    "Year 3: Software Engineering, Algorithms, Operating Systems, Web Development",
-                    "Year 4: Artificial Intelligence, Capstone Research Project, Industry Internship"
-                ],
-                careers: ["Software Engineer", "Systems Analyst", "Full Stack Developer", "Data Scientist", "AI Specialist"],
-                admissions: [
-                    "Form 138 / High School Report Card",
-                    "Certificate of Good Moral Character",
-                    "PSA Birth Certificate",
-                    "Passed ICF Academic Entrance Assessment"
-                ]
-            },
-            bspa: {
-                title: "Bachelor of Science in Public Administration",
-                description: "This program prepares students for leadership roles in public service, policy evaluation, non-profit management, and ethical governance.",
-                objectives: [
-                    "Understand public policy formulation and community management.",
-                    "Develop accountable, transparent, and service-oriented leadership.",
-                    "Execute efficient organizational strategies in government sectors."
-                ],
-                curriculum: [
-                    "Year 1: Introduction to Public Admin, Governance & Politics, Ethics",
-                    "Year 2: Organization & Management, Local Legislation, Public Personnel",
-                    "Year 3: Public Fiscal Administration, Policy Analysis, Public Finance",
-                    "Year 4: Research in Public Admin, On-the-Job Training in Public Sector"
-                ],
-                careers: ["Public Policy Analyst", "Civil Servant", "Human Resource Specialist", "City Administrator", "NGO Manager"],
-                admissions: [
-                    "Form 138 / High School Report Card",
-                    "Certificate of Good Moral Character",
-                    "PSA Birth Certificate",
-                    "Admission Interview"
-                ]
-            },
-            bstm: {
-                title: "Bachelor of Science in Tourism Management",
-                description: "Prepares professionals for dynamic careers in destination management, eco-tourism, flight operations, and international hospitality.",
-                objectives: [
-                    "Master global tour operations and event management skills.",
-                    "Promote sustainable cultural and ecological tourism development.",
-                    "Demonstrate high-level foreign language and hospitality skills."
-                ],
-                curriculum: [
-                    "Year 1: Micro Perspective of Tourism, Risk Management, Philippine Tourism",
-                    "Year 2: Foreign Languages, Travel Agency & Tour Operations",
-                    "Year 3: Destination Marketing, Event Management, E-Commerce in Tourism",
-                    "Year 4: Tourism Practicum (Local / International Internship)"
-                ],
-                careers: ["Tour Operations Manager", "Flight Attendant", "Travel Consultant", "Events Planner", "Resort Operations Manager"],
-                admissions: [
-                    "Form 138 / High School Report Card",
-                    "Good Moral Certificate",
-                    "Medical Clearance Certificate",
-                    "PSA Birth Certificate"
-                ]
-            },
-            bsed: {
-                title: "Bachelor of Secondary Education",
-                description: "Trains future high school educators with specialization in subjects like Mathematics, English, Science, and Social Studies.",
-                objectives: [
-                    "Develop mastery over secondary education curriculum and content.",
-                    "Apply innovative digital teaching methodologies.",
-                    "Foster inclusive and supportive classroom environments."
-                ],
-                curriculum: [
-                    "Year 1: Child & Adolescent Development, The Teaching Profession",
-                    "Year 2: Assessment of Learning, Curriculum Development, Subject Specialization",
-                    "Year 3: Instructional Technology, Field Study 1 & 2",
-                    "Year 4: Teaching Internship (Practice Teaching in Partner Schools)"
-                ],
-                careers: ["High School Teacher", "Curriculum Developer", "Academic Coordinator", "Educational Specialist"],
-                admissions: [
-                    "Form 138 / Senior High School Report Card",
-                    "Certificate of Good Moral Character",
-                    "PSA Birth Certificate"
-                ]
-            },
-            btvted: {
-                title: "Bachelor of Technical Vocational Teacher Education",
-                description: "Equips student-teachers with technical expertise and pedagogical skills to teach technical and vocational subjects.",
-                objectives: [
-                    "Gain national technical certifications in technical fields.",
-                    "Implement modern competency-based TVET training.",
-                    "Prepare students for skilled global workforce demands."
-                ],
-                curriculum: [
-                    "Year 1: Foundations of Technical Education, Technical Drafting",
-                    "Year 2: Competency Assessment Methods, Applied Electronics/Mechanics",
-                    "Year 3: Shop Layout & Management, Courseware Design",
-                    "Year 4: Industry Immersion & Practice Teaching"
-                ],
-                careers: ["TVET Instructor", "Vocational School Trainer", "Technical Assessor", "Industrial Skill Supervisor"],
-                admissions: [
-                    "Form 138 / SHS Card",
-                    "Good Moral Certificate",
-                    "PSA Birth Certificate"
-                ]
-            },
-            beed: {
-                title: "Bachelor of Elementary Education",
-                description: "Focuses on providing holistic education training tailored specifically for primary school child development and instruction.",
-                objectives: [
-                    "Master foundational elementary subjects and literacy strategies.",
-                    "Understand early childhood psychological and social development.",
-                    "Design creative and supportive primary learning activities."
-                ],
-                curriculum: [
-                    "Year 1: Child Development, Teaching Elementary Science & Math",
-                    "Year 2: Primary Language Literacy, Art & Music Education",
-                    "Year 3: Classroom Management, Special Needs Education Basics",
-                    "Year 4: Full-term Practice Teaching in Primary Schools"
-                ],
-                careers: ["Elementary School Teacher", "Primary Educator", "Child Care Director", "Educational Material Author"],
-                admissions: [
-                    "Form 138 / SHS Card",
-                    "Good Moral Certificate",
-                    "PSA Birth Certificate"
-                ]
-            },
-            bsba: {
-                title: "Bachelor of Science in Business Administration",
-                description: "Offers broad knowledge in core corporate operations, marketing strategy, modern management, and startup entrepreneurship.",
-                objectives: [
-                    "Develop innovative solutions to contemporary corporate challenges.",
-                    "Demonstrate proficiency in digital marketing and finance.",
-                    "Lead teams effectively with ethical business practices."
-                ],
-                curriculum: [
-                    "Year 1: Principles of Management, Microeconomics, Business Math",
-                    "Year 2: Marketing Management, Financial Accounting, Business Law",
-                    "Year 3: Human Resource Management, Operations, Strategic Management",
-                    "Year 4: Business Practicum / Corporate Internship & Feasibility Study"
-                ],
-                careers: ["Marketing Manager", "Entrepreneur", "Business Operations Analyst", "HR Officer", "Account Executive"],
-                admissions: [
-                    "Form 138 / High School Report Card",
-                    "Good Moral Certificate",
-                    "PSA Birth Certificate"
-                ]
-            },
-            bsa: {
-                title: "Bachelor of Science in Accountancy",
-                description: "Rigorous academic training designed to prepare students for the Certified Public Accountant (CPA) licensure examination and corporate financial practice.",
-                objectives: [
-                    "Demonstrate expertise in accounting standards and financial reporting.",
-                    "Execute auditing procedures and tax compliance strategies.",
-                    "Uphold high standards of professional ethics in financial reporting."
-                ],
-                curriculum: [
-                    "Year 1: Financial Accounting, Intermediate Accounting, Business Law",
-                    "Year 2: Advanced Accounting, Cost Accounting, Corporate Taxation",
-                    "Year 3: Auditing Theory, Auditing Problems, Accounting Information Systems",
-                    "Year 4: CPA Review Integration & Apprenticeship"
-                ],
-                careers: ["Certified Public Accountant (CPA)", "Auditor", "Tax Consultant", "Chief Financial Officer (CFO)", "Financial Controller"],
-                admissions: [
-                    "Form 138 / SHS Report Card (With High Math/English Proficiency)",
-                    "Passed College Entrance Exam & Accountancy Screening Interview",
-                    "Good Moral Certificate & PSA Birth Certificate"
-                ]
-            },
-            act: {
-                title: "Associate in Computer Technology",
-                description: "A 2-year diploma course focused on core practical computing, computer servicing, basic software coding, and IT systems operations.",
-                objectives: [
-                    "Master hardware troubleshooting and networking basics.",
-                    "Develop fundamental web and database applications.",
-                    "Prepare for immediate technical employment or advancement to BSCS."
-                ],
-                curriculum: [
-                    "Year 1: Fundamentals of IT, Computer Hardware Servicing, Web Design",
-                    "Year 2: Database Management, Network Essentials, Practical Internship"
-                ],
-                careers: ["IT Support Technician", "Computer Maintenance Specialist", "Web Developer Assistant", "Network Assistant"],
-                admissions: [
-                    "Form 138 / SHS Report Card",
-                    "Good Moral Certificate",
-                    "PSA Birth Certificate"
-                ]
-            }
-        };
-
-        const modal = document.getElementById('programModal');
-        const modalBody = document.getElementById('modalBody');
-
-        function openProgramDetails(key) {
-            const data = programData[key];
-            if (!data) return;
-
-            modalBody.innerHTML = `
-                <div class="modal-header">
-                    <h2>${data.title}</h2>
-                </div>
-                <div class="detail-block">
-                    <h4><i class="fa-solid fa-align-left"></i> Program Description</h4>
-                    <p>${data.description}</p>
-                </div>
-                <div class="detail-block">
-                    <h4><i class="fa-solid fa-bullseye"></i> Objectives</h4>
-                    <ul>
-                        ${data.objectives.map(item => `<li>${item}</li>`).join('')}
-                    </ul>
-                </div>
-                <div class="detail-block">
-                    <h4><i class="fa-solid fa-book-open"></i> Curriculum Structure</h4>
-                    <ul>
-                        ${data.curriculum.map(item => `<li>${item}</li>`).join('')}
-                    </ul>
-                </div>
-                <div class="detail-block">
-                    <h4><i class="fa-solid fa-user-tie"></i> Career Opportunities</h4>
-                    <ul>
-                        ${data.careers.map(item => `<li>${item}</li>`).join('')}
-                    </ul>
-                </div>
-                <div class="detail-block">
-                    <h4><i class="fa-solid fa-clipboard-check"></i> Admission Requirements</h4>
-                    <ul>
-                        ${data.admissions.map(item => `<li>${item}</li>`).join('')}
-                    </ul>
-                </div>
-                <div class="modal-footer">
-                    <a href="./enrollmentpage.html" class="btn btn-primary">
-                        <i class="fa-solid fa-paper-plane"></i> Apply Now
-                    </a>
-                </div>
-            `;
-
-            modal.style.display = 'block';
-        }
-
-        function closeProgramModal() {
-            modal.style.display = 'none';
-        }
-
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                closeProgramModal();
-            }
-        }
     </script>
 </body>
 </html>

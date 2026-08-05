@@ -9,7 +9,6 @@
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-
         * {
             margin: 0;
             padding: 0;
@@ -270,7 +269,7 @@
             width: 260px;
             background: rgba(10, 25, 47, 0.95);
             backdrop-filter: blur(12px);
-            border: 1px solid var(--border-teal, #172a45);
+            border: 1px solid var(--border-teal);
             border-radius: 12px;
             padding: 12px;
             box-shadow: 
@@ -297,7 +296,7 @@
         .portal-box-title {
             font-size: 0.75rem;
             font-weight: 700;
-            color: var(--primary-neon, #0df5e3);
+            color: var(--primary-neon);
             text-transform: uppercase;
             letter-spacing: 1px;
             padding: 4px 8px;
@@ -309,7 +308,7 @@
             gap: 12px;
             padding: 10px 12px;
             text-decoration: none;
-            color: var(--text-high-contrast, #e2e8f0);
+            color: var(--text-high-contrast);
             border-radius: 8px;
             background: rgba(2, 12, 27, 0.5);
             border: 1px solid transparent;
@@ -332,17 +331,221 @@
 
         .portal-option small {
             font-size: 0.75rem;
-            color: var(--text-muted-teal, #8892b0);
+            color: var(--text-muted-teal);
         }
 
         .portal-option:hover {
             background: rgba(13, 245, 227, 0.1);
-            border-color: var(--primary-neon, #0df5e3);
+            border-color: var(--primary-neon);
             transform: translateX(4px);
         }
 
         .portal-option:hover strong {
-            color: var(--primary-neon, #0df5e3);
+            color: var(--primary-neon);
+        }
+
+        /* --- Floating Person Button --- */
+        .floating-person-btn {
+            position: fixed;
+            top: 100px;
+            right: 25px;
+            z-index: 90;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: 2px solid var(--primary-neon);
+            color: var(--primary-neon);
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--neon-glow);
+            transition: var(--transition-smooth);
+        }
+
+        .floating-person-btn:hover {
+            background: var(--primary-neon);
+            color: var(--bg-deep-abyss);
+            transform: scale(1.1);
+        }
+
+        /* --- Profile Modal --- */
+        .profile-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(2, 12, 27, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .profile-modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .profile-modal-content {
+            background: var(--bg-card);
+            border: 1px solid var(--primary-neon);
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 750px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 30px rgba(13, 245, 227, 0.2);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .profile-modal-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-teal);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .profile-modal-header h3 {
+            color: var(--primary-neon);
+            font-size: 1.2rem;
+        }
+
+        .profile-modal-close {
+            background: transparent;
+            border: none;
+            color: var(--text-muted-teal);
+            font-size: 1.4rem;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .profile-modal-close:hover {
+            color: var(--primary-neon);
+        }
+
+        .profile-scroll-slot {
+            padding: 1.5rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .profile-scroll-slot::-webkit-scrollbar {
+            display: none;
+        }
+
+        .profile-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .profile-role-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary-neon);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .profile-card-layout {
+            border: 2px solid var(--primary-neon);
+            padding: 1.5rem;
+            display: flex;
+            gap: 2rem;
+            background: rgba(2, 12, 27, 0.6);
+            align-items: center;
+        }
+
+        .profile-left {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 140px;
+            text-align: center;
+        }
+
+        .profile-pic-circle {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            border: 2px solid var(--text-high-contrast);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.8rem;
+            font-size: 0.85rem;
+            color: var(--text-muted-teal);
+            background: var(--bg-deep-abyss);
+            overflow: hidden;
+        }
+
+        .profile-pic-circle img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-fullname {
+            font-size: 0.85rem;
+            color: var(--text-high-contrast);
+        }
+
+        .profile-nickname {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary-neon);
+        }
+
+        .profile-divider-v {
+            width: 2px;
+            background-color: var(--primary-neon);
+            align-self: stretch;
+        }
+
+        .profile-right {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            font-size: 0.95rem;
+        }
+
+        .profile-info-row {
+            color: var(--text-high-contrast);
+        }
+
+        .profile-info-row span.label {
+            color: var(--primary-neon);
+            font-weight: 600;
+        }
+
+        .profile-divider-h {
+            height: 2px;
+            background-color: var(--primary-neon);
+            margin: 0.5rem 0;
+            width: 100%;
+        }
+
+        .profile-tags {
+            display: flex;
+            gap: 1.5rem;
+            color: var(--primary-neon);
+            font-weight: 600;
         }
 
         /* --- Buttons --- */
@@ -431,7 +634,7 @@
             font-size: 1.1rem;
         }
 
-        /* --- Full Details Sections (Single Column Display) --- */
+        /* --- Full Details Sections --- */
         .all-departments-container {
             padding: 4rem 0;
             background-color: var(--bg-deep-abyss);
@@ -495,7 +698,6 @@
             transform: scale(1.03);
         }
 
-        /* CHANGED: Set to a single full-width vertical column layout */
         .dept-content-grid {
             display: flex;
             flex-direction: column;
@@ -692,6 +894,16 @@
             }
         }
 
+        @media screen and (max-width: 600px) {
+            .profile-card-layout {
+                flex-direction: column;
+            }
+            .profile-divider-v {
+                width: 100%;
+                height: 2px;
+            }
+        }
+
         @media screen and (max-width: 768px) {
             nav.desktop-nav, 
             .desktop-portal-wrapper {
@@ -722,6 +934,33 @@
             footer .footer-info {
                 flex-direction: column;
                 gap: 2rem;
+            }
+
+            .office-hours p {
+                gap: 20px;
+            }
+
+            .portal-box {
+                right: 0;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .logo h2 {
+                font-size: 1.1rem;
+            }
+
+            .logo span {
+                font-size: 0.5rem;
+            }
+
+            .school-name h1 {
+                font-size: 1.4rem;
+            }
+
+            footer .icon img {
+                height: 36px;
+                width: 36px;
             }
         }
     </style>
@@ -778,6 +1017,189 @@
         </div>
     </header>  
 
+    <!-- Floating Person Icon Button -->
+    <button class="floating-person-btn" id="openProfileModal" aria-label="View Profiles">
+        <i class="fa-solid fa-user"></i>
+    </button>
+
+    <!-- Profile Information Modal -->
+    <div class="profile-modal-overlay" id="profileModalOverlay">
+        <div class="profile-modal-content">
+            <div class="profile-modal-header">
+                <h3>Team Profile Information</h3>
+                <button class="profile-modal-close" id="closeProfileModal">&times;</button>
+            </div>
+            
+            <div class="profile-scroll-slot">
+                <!-- LEADER -->
+                <div class="profile-group">
+                    <h4 class="profile-role-title">Leader</h4>
+                    <div class="profile-card-layout">
+                        <div class="profile-left">
+                            <div class="profile-pic-circle">
+                                <img src="../BackGroundimage/ProfilePic/ittou.jpg" alt="Leader Photo">
+                            </div>
+                            <div class="profile-fullname">Almadin N. Mipanga</div>
+                            <div class="profile-nickname">ITTOU</div>
+                        </div>
+                        <div class="profile-divider-v"></div>
+                        <div class="profile-right">
+                            <div class="profile-info-row"><span class="label">Born:</span> June 25 2004</div>
+                            <div class="profile-info-row"><span class="label">Email Address:</span> dmipanga25@gmail.com</div>
+                            <div class="profile-info-row"><span class="label">Live in:</span> 1294, Sitio Vega, Palarca ST., Pob Norte, Paniqui Tarlac</div>
+                            <div class="profile-info-row"><span class="label">Contact NO.:</span> +63 9308895963</div>
+                            <div class="profile-divider-h"></div>
+                            <div class="profile-tags">
+                                <span>Frontend</span>
+                                <span>Hardware</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VICE LEADER -->
+                <div class="profile-group">
+                    <h4 class="profile-role-title">Vice Leader</h4>
+                    <div class="profile-card-layout">
+                        <div class="profile-left">
+                            <div class="profile-pic-circle">
+                                <img src="../BackGroundimage/ProfilePic/Shan.jpeg" alt="Vice Leader Photo">
+                            </div>
+                            <div class="profile-fullname">Shan Raye R. Guzman</div>
+                            <div class="profile-nickname">REI</div>
+                        </div>
+                        <div class="profile-divider-v"></div>
+                        <div class="profile-right">
+                            <div class="profile-info-row"><span class="label">Born:</span> June 01 2006</div>
+                            <div class="profile-info-row"><span class="label">Email Address:</span> shanrayeguzman0@gmail.com</div>
+                            <div class="profile-info-row"><span class="label">Live in:</span> Sitio Dos, Abogado, Paniqui, Tarlac</div>
+                            <div class="profile-info-row"><span class="label">Contact NO.:</span> +63 9157955411</div>
+                            <div class="profile-divider-h"></div>
+                            <div class="profile-tags">
+                                <span>Web Development</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MEMBER 1 -->
+                <div class="profile-group">
+                    <h4 class="profile-role-title">Member 1</h4>
+                    <div class="profile-card-layout">
+                        <div class="profile-left">
+                            <div class="profile-pic-circle">
+                                <img src="../BackGroundimage/ProfilePic/rina.jpg" alt="Member 1 Photo">
+                            </div>
+                            <div class="profile-fullname">Rina Del Rosario</div>
+                            <div class="profile-nickname">REN</div>
+                        </div>
+                        <div class="profile-divider-v"></div>
+                        <div class="profile-right">
+                            <div class="profile-info-row"><span class="label">Born:</span> December 10 2005</div>
+                            <div class="profile-info-row"><span class="label">Email Address:</span> rinadelrosario1024@gmail.com</div>
+                            <div class="profile-info-row"><span class="label">Live in:</span> 160, Abogado, Paniqui, Tarlac</div>
+                            <div class="profile-info-row"><span class="label">Contact NO.:</span> +63 9241290844</div>
+                            <div class="profile-divider-h"></div>
+                            <div class="profile-tags"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MEMBER 2 -->
+                <div class="profile-group">
+                    <h4 class="profile-role-title">Member 2</h4>
+                    <div class="profile-card-layout">
+                        <div class="profile-left">
+                            <div class="profile-pic-circle">
+                                <img src="../BackGroundimage/ProfilePic/Kelly.jpeg" alt="Member 2 Photo">
+                            </div>
+                            <div class="profile-fullname">Kelly O. Cabanisan</div>
+                            <div class="profile-nickname">ELY</div>
+                        </div>
+                        <div class="profile-divider-v"></div>
+                        <div class="profile-right">
+                            <div class="profile-info-row"><span class="label">Born:</span> September 02 2005</div>
+                            <div class="profile-info-row"><span class="label">Email Address:</span> kellycabanisan09025@gmail.com</div>
+                            <div class="profile-info-row"><span class="label">Live in:</span> 0461, Sitio Ilang-ilang, Pob Norte, Paniqui, Tarlac</div>
+                            <div class="profile-info-row"><span class="label">Contact NO.:</span> +63 9929286838</div>
+                            <div class="profile-divider-h"></div>
+                            <div class="profile-tags"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MEMBER 3 -->
+                <div class="profile-group">
+                    <h4 class="profile-role-title">Member 3</h4>
+                    <div class="profile-card-layout">
+                        <div class="profile-left">
+                            <div class="profile-pic-circle">
+                                <img src="../BackGroundimage/ProfilePic/Kennjie.jpeg" alt="Member 3 Photo">
+                            </div>
+                            <div class="profile-fullname">Kennjie J. Hiyao</div>
+                            <div class="profile-nickname">KEN</div>
+                        </div>
+                        <div class="profile-divider-v"></div>
+                        <div class="profile-right">
+                            <div class="profile-info-row"><span class="label">Born:</span> July 11 2004</div>
+                            <div class="profile-info-row"><span class="label">Email Address:</span> kenhiyao@gmail.com</div>
+                            <div class="profile-info-row"><span class="label">Live in:</span> Purok 6 Canan, Paniqui, Tarlac</div>
+                            <div class="profile-info-row"><span class="label">Contact NO.:</span> +63 9942395815</div>
+                            <div class="profile-divider-h"></div>
+                            <div class="profile-tags"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MEMBER 4 -->
+                <div class="profile-group">
+                    <h4 class="profile-role-title">Member 4</h4>
+                    <div class="profile-card-layout">
+                        <div class="profile-left">
+                            <div class="profile-pic-circle">
+                                <img src="../BackGroundimage/ProfilePic/Jairus.jpg" alt="Member 4 Photo">
+                            </div>
+                            <div class="profile-fullname">Michael Jairus F. Guirao</div>
+                            <div class="profile-nickname">JAI</div>
+                        </div>
+                        <div class="profile-divider-v"></div>
+                        <div class="profile-right">
+                            <div class="profile-info-row"><span class="label">Born:</span> September 07 2005</div>
+                            <div class="profile-info-row"><span class="label">Email Address:</span> jaiguirao16@gmail.com</div>
+                            <div class="profile-info-row"><span class="label">Live in:</span> Nipaco, Paniqui, Tarlac</div>
+                            <div class="profile-info-row"><span class="label">Contact NO.:</span> +63 9687763300</div>
+                            <div class="profile-divider-h"></div>
+                            <div class="profile-tags"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MEMBER 5 -->
+                <div class="profile-group">
+                    <h4 class="profile-role-title">Member 5</h4>
+                    <div class="profile-card-layout">
+                        <div class="profile-left">
+                            <div class="profile-pic-circle">
+                                <img src="../BackGroundimage/ProfilePic/adrian.jpg" alt="Member 5 Photo">
+                            </div>
+                            <div class="profile-fullname">Adrian D. Lampa</div>
+                            <div class="profile-nickname">DRIAN</div>
+                        </div>
+                        <div class="profile-divider-v"></div>
+                        <div class="profile-right">
+                            <div class="profile-info-row"><span class="label">Born:</span> September 07 2005</div>
+                            <div class="profile-info-row"><span class="label">Email Address:</span> lampaadrian5@gmail.com</div>
+                            <div class="profile-info-row"><span class="label">Live in:</span> Burgos St, Pob norte, Paniqui, Tarlac</div>
+                            <div class="profile-info-row"><span class="label">Contact NO.:</span> +63 9851414905</div>
+                            <div class="profile-divider-h"></div>
+                            <div class="profile-tags"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Mobile Sidebar Drawer & Overlay -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
     
@@ -833,7 +1255,7 @@
         <p>Explore complete program descriptions, course outlines, career outlooks, and admission criteria across all departments.</p>
     </section>
 
-    <!-- Full Department Details Section (Detailed Single-Column Column Layout) -->
+    <!-- Full Department Details Section -->
     <section class="all-departments-container">
         <div class="container">
 
@@ -1243,7 +1665,7 @@
         </div>
     </section>
 
-    <!-- Updated Footer -->
+    <!-- Footer -->
     <footer>
         <div class="footer-info">
             <div class="contact">
@@ -1345,6 +1767,27 @@
 
             setupPortalDropdown("portalLoginBtn", "portalMenu");
             setupPortalDropdown("mobilePortalBtn", "mobilePortalMenu");
+
+            /* Profile Modal Controls */
+            const openProfileModalBtn = document.getElementById("openProfileModal");
+            const closeProfileModalBtn = document.getElementById("closeProfileModal");
+            const profileModalOverlay = document.getElementById("profileModalOverlay");
+
+            if (openProfileModalBtn && closeProfileModalBtn && profileModalOverlay) {
+                openProfileModalBtn.addEventListener("click", () => {
+                    profileModalOverlay.classList.add("active");
+                });
+
+                closeProfileModalBtn.addEventListener("click", () => {
+                    profileModalOverlay.classList.remove("active");
+                });
+
+                profileModalOverlay.addEventListener("click", (e) => {
+                    if (e.target === profileModalOverlay) {
+                        profileModalOverlay.classList.remove("active");
+                    }
+                });
+            }
         });
     </script>
 </body>

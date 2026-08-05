@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Department Details | ICF Interworld Colleges Foundation Inc.</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-deep-abyss: #020c1b;      /* Deep dark oceanic background */
+            --bg-card: #0a192f;            /* Dark teal-tinted card background */
+            --bg-card-hover: #112240;      /* Elevated glass depth background */
+            --primary-neon: #0df5e3;       /* Bioluminescent vibrant teal */
+            --primary-neon-hover: #00cbb9; /* Slightly darker neon active */
+            --text-high-contrast: #e2e8f0; /* Crisp white-silver */
+            --text-muted-teal: #8892b0;    /* Soft teal gray */
+            --border-teal: #172a45;        /* Subdued border color */
+            --success-green: #10b981;      
+            --border-radius: 12px;
+            --transition-smooth: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --neon-glow: 0 0 15px rgba(13, 245, 227, 0.3);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-high-contrast);
+            background-color: var(--bg-deep-abyss);
+            line-height: 1.6;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .container { 
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* --- Header / Navigation --- */
+        header {
+            background-color: rgba(2, 12, 27, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-teal);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.2rem 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo img {
+            height: 40px;
+        }
+
+        .logo h2 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            color: var(--text-high-contrast);
+        }
+
+        .logo span {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 400;
+            color: var(--primary-neon);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* --- Menu Toggle Button for Mobile --- */
+        .mobile-menu-btn {
+            display: none;
+            background: transparent;
+            border: 1px solid var(--border-teal);
+            color: var(--primary-neon);
+            font-size: 1.3rem;
+            padding: 0.5rem 0.8rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .mobile-menu-btn:hover {
+            background-color: rgba(13, 245, 227, 0.1);
+            border-color: var(--primary-neon);
+        }
+
+        .desktop-nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .desktop-nav-links a {
+            text-decoration: none;
+            color: var(--text-muted-teal);
+            font-weight: 500;
+            font-size: 1.1rem;
+            transition: var(--transition-smooth);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .desktop-nav-links a:hover, .desktop-nav-links a.active {
+            color: var(--primary-neon);
+            text-shadow: 0 0 40px var(--primary-neon);
+        }
+
+        /* --- Mobile Off-Canvas Sidebar Drawer --- */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(2, 12, 27, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 998;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .mobile-sidebar {
+            position: fixed;
+            top: 0;
+            right: -320px;
+            width: 300px;
+            height: 100vh;
+            background: rgba(10, 25, 47, 0.98);
+            border-left: 1px solid var(--border-teal);
+            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.8);
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            padding: 2rem 1.5rem;
+            transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow-y: auto;
+        }
+
+        .mobile-sidebar.active {
+            right: 0;
+        }
+
+        .sidebar-close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: transparent;
+            border: none;
+            color: var(--text-muted-teal);
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: var(--transition-smooth);
+        }
+
+        .sidebar-close-btn:hover {
+            color: var(--primary-neon);
+            background: rgba(13, 245, 227, 0.1);
+        }
+
+        .sidebar-brand {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 1rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .sidebar-brand img {
+            height: 75px;
+            margin-bottom: 10px;
+        }
+
+        .sidebar-nav-links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+            width: 100%;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .sidebar-nav-links a {
+            text-decoration: none;
+            color: var(--text-high-contrast);
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: left;
+            gap: 10px;
+            padding: 0.6rem;
+            border-radius: 8px;
+            transition: var(--transition-smooth);
+        }
+
+        .sidebar-nav-links a:hover, .sidebar-nav-links a.active {
+            color: var(--primary-neon);
+            background: rgba(13, 245, 227, 0.08);
+        }
+
+        .sidebar-footer-portal {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-teal);
+        }
+
+        .sidebar-footer-portal .btn-secondary {
+            transform: scale(0.88);
+            width: 100%;
+            font-size: 0.85rem;
+            height: 42px;
+        }
+
+        /* --- Portal Dropdown --- */
+        .portal-dropdown-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .portal-box {
+            position: absolute;
+            top: calc(100% + 12px);
+            right: 0;
+            width: 260px;
+            background: rgba(10, 25, 47, 0.95);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-teal, #172a45);
+            border-radius: 12px;
+            padding: 12px;
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.7),
+                0 0 25px rgba(13, 245, 227, 0.15);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 1000;
+            
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-15px) scaleY(0.9);
+            transform-origin: top center;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .portal-box.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0) scaleY(1);
+        }
+
+        .portal-box-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--primary-neon, #0df5e3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 4px 8px;
+        }
+
+        .portal-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            text-decoration: none;
+            color: var(--text-high-contrast, #e2e8f0);
+            border-radius: 8px;
+            background: rgba(2, 12, 27, 0.5);
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .portal-option i {
+            font-size: 1.2rem;
+            color: var(--primary-neon);
+        }
+
+        .portal-option .option-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .portal-option strong {
+            font-size: 0.9rem;
+        }
+
+        .portal-option small {
+            font-size: 0.75rem;
+            color: var(--text-muted-teal, #8892b0);
+        }
+
+        .portal-option:hover {
+            background: rgba(13, 245, 227, 0.1);
+            border-color: var(--primary-neon, #0df5e3);
+            transform: translateX(4px);
+        }
+
+        .portal-option:hover strong {
+            color: var(--primary-neon, #0df5e3);
+        }
+
+        /* --- Buttons --- */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 0.75rem 1.6rem;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: var(--transition-smooth);
+            border: none;
+            font-size: 0.95rem;
+            height: 48px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-neon);
+            color: var(--bg-deep-abyss);
+            box-shadow: var(--neon-glow);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-neon-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(13, 245, 227, 0.5);
+        }
+
+        .btn-secondary {
+            background-color: var(--bg-card-hover);
+            color: var(--primary-neon);
+            border: 1px solid rgba(13, 245, 227, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--primary-neon);
+            color: var(--bg-deep-abyss);
+            box-shadow: var(--neon-glow);
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        /* --- Hero Banner --- */
+        .hero {
+            position: relative;
+            text-align: center;
+            padding: 5rem 1rem 3rem;
+            background: 
+                radial-gradient(circle at top, rgba(13, 245, 227, 0.15) 0%, rgba(10, 25, 47, 0.85) 60%, var(--bg-deep-abyss) 100%),
+                linear-gradient(180deg, rgba(2, 12, 27, 0.6) 0%, var(--bg-deep-abyss) 100%),
+                url('../BackGroundimage/FB_IMG_1784601454598.jpg') top/cover no-repeat; 
+            border-bottom: 1px solid var(--border-teal);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(13, 245, 227, 0.1);
+            color: var(--primary-neon);
+            border: 1px solid rgba(13, 245, 227, 0.3);
+            padding: 0.4rem 1.2rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 0 10px rgba(13, 245, 227, 0.1);
+        }
+
+        .hero h1 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            color: var(--text-high-contrast);
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .hero p {
+            color: var(--text-muted-teal);
+            max-width: 650px;
+            margin: 0 auto;
+            font-size: 1.1rem;
+        }
+
+        /* --- Full Details Sections (Single Column Display) --- */
+        .all-departments-container {
+            padding: 4rem 0;
+            background-color: var(--bg-deep-abyss);
+        }
+
+        .dept-detail-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-teal);
+            border-radius: var(--border-radius);
+            padding: 2.5rem;
+            margin-bottom: 3rem;
+            transition: var(--transition-smooth);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .dept-detail-card:hover {
+            border-color: var(--primary-neon);
+            box-shadow: var(--neon-glow);
+        }
+
+        .dept-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-teal);
+            padding-bottom: 1.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .dept-header h2 {
+            color: var(--primary-neon);
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* --- Department Image Container Styles --- */
+        .dept-image-container {
+            width: 100%;
+            max-height: 400px;
+            overflow: hidden;
+            border-radius: 8px;
+            border: 1px solid var(--border-teal);
+            margin-bottom: 2rem;
+            background-color: var(--bg-deep-abyss);
+        }
+
+        .dept-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.5s ease;
+            opacity: .8;
+        }
+
+        .dept-detail-card:hover .dept-image-container img {
+            transform: scale(1.03);
+        }
+
+        /* CHANGED: Set to a single full-width vertical column layout */
+        .dept-content-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .detail-block {
+            margin-bottom: 1rem;
+        }
+
+        .detail-block h4 {
+            color: var(--primary-neon);
+            font-size: 1.15rem;
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid rgba(13, 245, 227, 0.15);
+            padding-bottom: 0.4rem;
+        }
+
+        .detail-block ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .detail-block ul li {
+            position: relative;
+            padding-left: 1.5rem;
+            color: var(--text-high-contrast);
+            margin-bottom: 0.6rem;
+            font-size: 0.95rem;
+        }
+
+        .detail-block ul li::before {
+            content: "\f105";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            left: 0;
+            color: var(--primary-neon);
+        }
+
+        .dept-footer-action {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-teal);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        /* --- Footer Styles --- */
+        footer {
+            background-color: #01060f;
+            border-top: 1px solid var(--border-teal);
+            color: var(--text-muted-teal);
+            padding: 3rem 0 2rem;
+            font-size: 0.9rem;
+            margin-top: auto;
+        }
+
+        footer .footer-info {
+            display: flex;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: 0 auto 30px;
+            padding: 0 5%;
+        }
+
+        .footer-info img {
+            height: 16px;
+            margin-right: 12px;
+            vertical-align: middle;
+        }
+
+        .footer-info h4 {
+            width: 100%;
+            border-bottom: 1px solid var(--primary-neon);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            color: var(--text-high-contrast);
+            font-size: 1.1rem;
+        }
+
+        .contact p {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .office-hours p {
+            display: flex;
+            justify-content: space-between;
+            gap: 40px;
+            margin-bottom: 6px;
+        }
+
+        .school-name {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 5%;
+        }
+
+        .school-name img.icflogo {
+            height: 100px;
+        }
+
+        .school-name h1 {
+            text-align: left;
+            margin-left: 20px;
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            color: var(--text-high-contrast);
+            line-height: 1.2;
+        }
+
+        .school-name span {
+            display: inline-block;
+            font-size: 1rem;
+            font-weight: 400;
+            color: var(--primary-neon);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        footer .social-icon {
+            display: flex;
+            align-items: center;
+            border-left: 1px solid var(--primary-neon);
+            margin-left: 50px;
+            padding-left: 20px;
+            gap: 12px;
+        }
+
+        footer .icon img {
+            object-fit: cover;
+            border-radius: 50%;
+            border: 1px solid var(--primary-neon);
+            height: 42px;
+            width: 42px;
+            transition: var(--transition-smooth);
+        }
+
+        footer .icon img:hover {
+            transform: scale(1.1);
+            box-shadow: var(--neon-glow);
+        }
+
+        footer .footer-container {
+            align-items: center;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        footer .footer-container p {
+            padding-top: 20px;
+            border-top: 1px solid var(--border-teal);
+        }
+
+        /* ==========================================================================
+           RESPONSIVE LAYOUT BREAKPOINTS
+           ========================================================================== */
+        @media screen and (max-width: 1024px) {
+            .nav-container {
+                flex-wrap: wrap;
+                gap: 1.5rem;
+            }
+
+            .school-name {
+                flex-direction: column;
+                text-align: center;
+                gap: 1.5rem;
+            }
+
+            .school-name h1 {
+                text-align: center;
+                margin-left: 0;
+                font-size: 1.8rem;
+            }
+
+            footer .social-icon {
+                border-left: none;
+                margin-left: 0;
+                padding-left: 0;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+        }
+
+        @media screen and (max-width: 768px) {
+            nav.desktop-nav, 
+            .desktop-portal-wrapper {
+                display: none !important;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .hero {
+                padding: 3.5rem 1rem 2rem;
+            }
+
+            .hero h1 {
+                font-size: 2.1rem;
+            }
+
+            .dept-detail-card {
+                padding: 1.5rem;
+            }
+
+            .dept-footer-action {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            footer .footer-info {
+                flex-direction: column;
+                gap: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header>
+        <div class="container nav-container">
+            <div class="logo">
+               <a href="../index.html"><img src="../BackGroundimage/ICFLogo.png" alt="Logo"></a> 
+                <h2>ICF <span>Interworld Colleges Foundation Inc.</span></h2>
+            </div>
+
+            <!-- Hamburger Toggle Button -->
+            <button class="mobile-menu-btn" id="menuToggle" aria-label="Toggle Navigation">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+
+            <!-- Desktop Navigation Links -->
+            <nav class="desktop-nav">
+                <ul class="desktop-nav-links">
+                    <li><a href="../index.html"><i class="fa-solid fa-house"></i> Home</a></li>
+                    <li><a href="department.html" class="active"><i class="fa-solid fa-building-columns"></i> Department</a></li>
+                    <li><a href="about.html"><i class="fa-solid fa-circle-info"></i> About</a></li>
+                    <li><a href="contact.html"><i class="fa-solid fa-envelope"></i> Contact</a></li>
+                </ul>
+            </nav>
+
+            <!-- Desktop Portal Login Button -->
+            <div class="portal-dropdown-wrapper desktop-portal-wrapper">
+                <button id="portalLoginBtn" class="btn btn-secondary">
+                    <i class="fa-solid fa-right-to-bracket"></i> Portal Login
+                </button>
+
+                <div id="portalMenu" class="portal-box hidden">
+                    <span class="portal-box-title">Select Portal</span>
+                    <a href="../admin/login.html" class="portal-option">
+                        <i class="fa-solid fa-user-shield"></i>
+                        <div class="option-text">
+                            <strong>ADMIN</strong>
+                            <small>Faculty & Staff Access</small>
+                        </div>
+                    </a>
+                    <a href="../student/login.html" class="portal-option">
+                        <i class="fa-solid fa-user-graduate"></i>
+                        <div class="option-text">
+                            <strong>STUDENT</strong>
+                            <small>Student Portal Access</small>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>  
+
+    <!-- Mobile Sidebar Drawer & Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    
+    <aside class="mobile-sidebar" id="mobileSidebar">
+        <!-- Close Button -->
+        <button class="sidebar-close-btn" id="sidebarCloseBtn" aria-label="Close Menu">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <!-- Centered ICF Logo -->
+        <div class="sidebar-brand">
+            <img src="../BackGroundimage/ICFLogo.png" alt="ICF Logo">
+        </div>
+
+        <!-- Vertical Navigation Links -->
+        <ul class="sidebar-nav-links">
+            <li><a href="../index.html"><i class="fa-solid fa-house"></i> Home</a></li>
+            <li><a href="department.html" class="active"><i class="fa-solid fa-building-columns"></i> Department</a></li>
+            <li><a href="about.html"><i class="fa-solid fa-circle-info"></i> About</a></li>
+            <li><a href="contact.html"><i class="fa-solid fa-envelope"></i> Contact</a></li>
+        </ul>
+
+        <!-- Scaled Down Portal Login Button Below Navigation Links -->
+        <div class="sidebar-footer-portal portal-dropdown-wrapper">
+            <button id="mobilePortalBtn" class="btn btn-secondary">
+                <i class="fa-solid fa-right-to-bracket"></i> Portal Login
+            </button>
+
+            <div id="mobilePortalMenu" class="portal-box hidden">
+                <span class="portal-box-title">Select Portal</span>
+                <a href="../admin/login.html" class="portal-option">
+                    <i class="fa-solid fa-user-shield"></i>
+                    <div class="option-text">
+                        <strong>ADMIN</strong>
+                        <small>Faculty & Staff Access</small>
+                    </div>
+                </a>
+                <a href="../student/login.html" class="portal-option">
+                    <i class="fa-solid fa-user-graduate"></i>
+                    <div class="option-text">
+                        <strong>STUDENT</strong>
+                        <small>Student Portal Access</small>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Hero Banner -->
+    <section class="hero">
+        <div class="badge"><i class="fa-solid fa-book-bookmark"></i> Comprehensive Directory</div>
+        <h1>All Academic Departments & Programs</h1>
+        <p>Explore complete program descriptions, course outlines, career outlooks, and admission criteria across all departments.</p>
+    </section>
+
+    <!-- Full Department Details Section (Detailed Single-Column Column Layout) -->
+    <section class="all-departments-container">
+        <div class="container">
+
+            <!-- 1. BS Computer Science -->
+            <div class="dept-detail-card" id="bscs">
+                <div class="dept-header">
+                    <h2><i class="fa-solid fa-laptop-code"></i> Bachelor of Science in Computer Science</h2>
+                    <span class="badge"><i class="fa-solid fa-microchip"></i> College of Computer Studies</span>
+                </div>
+                <div class="dept-image-container">
+                    <img src="../BackGroundimage/ProfilePic/BSCS.jpg" alt="Bachelor of Science in Computer Science">
+                </div>
+                <div class="dept-content-grid">
+                    <div class="detail-block">
+                        <h4><i class="fa-solid fa-align-left"></i> Program Overview & Detailed Description</h4>
+                        <p style="color: var(--text-muted-teal);">The Bachelor of Science in Computer Science (BSCS) is a comprehensive 4-year degree program focused on the study of computing concepts, algorithmic problem solving, advanced software engineering paradigms, intelligent systems, and computational theory. The curriculum is meticulously designed to foster technical proficiency, creative coding innovation, and deep analytical reasoning to build robust applications for contemporary industrial sectors.</p>
+                    </div>
+                    <div class="detail-block">
+                        <h4><i class="fa-solid fa-bullseye"></i> Program Objectives & Competencies</h4>
+                        <ul>
+                            <li>Design, test, and implement complex, scalable software solutions across multiple tech platforms.</li>
+                            <li>Apply high-level theoretical and mathematical principles of computing to solve intricate real-world automation problems.</li>
+                            <li>Develop secure, optimal, and ethical computational applications that adhere strictly to international quality standards.</li>
+                            <li>Cultivate teamwork, project management capabilities, and agile methodology adaptation for enterprise tech environments.</li>
+                        </ul>
+                    </div>
+                    <div class="detail-block">
+                        <h4><i class="fa-solid fa-book-open"></i> Full Curriculum Structure & Milestone Timeline</h4>
+                        <ul>
+                            <li><strong>Year 1:</strong> Programming Fundamentals, Discrete Mathematics, Introduction to Computing, Data Structures & Basic Algorithms, General Education Courses</li>
+                            <li><strong>Year 2:</strong> Object-Oriented Programming, Computer Architecture & Organization, Relational Database Management Systems, Web Design & Client-Side Scripting</li>
+                            <li><strong>Year 3:</strong> Advanced Software Engineering, Design and Analysis of Algorithms, Operating Systems, Server-Side Web Development, Human-Computer Interaction</li>
+                            <li><strong>Year 4:</strong> Artificial Intelligence & Machine Learning Fundamentals, Capstone Research Project & Implementation, Professional Industry Internship (Practicum)</li>
+                        </ul>
+                    </div>
+                    <div class="detail-block">
+                        <h4><i class="fa-solid fa-user-tie"></i> Career Opportunities & Industry Pathways</h4>
+                        <ul>
+                            <li>Software Engineer / Developer, Systems Analyst, Full Stack Web Developer, Data Scientist, Artificial Intelligence Specialist, Database Administrator, IT Solutions Architect</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="dept-footer-action">
+                    <span style="color: var(--text-muted-teal); font-size: 0.9rem;"><i class="fa-solid fa-clipboard-check"></i> Requirements: Form 138, Good Moral Certificate, PSA Birth Certificate, Entrance Assessment Result</span>
+                    <a href="./enrollmentpage.html" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Apply Now</a>
+                </div>
+            </div>
+
+            <!-- 2. BS Public Administration -->
+            <div class="dept-detail-card" id="bspa">
+                <div class="dept-header">
+                    <h2><i class="fa-solid fa-scale-balanced"></i> Bachelor of Science in Public Administration</h2>
+                    <span class="badge"><i class="fa-solid fa-landmark"></i> College of Arts & Governance</span>
+                </div>
+                <div class="dept-image-container">
+                    <img src="../BackGroundimage/ProfilePic/BSPA.jpg" alt="Bachelor of Science in Public Administration">
+                </div>
+                <div class="dept-content-grid">
+                    <div class="detail-block">
+                        <h4><i class="fa-solid fa-align-left"></i> Program Overview & Detailed Description</h4>
+                        <p style="color: var(--text-muted-teal);">The Bachelor of Science in Public Administration (BSPA) program is structured to prepare students for effective executive and leadership roles within government agencies, policy formulation bureaus, non-profit institutions, and civic organizations. It emphasizes organizational theory, transparent public service stewardship, fiscal administration, and community development management.</p>
+                    </div>
+                    <div class="detail-block">
+                        <h4><i class="fa-solid fa-bullseye"></i> Program Objectives & Competencies</h4>
+                        <ul>
+                            <li>Master public policy formulation, evaluation frameworks, and community management procedures.</li>
+                            <li>Cultivate accountable, transparent, highly responsive, and service-oriented administrative leadership.</li>
+                            <li>Execute efficient bureaucratic and organizational strategies across various levels of government sectors.</li>
+                            <li>Promote civic engagement and sustainable socio-economic governance programs.</li>
+                        </ul>
+                    </div>
+                    <div class="detail-block">
+                        <h4><i class="fa-solid fa-book-open"></i> Full Curriculum Structure & Milestone Timeline</h4>
+                        <ul>
+                            <li><strong>Year 1:</strong> Introduction to Public Administration, Philippine Governance & Politics, Administrative Ethics and Accountability</li>
+                            <li><strong>Year 2:</strong> Organization and Management Theory, Local Legislation and Intergovernmental Relations, Public Personnel Management</li>
+                            <li><strong>Year 3:</strong> Public Fiscal Administration, Public Policy Analysis, Government Budgeting Systems, Philippine Public Finance</li>
+                            <li><strong>Year 4:</strong> Research Methods in Public Administration, Comprehensive Public Sector On-the-Job Training / Internship</li>
+                        </ul>
+                    </div>
+                    <div class="detail-block">
+                        <h4><i class="fa-solid fa-user-tie"></i> Career Opportunities & Industry Pathways</h4>
+                        <ul>
+                            <li>Public Policy Analyst, Civil Servant / Government Officer, Human Resource Specialist, City / Municipal Administrator, NGO Executive Director, Local Legislative Staff</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="dept-footer-action">
+                    <span style="color: var(--text-muted-teal); font-size: 0.9rem;"><i class="fa-solid fa-clipboard-check"></i> Requirements: Form 138, Good Moral Certificate, PSA Birth Certificate, Admission Screening Interview</span>
+                    <a href="./enrollmentpage.html" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Apply Now</a>
+                </div>
+            </div>
+
+            <!-- 3. BS Tourism Management -->
+            <div class="dept-detail-card" id="bstm">
+                <div class="dept-header">
+                    <h2><i class="fa-solid fa-plane-departure"></i> Bachelor of Science in Tourism Management</h2>
+                    <span class="badge"><i class="fa-solid fa-earth-americas"></i> College of Hospitality & Tourism</span>
+                </div>
+                <div class="dept-image-container">
+                    <img src="../BackGroundimage/ProfilePic/BSTM.jpg" alt="Bachelor of Science in Tourism Management">
+                </div>
+                <div class="dept-content-grid">
+                    <div class="detail-block">
+                        <h4><i class="fa-solid fa-align-left"></i> Program Overview & Detailed Description</h4>
+                        <p style="color: var(--text-muted-teal);">The Bachelor of Science in Tourism Management (BSTM) equips professionals with deep operational skills and administrative know-how for dynamic careers in global destination management, eco-tourism development, flight and ticketing operations, convention logistics, and international hospitality enterprises.</p>
+                    </div>
+                    <div class="detail-block">
+                        <h4><i class="fa-solid fa-bullseye"></i> Program Objectives & Competencies</h4>
+                        <ul>
+                            <li>Master global tour operations, ticketing systems, and large-scale event management skills.</li>
+                            <li>Promote sustainable cultural, environmental, and ecological tourism development practices.</li>
+                            <li>Demonstrate high-level foreign language competency, customer service excellence, and cross-cultural communication.</li>
+                            <li>Understand travel safety protocols, risk assessment, and tourism marketing campaigns.</li>
+                        </ul>
+                    </div>
+                    <div class="detail-block">
+                        <h4><i class="fa-solid fa-book-open"></i> Full Curriculum Structure & Milestone Timeline</h4>
+                        <ul>
+                            <li><strong>Year 1:</strong> Micro Perspective of Tourism & Hospitality, Tourism Risk Management, Philippine Culture and Tourism Geography</li>
+                            <li><strong>Year 2:</strong> Foreign Languages for Tourism, Travel Agency & Tour Operations Procedures, Transportation Management</li>
+                            <li><strong>Year 3:</strong> Tourism Destination Marketing, MICE (Meetings, Incentives, Conferences, Exhibitions) Management, E-Commerce in Tourism</li>
+                            <li><strong>Year 4:</strong> Comprehensive Tourism Practicum (Local or International Corporate Internship Program)</li>
+                        </ul>
+                    </div>
+                    <div class="detail-block">
+                        <h4><i class="fa-solid fa-user-tie"></i> Career Opportunities & Industry Pathways</h4>
+                        <ul>
+                            <li>Tour Operations Manager, Flight Attendant, Travel Consultant, Events & Convention Planner, Resort Operations Supervisor, Tourism Promotion Officer</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="dept-footer-action">
+                    <span style="color: var(--text-muted-teal); font-size: 0.9rem;"><i class="fa-solid fa-clipboard-check"></i> Requirements: Form 138, Good Moral Certificate, Medical Clearance, PSA Birth Certificate</span>
+                    <a href="./enrollmentpage.html" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Apply Now</a>
+                </div>
+            </div>
+
+            <!-- 4. BS Secondary Education -->
+            <div class="dept-detail-card" id="bsed">
+                <div class="dept-header">
+                    <h2><i class="fa-solid fa-chalkboard-user"></i> Bachelor of Secondary Education</h2>
+                    <span class="badge"><i class="fa-solid fa-graduation-cap"></i> College of Teacher Education</span>
+                </div>
+                <div class="dept-image-container">
+                    <img src="../BackGroundimage/ProfilePic/BSED.jpg" alt="Bachelor of Secondary Education">
+                </div>
+                <div class="dept-content-grid">
+                    <div class="detail-block">
+                        <h4><i class="fa-solid fa-align-left"></i> Program Overview & Detailed Description</h4>
+                        <p style="color: var(--text-muted-teal);">The Bachelor of Secondary Education (BSEd) program trains future high school educators, imparting specialized pedagogy and deep academic content knowledge across majors such as Mathematics, English, Science, and Social Studies to shape competent and inspiring secondary classroom leaders.</p>
+                    </div>
+                    <div class="detail-block">
+                        <h4><i class="fa-solid fa-bullseye"></i> Program Objectives & Competencies</h4>
+                        <ul>
+                            <li>Develop comprehensive mastery over secondary school curriculum contents and specialized major topics.</li>
+                            <li>Apply modern, interactive, and digital teaching methodologies to maximize student engagement.</li>
+                            <li>Foster safe, inclusive, and psychologically supportive high school classroom learning environments.</li>
+                            <li>Implement reliable learner assessment tools and instructional design frameworks.</li>
+                        </ul>
+                    </div>
+                    <div class="detail-block">
+                        <h4><i class="fa-solid fa-book-open"></i> Full Curriculum Structure & Milestone Timeline</h4>
+                        <ul>
+                            <li><strong>Year 1:</strong> Child and Adolescent Development, Facilitating Learning, The Teaching Profession, General Education Core</li>
+                            <li><strong>Year 2:</strong> Assessment of Learning 1 & 2, The Teacher and the Community, Curriculum Development, Subject Specialization Content</li>
+                            <li><strong>Year 3:</strong> Technology for Teaching and Learning, Pedagogical Content Knowledge, Field Study 1 & 2 (Observation & Participation)</li>
+                            <li><strong>Year 4:</strong> Teaching Internship (Full-Term Live Practice Teaching in Partner Secondary Schools)</li>
+                        </ul>
+                    </div>
+                    <div class="detail-block">
+                        <h4><i class="fa-solid fa-user-tie"></i> Career Opportunities & Industry Pathways</h4>
+                        <ul>
+                            <li>High School Subject Teacher, Curriculum Developer, Academic Coordinator, Educational Specialist, Private Tutor, Instructional Materials Designer</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="dept-footer-action">
+                    <span style="color: var(--text-muted-teal); font-size: 0.9rem;"><i class="fa-solid fa-clipboard-check"></i> Requirements: Form 138 / SHS Card, Good Moral Certificate, PSA Birth Certificate</span>
+                    <a href="./enrollmentpage.html" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Apply Now</a>
+                </div>
+            </div>
+
+            <!-- 5. BS Technical Vocational Teacher Education -->
+            <div class="dept-detail-card" id="btvted">
+                <div class="dept-header">
+                    <h2><i class="fa-solid fa-gears"></i> Bachelor of Technical Vocational Teacher Education</h2>
+                    <span class="badge"><i class="fa-solid fa-graduation-cap"></i> College of Teacher Education</span>
+                </div>
+                <div class="dept-image-container">
+                    <img src="../BackGroundimage/ProfilePic/BTVTE.jpg" alt="Bachelor of Technical Vocational Teacher Education">
+                </div>
+                <div class="dept-content-grid">
+                    <div class="detail-block">
+                        <h4><i class="fa-solid fa-align-left"></i> Program Overview & Detailed Description</h4>
+                        <p style="color: var(--text-muted-teal);">The Bachelor of Technical Vocational Teacher Education (BTVTEd) program equips student-teachers with advanced technical craftsmanship and pedagogical skills required to teach technical-vocational courses across senior high schools and technical training institutions.</p>
+                    </div>
+                    <div class="detail-block">
+                        <h4><i class="fa-solid fa-bullseye"></i> Program Objectives & Competencies</h4>
+                        <ul>
+                            <li>Acquire official National Certifications (NC) in specialized technical and industrial fields.</li>
+                            <li>Implement modern competency-based Technical, Vocational, and Education Training (TVET) standards.</li>
+                            <li>Equip learners with hands-on practical skills aligned with global workforce demands.</li>
+                            <li>Manage workshop safety, equipment maintenance, and technical instructional modules.</li>
+                        </ul>
+                    </div>
+                    <div class="detail-block">
+                        <h4><i class="fa-solid fa-book-open"></i> Full Curriculum Structure & Milestone Timeline</h4>
+                        <ul>
+                            <li><strong>Year 1:</strong> Foundations of Technical Education, Technical Drafting, Workshop Safety & Orientation, Basic Mathematics</li>
+                            <li><strong>Year 2:</strong> Competency-Based Training Frameworks, Applied Electronics and Mechanics, Technical Communication</li>
+                            <li><strong>Year 3:</strong> Shop Layout & Resource Management, Instructional Courseware Design, Advanced Trade Practices</li>
+                            <li><strong>Year 4:</strong> Industry Immersion, Technical Vocational Practice Teaching Internship</li>
+                        </ul>
+                    </div>
+                    <div class="detail-block">
+                        <h4><i class="fa-solid fa-user-tie"></i> Career Opportunities & Industry Pathways</h4>
+                        <ul>
+                            <li>TVET Instructor, Senior High School TVL Teacher, Vocational Training Center Trainer, Technical Skills Assessor, Industrial Workshop Supervisor</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="dept-footer-action">
+                    <span style="color: var(--text-muted-teal); font-size: 0.9rem;"><i class="fa-solid fa-clipboard-check"></i> Requirements: Form 138 / SHS Card, Good Moral Certificate, PSA Birth Certificate</span>
+                    <a href="./enrollmentpage.html" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Apply Now</a>
+                </div>
+            </div>
+
+            <!-- 6. BS Elementary Education -->
+            <div class="dept-detail-card" id="beed">
+                <div class="dept-header">
+                    <h2><i class="fa-solid fa-child-reaching"></i> Bachelor of Elementary Education</h2>
+                    <span class="badge"><i class="fa-solid fa-graduation-cap"></i> College of Teacher Education</span>
+                </div>
+                <div class="dept-image-container">
+                    <img src="../BackGroundimage/ProfilePic/BEED.jpg" alt="Bachelor of Elementary Education">
+                </div>
+                <div class="dept-content-grid">
+                    <div class="detail-block">
+                        <h4><i class="fa-solid fa-align-left"></i> Program Overview & Detailed Description</h4>
+                        <p style="color: var(--text-muted-teal);">The Bachelor of Elementary Education (BEEd) program focuses on holistic primary education training designed specifically for child development, foundational literacy, numeracy instruction, and early-stage pedagogical psychology to mold dedicated elementary school mentors.</p>
+                    </div>
+                    <div class="detail-block">
+                        <h4><i class="fa-solid fa-bullseye"></i> Program Objectives & Competencies</h4>
+                        <ul>
+                            <li>Master foundational elementary subjects, reading literacy strategies, and basic mathematical concepts.</li>
+                            <li>Understand early childhood psychological, emotional, and social development milestones.</li>
+                            <li>Design creative, engaging, and age-appropriate primary learning activities and materials.</li>
+                            <li>Implement inclusive education strategies catering to diverse young learners.</li>
+                        </ul>
+                    </div>
+                    <div class="detail-block">
+                        <h4><i class="fa-solid fa-book-open"></i> Full Curriculum Structure & Milestone Timeline</h4>
+                        <ul>
+                            <li><strong>Year 1:</strong> Child Development, Teaching Elementary Math & Science, Foundations of Education</li>
+                            <li><strong>Year 2:</strong> Primary Language Literacy, Arts and Music Education, Teaching Social Studies in Elementary</li>
+                            <li><strong>Year 3:</strong> Elementary Classroom Management, Special Needs Education Basics, Educational Technology Integration</li>
+                            <li><strong>Year 4:</strong> Full-Term Practice Teaching Internship in Accredited Primary Schools</li>
+                        </ul>
+                    </div>
+                    <div class="detail-block">
+                        <h4><i class="fa-solid fa-user-tie"></i> Career Opportunities & Industry Pathways</h4>
+                        <ul>
+                            <li>Elementary School Teacher, Primary Educator, Child Care Center Director, Educational Material Author, Kindergarten Teacher</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="dept-footer-action">
+                    <span style="color: var(--text-muted-teal); font-size: 0.9rem;"><i class="fa-solid fa-clipboard-check"></i> Requirements: Form 138 / SHS Card, Good Moral Certificate, PSA Birth Certificate</span>
+                    <a href="./enrollmentpage.html" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Apply Now</a>
+                </div>
+            </div>
+
+            <!-- 7. BS Business Administration -->
+            <div class="dept-detail-card" id="bsba">
+                <div class="dept-header">
+                    <h2><i class="fa-solid fa-briefcase"></i> Bachelor of Science in Business Administration</h2>
+                    <span class="badge"><i class="fa-solid fa-chart-line"></i> College of Business & Management</span>
+                </div>
+                <div class="dept-image-container">
+                    <img src="../BackGroundimage/ProfilePic/BSBA.jpg" alt="Bachelor of Science in Business Administration">
+                </div>
+                <div class="dept-content-grid">
+                    <div class="detail-block">
+                        <h4><i class="fa-solid fa-align-left"></i> Program Overview & Detailed Description</h4>
+                        <p style="color: var(--text-muted-teal);">The Bachelor of Science in Business Administration (BSBA) program provides a broad, comprehensive foundation in core corporate operations, marketing strategy, modern human resource management, financial planning, and startup entrepreneurial leadership in a competitive global market.</p>
+                    </div>
+                    <div class="detail-block">
+                        <h4><i class="fa-solid fa-bullseye"></i> Program Objectives & Competencies</h4>
+                        <ul>
+                            <li>Formulate innovative, strategic solutions to contemporary corporate and organizational challenges.</li>
+                            <li>Demonstrate high proficiency in digital marketing, corporate finance, and business data analysis.</li>
+                            <li>Lead multicultural teams efficiently while upholding rigorous ethical business standards.</li>
+                            <li>Draft comprehensive business plans and feasibility studies for new market ventures.</li>
+                        </ul>
+                    </div>
+                    <div class="detail-block">
+                        <h4><i class="fa-solid fa-book-open"></i> Full Curriculum Structure & Milestone Timeline</h4>
+                        <ul>
+                            <li><strong>Year 1:</strong> Principles of Management, Microeconomics, Business Mathematics, Accounting Fundamentals</li>
+                            <li><strong>Year 2:</strong> Marketing Management, Financial Accounting, Business Law & Obligations, Macroeconomics</li>
+                            <li><strong>Year 3:</strong> Human Resource Management, Operations Management, Strategic Management, Corporate Finance</li>
+                            <li><strong>Year 4:</strong> Corporate Business Practicum / Internship & Comprehensive Business Feasibility Study Defense</li>
+                        </ul>
+                    </div>
+                    <div class="detail-block">
+                        <h4><i class="fa-solid fa-user-tie"></i> Career Opportunities & Industry Pathways</h4>
+                        <ul>
+                            <li>Marketing Manager, Entrepreneur, Business Operations Analyst, Human Resource Officer, Corporate Account Executive, Management Consultant</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="dept-footer-action">
+                    <span style="color: var(--text-muted-teal); font-size: 0.9rem;"><i class="fa-solid fa-clipboard-check"></i> Requirements: Form 138, Good Moral Certificate, PSA Birth Certificate</span>
+                    <a href="./enrollmentpage.html" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Apply Now</a>
+                </div>
+            </div>
+
+            <!-- 8. BS Accountancy -->
+            <div class="dept-detail-card" id="bsa">
+                <div class="dept-header">
+                    <h2><i class="fa-solid fa-calculator"></i> Bachelor of Science in Accountancy</h2>
+                    <span class="badge"><i class="fa-solid fa-file-invoice-dollar"></i> College of Accountancy</span>
+                </div>
+                <div class="dept-image-container">
+                    <img src="../BackGroundimage/ProfilePic/BSA.jpg" alt="Bachelor of Science in Accountancy">
+                </div>
+                <div class="dept-content-grid">
+                    <div class="detail-block">
+                        <h4><i class="fa-solid fa-align-left"></i> Program Overview & Detailed Description</h4>
+                        <p style="color: var(--text-muted-teal);">The Bachelor of Science in Accountancy (BSA) program is a rigorous, highly specialized academic course designed to prepare students for corporate financial practice, managerial accounting, taxation compliance, and successful completion of the Certified Public Accountant (CPA) licensure examination.</p>
+                    </div>
+                    <div class="detail-block">
+                        <h4><i class="fa-solid fa-bullseye"></i> Program Objectives & Competencies</h4>
+                        <ul>
+                            <li>Demonstrate exceptional expertise in International Financial Reporting Standards (IFRS) and financial statements preparation.</li>
+                            <li>Execute detailed auditing procedures, forensic checks, and tax compliance strategies accurately.</li>
+                            <li>Uphold the highest standards of professional ethics, integrity, and accountability in financial management.</li>
+                            <li>Analyze complex financial statements to guide executive business decision-making.</li>
+                        </ul>
+                    </div>
+                    <div class="detail-block">
+                        <h4><i class="fa-solid fa-book-open"></i> Full Curriculum Structure & Milestone Timeline</h4>
+                        <ul>
+                            <li><strong>Year 1:</strong> Financial Accounting & Reporting, Intermediate Accounting 1 & 2, Regulatory Framework & Business Law</li>
+                            <li><strong>Year 2:</strong> Advanced Accounting, Cost Accounting & Control, Income Taxation, Business Taxation & Regulations</li>
+                            <li><strong>Year 3:</strong> Auditing Theory, Auditing Problems, Accounting Information Systems, Strategic Cost Management</li>
+                            <li><strong>Year 4:</strong> Comprehensive CPA Review Integration, Advanced Auditing, Professional Accountancy Apprenticeship</li>
+                        </ul>
+                    </div>
+                    <div class="detail-block">
+                        <h4><i class="fa-solid fa-user-tie"></i> Career Opportunities & Industry Pathways</h4>
+                        <ul>
+                            <li>Certified Public Accountant (CPA), External Auditor, Internal Auditor, Tax Consultant, Chief Financial Officer (CFO), Financial Controller, Budget Analyst</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="dept-footer-action">
+                    <span style="color: var(--text-muted-teal); font-size: 0.9rem;"><i class="fa-solid fa-clipboard-check"></i> Requirements: Form 138 (High Math/English Grades), Entrance Exam, Screening Interview, Good Moral</span>
+                    <a href="./enrollmentpage.html" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Apply Now</a>
+                </div>
+            </div>
+
+            <!-- 9. Associate in Computer Technology -->
+            <div class="dept-detail-card" id="act">
+                <div class="dept-header">
+                    <h2><i class="fa-solid fa-microchip"></i> Associate in Computer Technology</h2>
+                    <span class="badge"><i class="fa-solid fa-code"></i> College of Computer Studies</span>
+                </div>
+                <div class="dept-image-container">
+                    <img src="../BackGroundimage/ProfilePic/ACT.jpg" alt="Associate in Computer Technology">
+                </div>
+                <div class="dept-content-grid">
+                    <div class="detail-block">
+                        <h4><i class="fa-solid fa-align-left"></i> Program Overview & Detailed Description</h4>
+                        <p style="color: var(--text-muted-teal);">The Associate in Computer Technology (ACT) is a intensive 2-year diploma undergraduate course focusing on practical computing, computer hardware servicing, basic software programming, network troubleshooting, and day-to-day IT systems operations for rapid entry into the tech workforce.</p>
+                    </div>
+                    <div class="detail-block">
+                        <h4><i class="fa-solid fa-bullseye"></i> Program Objectives & Competencies</h4>
+                        <ul>
+                            <li>Master PC hardware assembly, diagnosis, repair, and network configuration basics.</li>
+                            <li>Develop fundamental web pages, scripts, and relational database queries.</li>
+                            <li>Prepare graduates for immediate technical employment or lateral ladderized advancement into the BSCS degree program.</li>
+                            <li>Execute basic IT helpdesk support and user assistance protocols.</li>
+                        </ul>
+                    </div>
+                    <div class="detail-block">
+                        <h4><i class="fa-solid fa-book-open"></i> Full Curriculum Structure & Milestone Timeline</h4>
+                        <ul>
+                            <li><strong>Year 1:</strong> Fundamentals of IT, Computer Hardware Servicing & Diagnostics, Web Design Basics, Computer Programming 1</li>
+                            <li><strong>Year 2:</strong> Database Management Systems, Local Area Network Essentials, Technical Troubleshooting, Practical IT Internship</li>
+                        </ul>
+                    </div>
+                    <div class="detail-block">
+                        <h4><i class="fa-solid fa-user-tie"></i> Career Opportunities & Industry Pathways</h4>
+                        <ul>
+                            <li>IT Support Technician, Computer Maintenance Specialist, Web Developer Assistant, Network Assistant, Technical Helpdesk Agent</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="dept-footer-action">
+                    <span style="color: var(--text-muted-teal); font-size: 0.9rem;"><i class="fa-solid fa-clipboard-check"></i> Requirements: Form 138 / SHS Card, Good Moral Certificate, PSA Birth Certificate</span>
+                    <a href="./enrollmentpage.html" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Apply Now</a>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Updated Footer -->
+    <footer>
+        <div class="footer-info">
+            <div class="contact">
+                <h4>CONTACT DETAILS</h4>
+                <ul>
+                    <p><img src="../BackGroundimage/Icon/placeholder.png" alt="Address Icon">Burgos Street, Paniqui, Tarlac, Philippines</p>
+                    <p><img src="../BackGroundimage/Icon/telephone.png" alt="Phone Icon">+63 930 536 3258</p>
+                    <p><img src="../BackGroundimage/Icon/Untitled30_20260715135601.png" alt="Email Icon">admin@icfpaniqui.edu.ph</p>
+                </ul>
+            </div>
+            <div class="office-hours">
+                <h4>OFFICE HOURS</h4>
+                <p>Sunday <span>Closed</span></p>
+                <p>Monday <span>8:00am - 4:00pm</span></p>
+                <p>Tuesday <span>8:00am - 4:00pm</span></p>
+                <p>Wednesday <span>8:00am - 4:00pm</span></p>
+                <p>Thursday <span>8:00am - 4:00pm</span></p>
+                <p>Friday <span>8:00am - 4:00pm</span></p>
+                <p>Saturday <span>8:00am - 12:00pm</span></p>
+            </div>
+        </div> 
+        <div class="school-name">
+            <img class="icflogo" src="../BackGroundimage/ICFLogo.png" alt="ICF Logo">
+            <h1>ICF <span>INTERWORLD</span> <span>COLLEGES</span> <span>INC.</span></h1>
+
+            <div class="social-icon">
+                <div class="icon">
+                    <a href="https://web.facebook.com/ICFPaniquiOfficial"><img src="../BackGroundimage/Icon/FacebookLogo.png" alt="Facebook"></a>
+                </div>
+                <div class="icon">
+                    <a href="#"><img src="../BackGroundimage/Icon/YoutubeLogo.jpg" alt="YouTube"></a>
+                </div>
+                <div class="icon">
+                    <a href="#"><img src="../BackGroundimage/Icon/TwitterLogo.jpg" alt="Twitter"></a>
+                </div>
+                <div class="icon">
+                    <a href="#"><img src="../BackGroundimage/Icon/tiktokLogo.jpg" alt="TikTok"></a>
+                </div>
+                <div class="icon">
+                    <a href="#"><img src="../BackGroundimage/Icon/Pinterestlogo.jpg" alt="Pinterest"></a>
+                </div>
+                <div class="icon">
+                    <a href="#"><img src="../BackGroundimage/Icon/InstagramLogo.png" alt="Instagram"></a>
+                </div>
+            </div>
+        </div>
+
+        <div class="container footer-container">
+            <p>&copy; 2026 ICF Interworld Colleges Foundation Inc. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Interactive Scripts -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            /* Off-Canvas Sidebar Drawer Controls */
+            const menuToggle = document.getElementById("menuToggle");
+            const mobileSidebar = document.getElementById("mobileSidebar");
+            const sidebarOverlay = document.getElementById("sidebarOverlay");
+            const sidebarCloseBtn = document.getElementById("sidebarCloseBtn");
+
+            const openSidebar = () => {
+                mobileSidebar.classList.add("active");
+                sidebarOverlay.classList.add("active");
+            };
+
+            const closeSidebar = () => {
+                mobileSidebar.classList.remove("active");
+                sidebarOverlay.classList.remove("active");
+            };
+
+            if (menuToggle && mobileSidebar && sidebarOverlay && sidebarCloseBtn) {
+                menuToggle.addEventListener("click", openSidebar);
+                sidebarCloseBtn.addEventListener("click", closeSidebar);
+                sidebarOverlay.addEventListener("click", closeSidebar);
+            }
+
+            /* Portal Dropdown Menu Handlers (Desktop & Mobile) */
+            const setupPortalDropdown = (btnId, menuId) => {
+                const btn = document.getElementById(btnId);
+                const menu = document.getElementById(menuId);
+
+                if (btn && menu) {
+                    btn.addEventListener("click", (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        menu.classList.toggle("show");
+                        menu.classList.toggle("hidden");
+                    });
+
+                    document.addEventListener("click", (e) => {
+                        if (!menu.contains(e.target) && e.target !== btn) {
+                            menu.classList.remove("show");
+                            menu.classList.add("hidden");
+                        }
+                    });
+                }
+            };
+
+            setupPortalDropdown("portalLoginBtn", "portalMenu");
+            setupPortalDropdown("mobilePortalBtn", "mobilePortalMenu");
+        });
+    </script>
+</body>
+</html>

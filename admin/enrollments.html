@@ -296,6 +296,32 @@
       color: var(--bg-deep-abyss);
     }
 
+    /* Header Actions Controls */
+    .table-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Filter Select Styling */
+    .filter-select {
+      padding: 8px 12px;
+      background-color: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      color: var(--bg-deep-abyss);
+      font-size: 0.85rem;
+      font-weight: 500;
+      outline: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .filter-select:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+    }
+
     .table-wrapper {
       overflow-x: auto;
     }
@@ -372,6 +398,11 @@
       background: #1d4ed8;
     }
 
+    .action-group {
+      display: flex;
+      gap: 6px;
+    }
+
     .btn-action {
       padding: 4px 10px;
       background: transparent;
@@ -385,6 +416,37 @@
     .btn-action:hover {
       background: #2563eb;
       color: white;
+    }
+
+    .btn-action.decline {
+      border-color: #dc2626;
+      color: #dc2626;
+    }
+
+    .btn-action.decline:hover {
+      background: #dc2626;
+      color: white;
+    }
+
+    .payment-cell {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-mark {
+      padding: 2px 6px;
+      font-size: 0.7rem;
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 3px;
+      cursor: pointer;
+      color: var(--bg-deep-abyss);
+      transition: all 0.2s ease;
+    }
+
+    .btn-mark:hover {
+      background: #cbd5e1;
     }
   </style>
 </head>
@@ -400,6 +462,7 @@
         <li><a href="adminpanel.html">Dashboard</a></li>
         <li><a href="user.html">Users</a></li>
         <li class="active"><a href="enrollments.html">Enrollments</a></li>
+        <li><a href="received-mail.html">Received Mail</a></li>
       </ul>
     </div>
 
@@ -441,10 +504,19 @@
     <div class="table-card">
       <div class="table-header">
         <h2>Enrollment Records</h2>
-        <button class="btn primary">+ New Enrollment</button>
+        <div class="table-actions">
+          <!-- Filter Dropdown for Payment Status -->
+          <select id="statusFilter" class="filter-select">
+            <option value="all">All Statuses</option>
+            <option value="paid">Paid</option>
+            <option value="pending">Pending</option>
+            <option value="declined">Declined</option>
+          </select>
+          <button class="btn primary">+ New Enrollment</button>
+        </div>
       </div>
       <div class="table-wrapper">
-        <table>
+        <table id="enrollmentTable">
           <thead>
             <tr>
               <th>Enrollment ID</th>
@@ -456,69 +528,173 @@
             </tr>
           </thead>
           <tbody>
-            <tr>
+            <tr data-status="paid">
               <td>#ENR-8901</td>
               <td>Sarah Jenkins</td>
               <td>Computer Science 101</td>
               <td>2026-07-15</td>
-              <td><span class="badge success">Paid</span></td>
-              <td><button class="btn-action">Edit</button></td>
+              <td>
+                <div class="payment-cell">
+                  <span class="badge success">Paid</span>
+                  <div style="display:flex; gap:4px;">
+                    <button class="btn-mark" onclick="updatePayment(this, 'pending', 'warning', 'Pending')">Mark Pending</button>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="action-group">
+                  <button class="btn-action">View</button>
+                  <button class="btn-action">Edit</button>
+                  <button class="btn-action decline" onclick="updatePayment(this, 'declined', 'danger', 'Declined')">Decline</button>
+                </div>
+              </td>
             </tr>
-            <tr>
+            <tr data-status="pending">
               <td>#ENR-8902</td>
               <td>Michael Chang</td>
               <td>Data Structures</td>
               <td>2026-07-18</td>
-              <td><span class="badge warning">Pending</span></td>
-              <td><button class="btn-action">Edit</button></td>
+              <td>
+                <div class="payment-cell">
+                  <span class="badge warning">Pending</span>
+                  <div style="display:flex; gap:4px;">
+                    <button class="btn-mark" onclick="updatePayment(this, 'paid', 'success', 'Paid')">Mark Paid</button>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="action-group">
+                  <button class="btn-action">View</button>
+                  <button class="btn-action">Edit</button>
+                  <button class="btn-action decline" onclick="updatePayment(this, 'declined', 'danger', 'Declined')">Decline</button>
+                </div>
+              </td>
             </tr>
-            <tr>
+            <tr data-status="paid">
               <td>#ENR-8903</td>
               <td>Emily Davis</td>
               <td>Web Development</td>
               <td>2026-07-20</td>
-              <td><span class="badge success">Paid</span></td>
-              <td><button class="btn-action">Edit</button></td>
+              <td>
+                <div class="payment-cell">
+                  <span class="badge success">Paid</span>
+                  <div style="display:flex; gap:4px;">
+                    <button class="btn-mark" onclick="updatePayment(this, 'pending', 'warning', 'Pending')">Mark Pending</button>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="action-group">
+                  <button class="btn-action">View</button>
+                  <button class="btn-action">Edit</button>
+                  <button class="btn-action decline" onclick="updatePayment(this, 'declined', 'danger', 'Declined')">Decline</button>
+                </div>
+              </td>
             </tr>
-            <tr>
-              <td>#ENR-8901</td>
+            <tr data-status="paid">
+              <td>#ENR-8904</td>
               <td>Sarah Jenkins</td>
               <td>Computer Science 101</td>
               <td>2026-07-15</td>
-              <td><span class="badge success">Paid</span></td>
-              <td><button class="btn-action">Edit</button></td>
+              <td>
+                <div class="payment-cell">
+                  <span class="badge success">Paid</span>
+                  <div style="display:flex; gap:4px;">
+                    <button class="btn-mark" onclick="updatePayment(this, 'pending', 'warning', 'Pending')">Mark Pending</button>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="action-group">
+                  <button class="btn-action">View</button>
+                  <button class="btn-action">Edit</button>
+                  <button class="btn-action decline" onclick="updatePayment(this, 'declined', 'danger', 'Declined')">Decline</button>
+                </div>
+              </td>
             </tr>
-            <tr>
-              <td>#ENR-8901</td>
+            <tr data-status="paid">
+              <td>#ENR-8905</td>
               <td>Sarah Jenkins</td>
               <td>Computer Science 101</td>
               <td>2026-07-15</td>
-              <td><span class="badge success">Paid</span></td>
-              <td><button class="btn-action">Edit</button></td>
+              <td>
+                <div class="payment-cell">
+                  <span class="badge success">Paid</span>
+                  <div style="display:flex; gap:4px;">
+                    <button class="btn-mark" onclick="updatePayment(this, 'pending', 'warning', 'Pending')">Mark Pending</button>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="action-group">
+                  <button class="btn-action">View</button>
+                  <button class="btn-action">Edit</button>
+                  <button class="btn-action decline" onclick="updatePayment(this, 'declined', 'danger', 'Declined')">Decline</button>
+                </div>
+              </td>
             </tr>
-            <tr>
-              <td>#ENR-8901</td>
+            <tr data-status="paid">
+              <td>#ENR-8906</td>
               <td>Sarah Jenkins</td>
               <td>Computer Science 101</td>
               <td>2026-07-15</td>
-              <td><span class="badge success">Paid</span></td>
-              <td><button class="btn-action">Edit</button></td>
+              <td>
+                <div class="payment-cell">
+                  <span class="badge success">Paid</span>
+                  <div style="display:flex; gap:4px;">
+                    <button class="btn-mark" onclick="updatePayment(this, 'pending', 'warning', 'Pending')">Mark Pending</button>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="action-group">
+                  <button class="btn-action">View</button>
+                  <button class="btn-action">Edit</button>
+                  <button class="btn-action decline" onclick="updatePayment(this, 'declined', 'danger', 'Declined')">Decline</button>
+                </div>
+              </td>
             </tr>
-            <tr>
-              <td>#ENR-8901</td>
+            <tr data-status="paid">
+              <td>#ENR-8907</td>
               <td>Sarah Jenkins</td>
               <td>Computer Science 101</td>
               <td>2026-07-15</td>
-              <td><span class="badge success">Paid</span></td>
-              <td><button class="btn-action">Edit</button></td>
+              <td>
+                <div class="payment-cell">
+                  <span class="badge success">Paid</span>
+                  <div style="display:flex; gap:4px;">
+                    <button class="btn-mark" onclick="updatePayment(this, 'pending', 'warning', 'Pending')">Mark Pending</button>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="action-group">
+                  <button class="btn-action">View</button>
+                  <button class="btn-action">Edit</button>
+                  <button class="btn-action decline" onclick="updatePayment(this, 'declined', 'danger', 'Declined')">Decline</button>
+                </div>
+              </td>
             </tr>
-            <tr>
-              <td>#ENR-8901</td>
+            <tr data-status="paid">
+              <td>#ENR-8908</td>
               <td>Sarah Jenkins</td>
               <td>Computer Science 101</td>
               <td>2026-07-15</td>
-              <td><span class="badge success">Paid</span></td>
-              <td><button class="btn-action">Edit</button></td>
+              <td>
+                <div class="payment-cell">
+                  <span class="badge success">Paid</span>
+                  <div style="display:flex; gap:4px;">
+                    <button class="btn-mark" onclick="updatePayment(this, 'pending', 'warning', 'Pending')">Mark Pending</button>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="action-group">
+                  <button class="btn-action">View</button>
+                  <button class="btn-action">Edit</button>
+                  <button class="btn-action decline" onclick="updatePayment(this, 'declined', 'danger', 'Declined')">Decline</button>
+                </div>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -526,6 +702,47 @@
     </div>
 
   </main>
+
+  <!-- Script for Filtering and Status Updating Functionality -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const statusFilter = document.getElementById('statusFilter');
+      const enrollmentTable = document.getElementById('enrollmentTable');
+      const rows = enrollmentTable.querySelectorAll('tbody tr');
+
+      statusFilter.addEventListener('change', (e) => {
+        const selectedValue = e.target.value.toLowerCase();
+
+        rows.forEach(row => {
+          const rowStatus = row.getAttribute('data-status');
+          
+          if (selectedValue === 'all' || rowStatus === selectedValue) {
+            row.style.display = '';
+          } else {
+            row.style.display = 'none';
+          }
+        });
+      });
+    });
+
+    function updatePayment(button, newStatus, badgeClass, badgeText) {
+      const row = button.closest('tr');
+      row.setAttribute('data-status', newStatus);
+      
+      const badge = row.querySelector('.badge');
+      badge.className = `badge ${badgeClass}`;
+      badge.textContent = badgeText;
+
+      const markContainer = badge.nextElementSibling;
+      if (newStatus === 'paid') {
+        markContainer.innerHTML = '<button class="btn-mark" onclick="updatePayment(this, \'pending\', \'warning\', \'Pending\')">Mark Pending</button>';
+      } else if (newStatus === 'pending') {
+        markContainer.innerHTML = '<button class="btn-mark" onclick="updatePayment(this, \'paid\', \'success\', \'Paid\')">Mark Paid</button>';
+      } else if (newStatus === 'declined') {
+        markContainer.innerHTML = '<button class="btn-mark" onclick="updatePayment(this, \'pending\', \'warning\', \'Pending\')">Mark Pending</button> <button class="btn-mark" onclick="updatePayment(this, \'paid\', \'success\', \'Paid\')">Mark Paid</button>';
+      }
+    }
+  </script>
   <script src="script.js"></script>
 </body>
 </html>

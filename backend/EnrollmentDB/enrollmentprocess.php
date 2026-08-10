@@ -34,6 +34,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $birth_day      = str_pad($birth_day, 2, '0', STR_PAD_LEFT);
     $birthday       = "$birth_year-$birth_month-$birth_day";
 
+    // Validate date
+    if (!checkdate((int)$birth_month, (int)$birth_day, (int)$birth_year)) {
+        header("Location: enrollment_success.php?status=error&message=" . urlencode("Invalid birth date provided."));
+        exit();
+    }
+
     $birthplace     = clean_input($_POST['birthplace'] ?? '');
     $citizenship    = clean_input($_POST['citizenship'] ?? '');
     $civilstatus    = clean_input($_POST['civil_status'] ?? '');
@@ -62,6 +68,37 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $full_address   = clean_input($_POST['address'] ?? '');
     $mobile_number  = clean_input($_POST['mobile_number'] ?? '');
     $email          = clean_input($_POST['email'] ?? '');
+
+    // Handle file uploads (requirements)
+    $uploaded_files = [];
+    if (!empty($_FILES['requirementFiles']['name'][0])) {
+        $uploadDir = 'uploads/requirements/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        $allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/jpeg', 'image/jpg', 'image/png'];
+        $fileCount = count($_FILES['requirementFiles']['name']);
+
+        for ($i = 0; $i < $fileCount; $i++) {
+            if ($_FILES['requirementFiles']['error'][$i] === UPLOAD_ERR_OK) {
+                $tmpName = $_FILES['requirementFiles']['tmp_name'][$i];
+                $originalName = basename($_FILES['requirementFiles']['name'][$i]);
+                $fileType = $_FILES['requirementFiles']['type'][$i];
+
+                if (!in_array($fileType, $allowedTypes)) {
+                    continue; // Skip invalid file types
+                }
+
+                $safeName = time() . '_' . $i . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $originalName);
+                $targetPath = $uploadDir . $safeName;
+
+                if (move_uploaded_file($tmpName, $targetPath)) {
+                    $uploaded_files[] = $safeName;
+                }
+            }
+        }
+    }
 
     $sql = "INSERT INTO enrolled (
         firstname, middlename, lastname, suffix, gender, birthday, birthplace, 

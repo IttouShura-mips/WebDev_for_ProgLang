@@ -157,7 +157,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
 
         <div class="action-group">
             <!-- FIXED: Redirects to login.html in same directory -->
-            <a href="login.html" class="btn-home">Go to Login</a>
+            <a href="../student/login.html" class="btn-home">Go to Login</a>
         </div>
 
     <?php else: ?>
@@ -193,7 +193,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
             <div class="action-group">
                 <button type="submit" name="submit" class="login-button">Sign Up</button>
                 <!-- FIXED: Same-directory path -->
-                <a href="../../login.html" class="back-login">Back to Login</a>
+                <a href="../student/login.html" class="back-login">Back to Login</a>
             </div>
         </form>
 

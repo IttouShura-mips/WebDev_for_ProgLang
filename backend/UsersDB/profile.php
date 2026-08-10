@@ -23,7 +23,7 @@ try {
 // Fetch full student record from database
 $username = $_SESSION['username'];
 try {
-    $stmt = $conn->prepare("SELECT first_name, middle_name, last_name, username, created_at FROM users WHERE username = :username LIMIT 1");
+    $stmt = $conn->prepare("SELECT user_id, first_name, middle_name, last_name, username FROM users WHERE username = :username LIMIT 1");
     $stmt->execute([':username' => $username]);
     $student = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -41,7 +41,7 @@ $first_name    = htmlspecialchars($student['first_name']);
 $middle_name   = htmlspecialchars($student['middle_name']);
 $last_name     = htmlspecialchars($student['last_name']);
 $username_disp = htmlspecialchars($student['username']);
-$joined_date   = $student['created_at'] ? date('M d, Y', strtotime($student['created_at'])) : 'N/A';
+$user_id       = htmlspecialchars($student['user_id']);
 $initial       = strtoupper(substr($student['first_name'], 0, 1));
 ?>
 <!DOCTYPE html>
@@ -77,7 +77,6 @@ $initial       = strtoupper(substr($student['first_name'], 0, 1));
             flex-direction: column;
         }
 
-        /* Navbar */
         .navbar {
             background-color: var(--bg-card);
             border-bottom: 1px solid var(--border-teal);
@@ -139,7 +138,6 @@ $initial       = strtoupper(substr($student['first_name'], 0, 1));
             box-shadow: 0 0 15px rgba(255, 107, 107, 0.3);
         }
 
-        /* Main Content */
         .main-content {
             flex: 1;
             display: flex;
@@ -332,6 +330,11 @@ $initial       = strtoupper(substr($student['first_name'], 0, 1));
             <div class="section-title">Personal Information</div>
             <div class="info-grid">
                 <div class="info-item">
+                    <i class="fas fa-hashtag"></i>
+                    <div class="info-label">User ID</div>
+                    <div class="info-value"><?php echo $user_id; ?></div>
+                </div>
+                <div class="info-item">
                     <i class="fas fa-user"></i>
                     <div class="info-label">First Name</div>
                     <div class="info-value"><?php echo $first_name; ?></div>
@@ -346,15 +349,10 @@ $initial       = strtoupper(substr($student['first_name'], 0, 1));
                     <div class="info-label">Last Name</div>
                     <div class="info-value"><?php echo $last_name; ?></div>
                 </div>
-                <div class="info-item">
+                <div class="info-item full-width">
                     <i class="fas fa-fingerprint"></i>
                     <div class="info-label">Username / Student ID</div>
                     <div class="info-value"><?php echo $username_disp; ?></div>
-                </div>
-                <div class="info-item full-width">
-                    <i class="fas fa-calendar-plus"></i>
-                    <div class="info-label">Account Created</div>
-                    <div class="info-value"><?php echo $joined_date; ?></div>
                 </div>
             </div>
 

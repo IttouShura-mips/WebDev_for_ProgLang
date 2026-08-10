@@ -3,25 +3,25 @@ session_start();
 
 // Database Connection
 $host     = '127.0.0.1'; 
-$db_name  = 'enrollmentdb'; //[cite: 3]
-$dbuser   = 'root'; //[cite: 3]
-$dbpass   = ''; //[cite: 3]
+$db_name  = 'enrollmentdb';
+$dbuser   = 'root';
+$dbpass   = '';
 
 try {
-    $conn = new PDO("mysql:host=$host;dbname=$db_name;charset=utf8mb4", $dbuser, $dbpass); //[cite: 3]
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); //[cite: 3]
-} catch (PDOException $e) { //[cite: 3]
-    die("Database connection failed: " . $e->getMessage()); //[cite: 3]
+    $conn = new PDO("mysql:host=$host;dbname=$db_name;charset=utf8mb4", $dbuser, $dbpass);
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    die("Database connection failed: " . $e->getMessage());
 }
 
 // Flag for the UI
 $login_success = false;
 
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['submit'])) {
-    $username = trim($_POST['username'] ?? ''); //[cite: 3]
-    $password = trim($_POST['password'] ?? ''); //[cite: 3]
+    $username = trim($_POST['username'] ?? '');
+    $password = trim($_POST['password'] ?? '');
 
-    if (empty($username) || empty($password)) { //[cite: 3]
+    if (empty($username) || empty($password)) {
         echo "<script>alert('Please fill in all required fields.'); window.history.back();</script>";
         exit();
     }
@@ -34,16 +34,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['submit'])) {
 
         // Verify the user exists and the hashed password matches
         if ($student && password_verify($password, $student['password'])) {
-            
+
             // Set session variables
             $_SESSION['student_name'] = $student['first_name'] . ' ' . $student['last_name'];
             $_SESSION['username']     = $username;
-            
-            // Set flag to show Success UI instead of redirecting immediately
+
+            // Set flag to show Success UI
             $login_success = true;
-            
+
         } else {
-            echo "<script>alert('Invalid username or password. Please try again.'); window.location.href='../../login.php';</script>";
+            echo "<script>alert('Invalid username or password. Please try again.'); window.location.href='login.html';</script>";
             exit();
         }
     } catch (PDOException $e) {
@@ -70,7 +70,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['submit'])) {
         }
 
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Inter', Arial, sans-serif;
             background-color: var(--bg-deep-abyss);
             display: flex;
             justify-content: center;
@@ -94,7 +94,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['submit'])) {
             margin-bottom: 15px;
             color: #0df5e3;
         }
-        
+
         .card p {
             color: #8892b0;
             margin-bottom: 25px;
@@ -142,9 +142,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['submit'])) {
     <div class="success-icon">&#10004;</div>
     <h2>Login Successful!</h2>
     <p>Welcome back, <?php echo htmlspecialchars($_SESSION['student_name']); ?>. Your credentials have been verified.</p>
-    
+
     <div class="action-group">
-        <a href="../../student/login.html" class="btn-home">Go back to page</a>
+        <!-- FIXED: Redirects to profile.php instead of going back to login -->
+        <a href="profile.php" class="btn-home">Go to Dashboard</a>
     </div>
 </div>
 

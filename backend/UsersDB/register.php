@@ -29,10 +29,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
     } else {
         try {
             $hashed_password = password_hash($plain_password, PASSWORD_DEFAULT);
-            
+
             $sql = "INSERT INTO users (first_name, middle_name, last_name, username, password) 
                     VALUES (:first_name, :middle_name, :last_name, :username, :password)";
-                    
+
             $stmt = $conn->prepare($sql);
             $stmt->execute([
                 ':first_name'  => $first_name,
@@ -62,20 +62,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Registration</title>
-       <link rel="stylesheet" href="../../style.css">
     <style>
+        :root {
+            --bg-deep-abyss: #020c1b;
+            --bg-card: #0a192f;
+            --primary-neon: #0df5e3;
+            --primary-neon-hover: #00cbb9;
+            --neon-glow: 0 0 15px rgba(13, 245, 227, 0.3);
+        }
         body {
-            font-family: Arial, sans-serif;
-            background-color:  var(--bg-deep-abyss);
+            font-family: 'Inter', Arial, sans-serif;
+            background-color: var(--bg-deep-abyss);
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
         }
-
         .card {
-         background-color: var(--bg-card);
+            background-color: var(--bg-card);
             padding: 30px;
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
@@ -83,16 +88,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
             max-width: 400px;
             text-align: center;
         }
-
         .card h2 {
             margin-bottom: 20px;
             color: #7ae2ff;
         }
-
-        .login-card {
-            margin-bottom: 15px;
-        }
-
+        .login-card { margin-bottom: 15px; }
         .login-card input {
             width: 100%;
             padding: 12px;
@@ -101,17 +101,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
             box-sizing: border-box;
             font-size: 14px;
         }
-
         .action-group {
             margin-top: 20px;
             display: flex;
             flex-direction: column;
             gap: 12px;
         }
-
         .login-button, .btn-home {
             background-color: var(--primary-neon);
-            color: white;
+            color: #020c1b;
             border: none;
             padding: 12px;
             border-radius: 6px;
@@ -120,23 +118,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
             text-decoration: none;
             display: inline-block;
             font-weight: bold;
+            transition: all 0.3s ease;
         }
-
         .login-button:hover, .btn-home:hover {
             background-color: var(--primary-neon-hover);
-             box-shadow: var(--neon-glow);
+            box-shadow: var(--neon-glow);
         }
-
         .back-login {
-            color: #007bff;
+            color: #0df5e3;
             text-decoration: none;
             font-size: 14px;
         }
-
-        .back-login:hover {
-            text-decoration: underline;
-        }
-
+        .back-login:hover { text-decoration: underline; }
         .error-box {
             background-color: #f8d7da;
             color: #721c24;
@@ -145,7 +138,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
             margin-bottom: 15px;
             font-size: 14px;
         }
-
         .success-icon {
             font-size: 50px;
             color: #28a745;
@@ -157,15 +149,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
 
 <div class="card">
     <?php if ($registration_success): ?>
-        
+
         <!-- SUCCESS UI SCREEN -->
         <div class="success-icon">&#10004;</div>
         <h2>Signup Successful!</h2>
-        <p>Your account has been created successfully. You can now return to the homepage.</p>
-        
+        <p>Your account has been created successfully. You can now log in.</p>
+
         <div class="action-group">
-            <!-- 2 Levels Up Path -->
-            <a href="../../index.html" class="btn-home" style="color: grey;">Back to Homepage</a>
+            <!-- FIXED: Redirects to login.html in same directory -->
+            <a href="login.html" class="btn-home">Go to Login</a>
         </div>
 
     <?php else: ?>
@@ -200,8 +192,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
 
             <div class="action-group">
                 <button type="submit" name="submit" class="login-button">Sign Up</button>
-                <!-- 2 Levels Up Path -->
-                <a href="../../index.html" class="back-login">Back to Homepage</a>
+                <!-- FIXED: Same-directory path -->
+                <a href="login.html" class="back-login">Back to Login</a>
             </div>
         </form>
 

@@ -8,9 +8,20 @@ require 'db.php';
 
 $admin_name = htmlspecialchars($_SESSION['admin_name'] ?? $_SESSION['admin_user']);
 
-// Fetch students
+// Check which columns actually exist in the enrolled table
+$existingCols = [];
+$colRes = $conn->query("SHOW COLUMNS FROM enrolled");
+while ($c = $colRes->fetch_assoc()) {
+    $existingCols[] = $c['Field'];
+}
+
+// Build safe SELECT query
+$safeCols = ['student_id', 'firstname', 'lastname', 'email'];
+$optionalCols = ['ip_address', 'last_login', 'status'];
+$selectCols = array_merge($safeCols, array_intersect($optionalCols, $existingCols));
+
 $students = [];
-$res = $conn->query("SELECT student_id, firstname, lastname, email, ip_address, last_login, status FROM enrolled ORDER BY student_id DESC");
+$res = $conn->query("SELECT " . implode(', ', $selectCols) . " FROM enrolled ORDER BY student_id DESC");
 while ($row = $res->fetch_assoc()) { $students[] = $row; }
 
 // Handle delete/terminate
@@ -63,24 +74,33 @@ if (isset($_GET['terminate'])) {
     </header>
 
     <section class="tables-container">
-      <!-- Students Section -->
       <div class="table-card">
         <div class="table-header">
           <h2>Students</h2>
           <div class="table-controls">
             <input type="text" class="section-search" placeholder="Search username..." data-table="studentTable">
+            <?php if (in_array('status', $existingCols)): ?>
             <select class="filter-select" data-table="studentTable">
               <option value="all">All Status</option>
               <option value="online">Online</option>
               <option value="offline">Offline</option>
             </select>
+            <?php endif; ?>
             <a href="create.php"><button class="btn primary">+ Add Student</button></a>
           </div>
         </div>
         <div class="table-wrapper">
           <table id="studentTable">
             <thead>
-              <tr><th>User ID</th><th>Username</th><th>Role</th><th>IP Address</th><th>Last Login</th><th>Status</th><th>Action</th></tr>
+              <tr>
+                <th>User ID</th>
+                <th>Username</th>
+                <th>Role</th>
+                <?php if (in_array('ip_address', $existingCols)): ?><th>IP Address</th><?php endif; ?>
+                <?php if (in_array('last_login', $existingCols)): ?><th>Last Login</th><?php endif; ?>
+                <?php if (in_array('status', $existingCols)): ?><th>Status</th><?php endif; ?>
+                <th>Action</th>
+              </tr>
             </thead>
             <tbody>
               <?php if (count($students) > 0): ?>
@@ -92,9 +112,9 @@ if (isset($_GET['terminate'])) {
                   <td>#USR-<?php echo str_pad($s['student_id'], 3, '0', STR_PAD_LEFT); ?></td>
                   <td class="username"><?php echo htmlspecialchars($username); ?></td>
                   <td>Student</td>
-                  <td><?php echo htmlspecialchars($s['ip_address'] ?? 'N/A'); ?></td>
-                  <td><?php echo $s['last_login'] ?? 'Never'; ?></td>
-                  <td><span class="badge <?php echo $status === 'online' ? 'success' : 'danger'; ?>"><?php echo ucfirst($status); ?></span></td>
+                  <?php if (in_array('ip_address', $existingCols)): ?><td><?php echo htmlspecialchars($s['ip_address'] ?? 'N/A'); ?></td><?php endif; ?>
+                  <?php if (in_array('last_login', $existingCols)): ?><td><?php echo $s['last_login'] ?? 'Never'; ?></td><?php endif; ?>
+                  <?php if (in_array('status', $existingCols)): ?><td><span class="badge <?php echo $status === 'online' ? 'success' : 'danger'; ?>"><?php echo ucfirst($status); ?></span></td><?php endif; ?>
                   <td>
                     <div class="action-group">
                       <a href="edit.php?id=<?php echo $s['student_id']; ?>"><button class="btn-action">Edit</button></a>
@@ -104,7 +124,7 @@ if (isset($_GET['terminate'])) {
                 </tr>
                 <?php endforeach; ?>
               <?php else: ?>
-                <tr><td colspan="7" style="text-align:center; color:#666;">No students found</td></tr>
+                <tr><td colspan="<?php echo 4 + count(array_intersect(['ip_address','last_login','status'], $existingCols)); ?>" style="text-align:center; color:#666;">No students found</td></tr>
               <?php endif; ?>
             </tbody>
           </table>
@@ -113,7 +133,6 @@ if (isset($_GET['terminate'])) {
     </section>
   </main>
 
-  <!-- Terminate Modal -->
   <div id="terminateModal" class="modal-overlay">
     <div class="modal-box">
       <div class="modal-header">
@@ -132,7 +151,6 @@ if (isset($_GET['terminate'])) {
 
   <script src="script.js"></script>
   <script>
-    // Table filtering
     document.querySelectorAll('.section-search, .filter-select').forEach(el => {
       el.addEventListener('input', filterTables);
       el.addEventListener('change', filterTables);

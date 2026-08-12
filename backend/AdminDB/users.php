@@ -53,7 +53,7 @@ if (isset($_GET['terminate'])) {
       </ul>
     </div>
     <div class="sidebar-footer">
-      <a href="../index.html" class="btn-homepage"><i class="fa-solid fa-arrow-left"></i> Back to Homepage</a>
+      <a href="../../index.html" class="btn-homepage"><i class="fa-solid fa-arrow-left"></i> Back to Homepage</a>
       <a href="logout.php" class="btn-homepage" style="margin-top:10px; border-color:#ef4444; color:#ef4444;"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
     </div>
   </aside>

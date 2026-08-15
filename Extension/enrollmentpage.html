@@ -1106,7 +1106,20 @@
                         </div>
                         <div class="form-group">
                             <label for="motherMobile">Mother's Mobile No.</label>
-                            <input type="tel" pattern="[0-9]{11}" id="motherMobile" name="mother_mobile" class="form-control" placeholder="+63 9*********" autocomplete="none" required>
+                            <input 
+                                type="tel" 
+                                id="motherMobile" 
+                                value="+63 9"
+                                class="form-control" 
+                                pattern="^(09|\+639|639) \d {9$}"
+
+                                oninput="formatPhoneNumber(this)"
+                                onkeydown="preventPrefixDelete(event, this)"
+                                onfocus="moveCursorToEnd(this)"
+                                onclick="moveCursorToEnd(this)"
+                                maxlength="16"
+                                autocomplete="none" 
+                                required>
                         </div>
 
                         <div class="form-group">
@@ -1115,7 +1128,20 @@
                         </div>
                         <div class="form-group">
                             <label for="fatherMobile">Father's Mobile No.</label>
-                            <input type="tel" pattern="[0-9]{11}" id="fatherMobile" name="father_mobile" class="form-control" placeholder="+63 9*********" autocomplete="none" required>
+                            <input 
+                                type="tel" 
+                                id="motherMobile" 
+                                value="+63 9"
+                                class="form-control" 
+                                pattern="^(09|\+639|639) \d {9$}"
+
+                                oninput="formatPhoneNumber(this)"
+                                onkeydown="preventPrefixDelete(event, this)"
+                                onfocus="moveCursorToEnd(this)"
+                                onclick="moveCursorToEnd(this)"
+                                maxlength="16"
+                                autocomplete="none" 
+                                required>
                         </div>
 
                         <div class="form-group">
@@ -1124,7 +1150,20 @@
                         </div>
                         <div class="form-group">
                             <label for="guardianMobile">Guardian's Mobile No.</label>
-                            <input type="text" id="guardianMobile" name="guardian_mobile" class="form-control" placeholder="+63 9*********" autocomplete="none" required>
+                            <input 
+                                type="tel" 
+                                id="motherMobile" 
+                                value="+63 9"
+                                class="form-control" 
+                                pattern="^(09|\+639|639) \d {9$}"
+
+                                oninput="formatPhoneNumber(this)"
+                                onkeydown="preventPrefixDelete(event, this)"
+                                onfocus="moveCursorToEnd(this)"
+                                onclick="moveCursorToEnd(this)"
+                                maxlength="16"
+                                autocomplete="none" 
+                                required>
                         </div>
                     </div>
                 </div>
@@ -1222,7 +1261,20 @@
 
                         <div class="form-group">
                             <label for="mobileNo">Mobile Number</label>
-                            <input type="tel" pattern="[0-9]{11}" id="mobileNo" name="mobile_number" class="form-control" placeholder="+63 9*********" autocomplete="none" required>
+                            <input 
+                                type="tel" 
+                                id="motherMobile" 
+                                value="+63 9"
+                                class="form-control" 
+                                pattern="^(09|\+639|639) \d {9$}"
+
+                                oninput="formatPhoneNumber(this)"
+                                onkeydown="preventPrefixDelete(event, this)"
+                                onfocus="moveCursorToEnd(this)"
+                                onclick="moveCursorToEnd(this)"
+                                maxlength="16"
+                                autocomplete="none" 
+                                required>
                         </div>
 
                         <div class="form-group">
@@ -1422,6 +1474,63 @@
 
     <!-- Interactive Scripts -->
     <script>
+        const PREFIX = "+63 9";
+
+        function formatPhoneNumber(input) {
+        // 1. Strip everything except numbers
+        // We extract just the typed digits by removing the "+63 " prefix completely
+        let currentVal = input.value;
+        
+        // Ensure the user didn't somehow delete the core prefix structure
+        if (!currentVal.startsWith("+63")) {
+            input.value = PREFIX;
+            return;
+        }
+
+        // Extract only the raw digits after "+63 "
+        let digits = currentVal.substring(4).replace(/[^0-9]/g, '');
+
+        // 2. Rebuild the string with the custom spacing: 9XX XXX XXXX
+        let formatted = "+63 ";
+        
+        if (digits.length > 0) {
+            // First block: up to 3 digits (e.g., 930)
+            formatted += digits.substring(0, 3);
+        }
+        if (digits.length > 3) {
+            // Second block: next 3 digits (e.g., 889)
+            formatted += " " + digits.substring(3, 6);
+        }
+        if (digits.length > 6) {
+            // Third block: last 4 digits (e.g., 5963)
+            formatted += " " + digits.substring(6, 10);
+        }
+
+        // Update the input field value
+        input.value = formatted;
+        }
+
+        // Stops backspace from breaking the "+63 9" prefix
+        function preventPrefixDelete(event, input) {
+        const selectionStart = input.selectionStart;
+        if (selectionStart <= PREFIX.length) {
+            if (event.keyCode === 8 || event.keyCode === 46) {
+            event.preventDefault();
+            }
+        }
+        }
+
+        // Keeps the blinking typing cursor at the very end of the numbers
+        function moveCursorToEnd(input) {
+        setTimeout(() => {
+            if (input.selectionStart < PREFIX.length) {
+            input.setSelectionRange(input.value.length, input.value.length);
+            }
+        }, 0);
+        }
+
+
+
         document.addEventListener("DOMContentLoaded", () => {
             /* Off-Canvas Sidebar Drawer Controls */
             const menuToggle = document.getElementById("menuToggle");

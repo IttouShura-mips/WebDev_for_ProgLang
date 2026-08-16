@@ -43,8 +43,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['submit'])) {
             $login_success = true;
 
         } else {
-            // Redirect back to login with error flag instead of alert
-            header("Location: login.html?error=1");
+            // FIXED: Redirect back to the correct login page path with error flag and preserve username
+            header("Location: ../../student/login.html?error=1&user=" . urlencode($username));
             exit();
         }
     } catch (PDOException $e) {

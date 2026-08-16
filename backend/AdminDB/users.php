@@ -15,13 +15,9 @@ while ($c = $colRes->fetch_assoc()) {
     $existingCols[] = $c['Field'];
 }
 
-// Build safe SELECT query
-$safeCols = ['student_id', 'firstname', 'lastname', 'email'];
-$optionalCols = ['ip_address', 'last_login', 'status'];
-$selectCols = array_merge($safeCols, array_intersect($optionalCols, $existingCols));
-
+// Fetch full records for view modal
 $students = [];
-$res = $conn->query("SELECT " . implode(', ', $selectCols) . " FROM enrolled ORDER BY student_id DESC");
+$res = $conn->query("SELECT * FROM enrolled ORDER BY student_id DESC");
 while ($row = $res->fetch_assoc()) { $students[] = $row; }
 
 // Handle delete/terminate
@@ -40,6 +36,16 @@ if (isset($_GET['terminate'])) {
   <title>Admin Control Panel - Users</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <link rel="stylesheet" href="adminpanelstyle.css">
+  <style>
+    .view-modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .view-modal-grid.full { grid-template-columns: 1fr; }
+    .view-modal-section { margin-bottom: 18px; }
+    .view-modal-section h4 { color: var(--primary-neon); font-size: 0.95rem; margin-bottom: 10px; border-bottom: 1px solid var(--border-teal); padding-bottom: 6px; }
+    .view-modal-row { display: flex; margin-bottom: 8px; font-size: 0.88rem; }
+    .view-modal-label { width: 140px; color: var(--text-muted-teal); font-weight: 600; flex-shrink: 0; }
+    .view-modal-value { color: var(--text-high-contrast); flex: 1; word-break: break-word; }
+    @media (max-width: 600px) { .view-modal-grid { grid-template-columns: 1fr; } }
+  </style>
 </head>
 <body>
   <aside class="sidebar">
@@ -108,7 +114,7 @@ if (isset($_GET['terminate'])) {
                   $username = strtolower(str_replace(' ', '_', $s['firstname'] . '_' . $s['lastname']));
                   $status = $s['status'] ?? 'offline';
                 ?>
-                <tr data-status="<?php echo strtolower($status); ?>">
+                <tr data-status="<?php echo strtolower($status); ?>" data-record='<?php echo htmlspecialchars(json_encode($s), ENT_QUOTES, "UTF-8"); ?>'>
                   <td>#USR-<?php echo str_pad($s['student_id'], 3, '0', STR_PAD_LEFT); ?></td>
                   <td class="username"><?php echo htmlspecialchars($username); ?></td>
                   <td>Student</td>
@@ -117,6 +123,7 @@ if (isset($_GET['terminate'])) {
                   <?php if (in_array('status', $existingCols)): ?><td><span class="badge <?php echo $status === 'online' ? 'success' : 'danger'; ?>"><?php echo ucfirst($status); ?></span></td><?php endif; ?>
                   <td>
                     <div class="action-group">
+                      <button class="btn-action" onclick="openViewModal(this)" style="border-color:#10b981; color:#10b981;"><i class="fa-solid fa-eye"></i> View</button>
                       <a href="edit.php?id=<?php echo $s['student_id']; ?>"><button class="btn-action">Edit</button></a>
                       <button class="btn-action delete" onclick="openTerminateModal(<?php echo $s['student_id']; ?>, '<?php echo htmlspecialchars($username); ?>')">Terminate</button>
                     </div>
@@ -132,6 +139,22 @@ if (isset($_GET['terminate'])) {
       </div>
     </section>
   </main>
+
+  <!-- View Enrollment Modal -->
+  <div class="modal-overlay" id="viewEnrollmentModal">
+    <div class="modal-container" style="max-width: 700px; max-height: 85vh; overflow-y: auto;">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-id-card"></i> Enrollment Details</h3>
+        <button class="modal-close-btn" onclick="closeViewModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body" id="viewModalBody">
+        <!-- Populated by JS -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn primary" onclick="closeViewModal()">Close</button>
+      </div>
+    </div>
+  </div>
 
   <div id="terminateModal" class="modal-overlay">
     <div class="modal-box">
@@ -179,6 +202,79 @@ if (isset($_GET['terminate'])) {
     function closeTerminateModal() {
       document.getElementById('terminateModal').classList.remove('active');
     }
+
+    function openViewModal(btn) {
+      const row = btn.closest('tr');
+      const data = JSON.parse(row.getAttribute('data-record'));
+      if (!data) return;
+
+      const sections = [
+        {
+          title: 'Personal Information',
+          fields: [
+            ['First Name', data.firstname],
+            ['Middle Name', data.middlename],
+            ['Last Name', data.lastname],
+            ['Suffix', data.suffix || 'N/A'],
+            ['Gender', data.gender],
+            ['Birthday', data.birthday],
+            ['Birthplace', data.birthplace],
+            ['Citizenship', data.citizenship],
+            ['Civil Status', data.civilstatus],
+            ['Employment', data.employment]
+          ]
+        },
+        {
+          title: 'Family / Guardian',
+          fields: [
+            ["Mother's Name", data.mother],
+            ["Mother's Phone", data.mphone_number],
+            ["Father's Name", data.father],
+            ["Father's Phone", data.fphone_number],
+            ["Guardian's Name", data.guardian],
+            ["Guardian's Phone", data.gphone_number]
+          ]
+        },
+        {
+          title: 'Academic Information',
+          fields: [
+            ['Course', data.course],
+            ['Major', data.major],
+            ['School Address', data.school_address],
+            ['Academic Year', data.academic_year],
+            ['Scholarship', data.scholarship]
+          ]
+        },
+        {
+          title: 'Contact & Address',
+          fields: [
+            ['Full Address', data.full_address],
+            ['Mobile Number', data.mobile_number],
+            ['Email', data.email]
+          ]
+        }
+      ];
+
+      let html = '';
+      sections.forEach(sec => {
+        html += `<div class="view-modal-section"><h4>${sec.title}</h4><div class="view-modal-grid">`;
+        sec.fields.forEach(([label, value]) => {
+          html += `<div class="view-modal-row"><span class="view-modal-label">${label}:</span><span class="view-modal-value">${value || 'N/A'}</span></div>`;
+        });
+        html += '</div></div>';
+      });
+
+      document.getElementById('viewModalBody').innerHTML = html;
+      document.getElementById('viewEnrollmentModal').classList.add('active');
+    }
+
+    function closeViewModal() {
+      document.getElementById('viewEnrollmentModal').classList.remove('active');
+    }
+
+    document.getElementById('viewEnrollmentModal').addEventListener('click', function(e) {
+      if (e.target === this) closeViewModal();
+    });
   </script>
 </body>
 </html>

@@ -298,8 +298,9 @@
     </div>
 
     <script>
-        // Check for error parameter in URL
         const urlParams = new URLSearchParams(window.location.search);
+
+        // Show error state if redirected back with ?error=1
         if (urlParams.get('error') === '1') {
             const usernameInput = document.getElementById('username');
             const passwordInput = document.getElementById('password');
@@ -309,11 +310,20 @@
             passwordInput.classList.add('input-error');
             errorMsg.classList.add('show');
 
+            // Pre-fill username so user doesn't have to retype it
+            const savedUser = urlParams.get('user');
+            if (savedUser) {
+                usernameInput.value = decodeURIComponent(savedUser);
+            }
+
             // Clear error styling when user starts typing
             [usernameInput, passwordInput].forEach(input => {
                 input.addEventListener('input', function() {
                     this.classList.remove('input-error');
-                    errorMsg.classList.remove('show');
+                    // Only hide the message if both fields have been interacted with
+                    if (usernameInput.value && passwordInput.value) {
+                        errorMsg.classList.remove('show');
+                    }
                 });
             });
         }

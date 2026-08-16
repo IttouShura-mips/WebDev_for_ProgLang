@@ -104,6 +104,8 @@
             width: 100%;
             display: flex;
             justify-content: center;
+            flex-direction: column;
+            align-items: center;
         }
 
         .login-card input {
@@ -125,6 +127,42 @@
         .login-card input:focus {
             border-color: var(--primary-neon);
             box-shadow: 0 0 12px rgba(13, 245, 227, 0.25);
+        }
+
+        /* Error state for inputs */
+        .login-card input.input-error {
+            border-color: #ff6b6b;
+            box-shadow: 0 0 12px rgba(255, 107, 107, 0.3);
+            color: #ff6b6b;
+        }
+
+        .login-card input.input-error::placeholder {
+            color: #ff6b6b;
+        }
+
+        .error-msg {
+            color: #ff6b6b;
+            font-size: 13px;
+            margin-bottom: 10px;
+            background: rgba(255, 107, 107, 0.1);
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            display: none;
+            width: 100%;
+            max-width: 340px;
+            text-align: center;
+        }
+
+        .error-msg.show {
+            display: block;
+            animation: shake 0.4s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
         }
 
         .action-group {
@@ -180,16 +218,6 @@
 
         form a { text-decoration: none; }
 
-        .error-msg {
-            color: #ff6b6b;
-            font-size: 13px;
-            margin-bottom: 10px;
-            background: rgba(255, 107, 107, 0.1);
-            padding: 8px 16px;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 107, 107, 0.3);
-        }
-
         @media (max-width: 768px) {
             body {
                 align-items: center;
@@ -206,6 +234,7 @@
             .header h1 { font-size: 28px; }
             form { margin-top: 25px; padding-top: 20px; }
             .login-card input { width: 100%; max-width: 320px; }
+            .error-msg { max-width: 320px; }
         }
 
         @media (max-width: 480px) {
@@ -232,6 +261,7 @@
                 text-align: center;
             }
             .register { line-height: 43px; }
+            .error-msg { max-width: 280px; }
         }
     </style>               
 <base target="_blank">
@@ -245,7 +275,6 @@
             <h4>Interworld Colleges Foundation Inc.</h4>
         </div>
 
-        <!-- FIXED: Added action, method, and name attributes -->
         <form action="../backend/UsersDB/login.php" method="POST" autocomplete="off"> 
             <div class="form-header">
                 <h1>Welcome ICF'ians</h1>
@@ -253,6 +282,7 @@
             </div>
 
             <div class="login-card">
+                <div class="error-msg" id="errorMsg">Incorrect password and user name</div>
                 <input type="text" id="username" name="username" autocomplete="off" required placeholder="Enter Your Username">
             </div>
 
@@ -266,6 +296,28 @@
             </div>
         </form>
     </div>
+
+    <script>
+        // Check for error parameter in URL
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('error') === '1') {
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            const errorMsg = document.getElementById('errorMsg');
+
+            usernameInput.classList.add('input-error');
+            passwordInput.classList.add('input-error');
+            errorMsg.classList.add('show');
+
+            // Clear error styling when user starts typing
+            [usernameInput, passwordInput].forEach(input => {
+                input.addEventListener('input', function() {
+                    this.classList.remove('input-error');
+                    errorMsg.classList.remove('show');
+                });
+            });
+        }
+    </script>
 
 </body>
 </html>

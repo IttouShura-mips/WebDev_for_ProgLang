@@ -43,7 +43,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['submit'])) {
             $login_success = true;
 
         } else {
-            echo "<script>alert('Invalid username or password. Please try again.'); window.location.href='login.html';</script>";
+            // Redirect back to login with error flag instead of alert
+            header("Location: login.html?error=1");
             exit();
         }
     } catch (PDOException $e) {
@@ -144,7 +145,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['submit'])) {
     <p>Welcome back, <?php echo htmlspecialchars($_SESSION['student_name']); ?>. Your credentials have been verified.</p>
 
     <div class="action-group">
-        <!-- FIXED: Redirects to profile.php instead of going back to login -->
         <a href="profile.php" class="btn-home">Go to Dashboard</a>
     </div>
 </div>

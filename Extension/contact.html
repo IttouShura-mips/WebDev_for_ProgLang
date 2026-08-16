@@ -823,6 +823,7 @@
             }
         }
     </style>
+<base target="_blank">
 </head>
 <body>
 
@@ -990,7 +991,9 @@
                     <h3>Inquire Us</h3>
                     <p>Send an official message directly to our administrative team.</p>
 
-                    <form id="inquiryForm" action="#" method="POST">
+                    <div id="formAlert" style="display:none; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 0.9rem; font-weight: 600;"></div>
+
+                    <form id="inquiryForm" action="submit_inquiry.php" method="POST">
                         <div class="form-group">
                             <label for="fullname">Full Name</label>
                             <input type="text" id="fullname" name="fullname" class="form-control" placeholder="e.g. Juan Dela Cruz" autocomplete="none" required>
@@ -1160,13 +1163,60 @@
 
             fadeCards.forEach((card) => cardObserver.observe(card));
 
-            /* Form Submission Handler */
+            /* Form Submission Handler & URL Alert Display */
             const inquiryForm = document.getElementById("inquiryForm");
+            const formAlert = document.getElementById("formAlert");
+
+            // Show alerts based on URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('success')) {
+                formAlert.style.display = 'block';
+                formAlert.style.background = 'rgba(16, 185, 129, 0.15)';
+                formAlert.style.border = '1px solid #10b981';
+                formAlert.style.color = '#6ee7b7';
+                formAlert.innerHTML = '<i class="fa-solid fa-circle-check"></i> Thank you! Your inquiry has been sent successfully. Our team will review it shortly.';
+                if(window.history.replaceState) window.history.replaceState({}, document.title, window.location.pathname);
+            } else if (urlParams.has('error')) {
+                const err = urlParams.get('error');
+                formAlert.style.display = 'block';
+                formAlert.style.background = 'rgba(239, 68, 68, 0.15)';
+                formAlert.style.border = '1px solid #ef4444';
+                formAlert.style.color = '#fca5a5';
+                let msg = 'Something went wrong. Please try again.';
+                if (err === 'empty') msg = 'Please fill in all required fields.';
+                if (err === 'email') msg = 'Please enter a valid email address.';
+                if (err === 'db') msg = 'Server error. Please try again later.';
+                formAlert.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> ' + msg;
+                if(window.history.replaceState) window.history.replaceState({}, document.title, window.location.pathname);
+            }
+
             if (inquiryForm) {
                 inquiryForm.addEventListener("submit", (e) => {
-                    e.preventDefault();
-                    alert("Thank you! Your inquiry has been sent successfully. Our team will review it shortly.");
-                    inquiryForm.reset();
+                    const fullname = document.getElementById("fullname").value.trim();
+                    const email = document.getElementById("email").value.trim();
+                    const subject = document.getElementById("subject").value.trim();
+                    const concern = document.getElementById("concern").value.trim();
+
+                    if (!fullname || !email || !subject || !concern) {
+                        e.preventDefault();
+                        formAlert.style.display = 'block';
+                        formAlert.style.background = 'rgba(239, 68, 68, 0.15)';
+                        formAlert.style.border = '1px solid #ef4444';
+                        formAlert.style.color = '#fca5a5';
+                        formAlert.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Please fill in all required fields.';
+                        return;
+                    }
+
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailRegex.test(email)) {
+                        e.preventDefault();
+                        formAlert.style.display = 'block';
+                        formAlert.style.background = 'rgba(239, 68, 68, 0.15)';
+                        formAlert.style.border = '1px solid #ef4444';
+                        formAlert.style.color = '#fca5a5';
+                        formAlert.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Please enter a valid email address.';
+                        return;
+                    }
                 });
             }
         });

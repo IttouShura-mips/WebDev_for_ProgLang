@@ -4,31 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contact Us | ICF Interworld Colleges Foundation Inc.</title>
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-    <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>  
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
-            --bg-deep-abyss: #020c1b;      /* Deep dark oceanic background */
-            --bg-card: #0a192f;            /* Dark teal-tinted card background */
-            --bg-card-hover: #112240;      /* Elevated glass depth background */
-            --primary-neon: #0df5e3;       /* Bioluminescent vibrant teal */
-            --primary-neon-hover: #00cbb9; /* Slightly darker neon active */
-            --text-high-contrast: #e2e8f0; /* Crisp white-silver */
-            --text-muted-teal: #8892b0;    /* Soft teal gray */
-            --border-teal: #172a45;        /* Subdued border color */
+            --bg-deep-abyss: #020c1b;
+            --bg-card: #0a192f;
+            --bg-card-hover: #112240;
+            --primary-neon: #0df5e3;
+            --primary-neon-hover: #00cbb9;
+            --text-high-contrast: #e2e8f0;
+            --text-muted-teal: #8892b0;
+            --border-teal: #172a45;
             --border-radius: 12px;
             --transition-smooth: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             --neon-glow: 0 0 15px rgba(13, 245, 227, 0.3);
         }
-
         body {
             font-family: 'Inter', sans-serif;
             color: var(--text-high-contrast);
@@ -39,14 +31,7 @@
             flex-direction: column;
             min-height: 100vh;
         }
-
-        .container { 
-            width: 90%;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        /* --- Header / Navigation --- */
+        .container { width: 90%; max-width: 1200px; margin: 0 auto; }
         header {
             background-color: rgba(2, 12, 27, 0.85);
             backdrop-filter: blur(12px);
@@ -56,791 +41,294 @@
             top: 0;
             z-index: 100;
         }
-
-        .nav-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1.2rem 0;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .logo img {
-            height: 40px;
-        }
-
-        .logo h2 {
-            font-size: 1.3rem;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            color: var(--text-high-contrast);
-        }
-
-        .logo span {
-            display: block;
-            font-size: 0.75rem;
-            font-weight: 400;
-            color: var(--primary-neon);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        /* --- Menu Toggle Button for Mobile --- */
+        .nav-container { display: flex; justify-content: space-between; align-items: center; padding: 1.2rem 0; }
+        .logo { display: flex; align-items: center; gap: 12px; }
+        .logo img { height: 40px; }
+        .logo h2 { font-size: 1.3rem; font-weight: 700; letter-spacing: 0.5px; color: var(--text-high-contrast); }
+        .logo span { display: block; font-size: 0.75rem; font-weight: 400; color: var(--primary-neon); text-transform: uppercase; letter-spacing: 1px; }
         .mobile-menu-btn {
-            display: none;
-            background: transparent;
-            border: 1px solid var(--border-teal);
-            color: var(--primary-neon);
-            font-size: 1.3rem;
-            padding: 0.5rem 0.8rem;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: var(--transition-smooth);
+            display: none; background: transparent; border: 1px solid var(--border-teal);
+            color: var(--primary-neon); font-size: 1.3rem; padding: 0.5rem 0.8rem;
+            border-radius: 8px; cursor: pointer; transition: var(--transition-smooth);
         }
-
-        .mobile-menu-btn:hover {
-            background-color: rgba(13, 245, 227, 0.1);
-            border-color: var(--primary-neon);
-        }
-
-        .desktop-nav-links {
-            display: flex;
-            list-style: none;
-            gap: 2rem;
-        }
-
+        .mobile-menu-btn:hover { background-color: rgba(13, 245, 227, 0.1); border-color: var(--primary-neon); }
+        .desktop-nav-links { display: flex; list-style: none; gap: 2rem; }
         .desktop-nav-links a {
-            text-decoration: none;
-            color: var(--text-muted-teal);
-            font-weight: 500;
-            font-size: 1.1rem;
-            transition: var(--transition-smooth);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            text-decoration: none; color: var(--text-muted-teal); font-weight: 500;
+            font-size: 1.1rem; transition: var(--transition-smooth); cursor: pointer;
+            display: flex; align-items: center; gap: 8px;
         }
-
-        .desktop-nav-links a:hover, .desktop-nav-links a.active {
-            color: var(--primary-neon);
-            text-shadow: 0 0 40px var(--primary-neon);
-        }
-
-        /* --- Mobile Off-Canvas Sidebar Drawer --- */
+        .desktop-nav-links a:hover, .desktop-nav-links a.active { color: var(--primary-neon); text-shadow: 0 0 40px var(--primary-neon); }
         .sidebar-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(2, 12, 27, 0.7);
-            backdrop-filter: blur(4px);
-            z-index: 998;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(2, 12, 27, 0.7); backdrop-filter: blur(4px);
+            z-index: 998; opacity: 0; visibility: hidden; transition: all 0.3s ease;
         }
-
-        .sidebar-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
+        .sidebar-overlay.active { opacity: 1; visibility: visible; }
         .mobile-sidebar {
-            position: fixed;
-            top: 0;
-            right: -320px;
-            width: 300px;
-            height: 100vh;
-            background: rgba(10, 25, 47, 0.98);
-            border-left: 1px solid var(--border-teal);
-            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.8);
-            z-index: 999;
-            display: flex;
-            flex-direction: column;
-            padding: 2rem 1.5rem;
-            transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-            overflow-y: auto;
+            position: fixed; top: 0; right: -320px; width: 300px; height: 100vh;
+            background: rgba(10, 25, 47, 0.98); border-left: 1px solid var(--border-teal);
+            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.8); z-index: 999;
+            display: flex; flex-direction: column; padding: 2rem 1.5rem;
+            transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1); overflow-y: auto;
         }
-
-        .mobile-sidebar.active {
-            right: 0;
-        }
-
+        .mobile-sidebar.active { right: 0; }
         .sidebar-close-btn {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: transparent;
-            border: none;
-            color: var(--text-muted-teal);
-            font-size: 1.5rem;
-            cursor: pointer;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            transition: var(--transition-smooth);
+            position: absolute; top: 1rem; right: 1rem; background: transparent;
+            border: none; color: var(--text-muted-teal); font-size: 1.5rem;
+            cursor: pointer; width: 36px; height: 36px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; transition: var(--transition-smooth);
         }
-
-        .sidebar-close-btn:hover {
-            color: var(--primary-neon);
-            background: rgba(13, 245, 227, 0.1);
-        }
-
-        .sidebar-brand {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-top: 1rem;
-            margin-bottom: 2rem;
-            text-align: center;
-        }
-
-        .sidebar-brand img {
-            height: 75px;
-            margin-bottom: 10px;
-        }
-
+        .sidebar-close-btn:hover { color: var(--primary-neon); background: rgba(13, 245, 227, 0.1); }
+        .sidebar-brand { display: flex; flex-direction: column; align-items: center; margin-top: 1rem; margin-bottom: 2rem; text-align: center; }
+        .sidebar-brand img { height: 75px; margin-bottom: 10px; }
         .sidebar-nav-links {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 1.2rem;
-            width: 100%;
-            text-align: center;
-            margin-bottom: 2rem;
+            list-style: none; display: flex; flex-direction: column;
+            gap: 1.2rem; width: 100%; text-align: center; margin-bottom: 2rem;
         }
-
         .sidebar-nav-links a {
-            text-decoration: none;
-            color: var(--text-high-contrast);
-            font-size: 1.1rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: left;
-            gap: 10px;
-            padding: 0.6rem;
-            border-radius: 8px;
-            transition: var(--transition-smooth);
+            text-decoration: none; color: var(--text-high-contrast); font-size: 1.1rem;
+            font-weight: 600; display: flex; align-items: center; justify-content: left;
+            gap: 10px; padding: 0.6rem; border-radius: 8px; transition: var(--transition-smooth);
         }
-
-        .sidebar-nav-links a:hover, .sidebar-nav-links a.active {
-            color: var(--primary-neon);
-            background: rgba(13, 245, 227, 0.08);
-        }
-
+        .sidebar-nav-links a:hover, .sidebar-nav-links a.active { color: var(--primary-neon); background: rgba(13, 245, 227, 0.08); }
         .sidebar-footer-portal {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            padding-top: 1rem;
+            width: 100%; display: flex; flex-direction: column;
+            align-items: center; gap: 10px; padding-top: 1rem;
             border-top: 1px solid var(--border-teal);
         }
-
-        .sidebar-footer-portal .btn-secondary {
-            transform: scale(0.88);
-            width: 100%;
-            font-size: 0.85rem;
-            height: 42px;
-        }
-
-        /* --- Portal Dropdown --- */
-        .portal-dropdown-wrapper {
-            position: relative;
-            display: inline-block;
-        }
-
+        .sidebar-footer-portal .btn-secondary { transform: scale(0.88); width: 100%; font-size: 0.85rem; height: 42px; }
+        .portal-dropdown-wrapper { position: relative; display: inline-block; }
         .portal-box {
-            position: absolute;
-            top: calc(100% + 12px);
-            right: 0;
-            width: 260px;
-            background: rgba(10, 25, 47, 0.95);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--border-teal);
-            border-radius: 12px;
-            padding: 12px;
-            box-shadow: 
-                0 20px 40px rgba(0, 0, 0, 0.7),
-                0 0 25px rgba(13, 245, 227, 0.15);
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            z-index: 1000;
-            
-            opacity: 0;
-            visibility: hidden;
+            position: absolute; top: calc(100% + 12px); right: 0; width: 260px;
+            background: rgba(10, 25, 47, 0.95); backdrop-filter: blur(12px);
+            border: 1px solid var(--border-teal); border-radius: 12px; padding: 12px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7), 0 0 25px rgba(13, 245, 227, 0.15);
+            display: flex; flex-direction: column; gap: 8px; z-index: 1000;
+            opacity: 0; visibility: hidden;
             transform: translateY(-15px) scaleY(0.9);
             transform-origin: top center;
             transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
-
-        .portal-box.show {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0) scaleY(1);
-        }
-
+        .portal-box.show { opacity: 1; visibility: visible; transform: translateY(0) scaleY(1); }
         .portal-box-title {
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: var(--primary-neon);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            padding: 4px 8px;
+            font-size: 0.75rem; font-weight: 700; color: var(--primary-neon);
+            text-transform: uppercase; letter-spacing: 1px; padding: 4px 8px;
         }
-
         .portal-option {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 12px;
-            text-decoration: none;
-            color: var(--text-high-contrast);
-            border-radius: 8px;
-            background: rgba(2, 12, 27, 0.5);
-            border: 1px solid transparent;
+            display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+            text-decoration: none; color: var(--text-high-contrast); border-radius: 8px;
+            background: rgba(2, 12, 27, 0.5); border: 1px solid transparent;
             transition: all 0.2s ease;
         }
-
-        .portal-option i {
-            font-size: 1.2rem;
-            color: var(--primary-neon);
-        }
-
-        .portal-option .option-text {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .portal-option strong {
-            font-size: 0.9rem;
-        }
-
-        .portal-option small {
-            font-size: 0.75rem;
-            color: var(--text-muted-teal);
-        }
-
+        .portal-option i { font-size: 1.2rem; color: var(--primary-neon); }
+        .portal-option .option-text { display: flex; flex-direction: column; }
+        .portal-option strong { font-size: 0.9rem; }
+        .portal-option small { font-size: 0.75rem; color: var(--text-muted-teal); }
         .portal-option:hover {
-            background: rgba(13, 245, 227, 0.1);
-            border-color: var(--primary-neon);
+            background: rgba(13, 245, 227, 0.1); border-color: var(--primary-neon);
             transform: translateX(4px);
         }
-
-        .portal-option:hover strong {
-            color: var(--primary-neon);
-        }
-
-        /* --- Buttons --- */
+        .portal-option:hover strong { color: var(--primary-neon); }
         .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 0.75rem 1.6rem;
-            border-radius: var(--border-radius);
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: none;
-            transition: var(--transition-smooth);
-            border: none;
-            font-size: 0.95rem;
-            height: 48px;
+            display: inline-flex; align-items: center; justify-content: center;
+            gap: 8px; padding: 0.75rem 1.6rem; border-radius: var(--border-radius);
+            font-weight: 600; cursor: pointer; text-decoration: none;
+            transition: var(--transition-smooth); border: none; font-size: 0.95rem; height: 48px;
         }
-
         .btn-primary {
-            background-color: var(--primary-neon);
-            color: var(--bg-deep-abyss);
+            background-color: var(--primary-neon); color: var(--bg-deep-abyss);
             box-shadow: var(--neon-glow);
         }
-
         .btn-primary:hover {
-            background-color: var(--primary-neon-hover);
-            transform: translateY(-2px);
+            background-color: var(--primary-neon-hover); transform: translateY(-2px);
             box-shadow: 0 0 20px rgba(13, 245, 227, 0.5);
         }
-
         .btn-secondary {
-            background-color: var(--bg-card-hover);
-            color: var(--primary-neon);
+            background-color: var(--bg-card-hover); color: var(--primary-neon);
             border: 1px solid rgba(13, 245, 227, 0.3);
         }
-
         .btn-secondary:hover {
-            background-color: var(--primary-neon);
-            color: var(--bg-deep-abyss);
+            background-color: var(--primary-neon); color: var(--bg-deep-abyss);
             box-shadow: var(--neon-glow);
         }
-
-        /* --- Hero Section --- */
         .hero-banner {
-            position: relative;
-            padding: 6rem 0 4rem;
-            border-bottom: 1px solid var(--border-teal);
-            text-align: center;
-            background: 
-                linear-gradient(180deg, rgba(2, 12, 27, 0.85) 0%, rgba(10, 25, 47, 0.90) 60%, rgba(2, 12, 27, 0.98) 100%),
-                url('../BackGroundimage/ICFcoverphoto.jpg') no-repeat center center / cover;
+            position: relative; padding: 6rem 0 4rem;
+            border-bottom: 1px solid var(--border-teal); text-align: center;
+            background: linear-gradient(180deg, rgba(2, 12, 27, 0.85) 0%, rgba(10, 25, 47, 0.90) 60%, rgba(2, 12, 27, 0.98) 100%), url('../BackGroundimage/ICFcoverphoto.jpg') no-repeat center center / cover;
         }
-
         .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(13, 245, 227, 0.12);
-            color: var(--primary-neon);
-            border: 1px solid rgba(13, 245, 227, 0.4);
-            backdrop-filter: blur(8px);
-            padding: 0.4rem 1.2rem;
-            border-radius: 50px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(13, 245, 227, 0.12); color: var(--primary-neon);
+            border: 1px solid rgba(13, 245, 227, 0.4); backdrop-filter: blur(8px);
+            padding: 0.4rem 1.2rem; border-radius: 50px; font-size: 0.85rem; font-weight: 600; margin-bottom: 1.5rem;
         }
-
-        .hero-banner h1 {
-            font-size: 3.2rem;
-            font-weight: 800;
-            color: var(--text-high-contrast);
-            margin-bottom: 1rem;
-            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
-        }
-
-        .hero-banner p {
-            font-size: 1.15rem;
-            color: var(--text-high-contrast);
-            opacity: 0.9;
-            max-width: 750px;
-            margin: 0 auto;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
-        }
-
-        /* --- Contact Layout Grid --- */
-        section {
-            padding: 4rem 0;
-        }
-
-        .contact-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2.5rem;
-        }
-
+        .hero-banner h1 { font-size: 3.2rem; font-weight: 800; color: var(--text-high-contrast); margin-bottom: 1rem; text-shadow: 0 4px 20px rgba(0, 0, 0, 0.6); }
+        .hero-banner p { font-size: 1.15rem; color: var(--text-high-contrast); opacity: 0.9; max-width: 750px; margin: 0 auto; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8); }
+        section { padding: 4rem 0; }
+        .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; }
         .info-card {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-teal);
-            border-radius: var(--border-radius);
-            padding: 2.5rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1.8rem;
+            background-color: var(--bg-card); border: 1px solid var(--border-teal);
+            border-radius: var(--border-radius); padding: 2.5rem;
+            display: flex; flex-direction: column; gap: 1.8rem;
         }
-
-        .info-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 1.2rem;
-        }
-
+        .info-item { display: flex; align-items: flex-start; gap: 1.2rem; }
         .info-icon {
-            width: 48px;
-            height: 48px;
-            background: rgba(13, 245, 227, 0.1);
-            border: 1px solid var(--primary-neon);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
+            width: 48px; height: 48px; background: rgba(13, 245, 227, 0.1);
+            border: 1px solid var(--primary-neon); border-radius: 10px;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
         }
-
-        .info-icon i {
-            font-size: 1.3rem;
-            color: var(--primary-neon);
-        }
-
-        .info-content h4 {
-            font-size: 1.1rem;
-            color: var(--text-high-contrast);
-            margin-bottom: 0.2rem;
-        }
-
-        .info-content p, .info-content a {
-            color: var(--text-muted-teal);
-            font-size: 0.95rem;
-            text-decoration: none;
-            transition: var(--transition-smooth);
-        }
-
-        .info-content a:hover {
-            color: var(--primary-neon);
-        }
-
+        .info-icon i { font-size: 1.3rem; color: var(--primary-neon); }
+        .info-content h4 { font-size: 1.1rem; color: var(--text-high-contrast); margin-bottom: 0.2rem; }
+        .info-content p, .info-content a { color: var(--text-muted-teal); font-size: 0.95rem; text-decoration: none; transition: var(--transition-smooth); }
+        .info-content a:hover { color: var(--primary-neon); }
         .response-note {
-            background: rgba(13, 245, 227, 0.05);
-            border-left: 3px solid var(--primary-neon);
-            padding: 1rem;
-            border-radius: 0 8px 8px 0;
-            font-size: 0.88rem;
-            color: var(--text-muted-teal);
+            background: rgba(13, 245, 227, 0.05); border-left: 3px solid var(--primary-neon);
+            padding: 1rem; border-radius: 0 8px 8px 0; font-size: 0.88rem; color: var(--text-muted-teal);
         }
-
-        /* Interactive Map Container */
-        .map-container {
-            width: 100%;
-            height: 250px;
-            border-radius: var(--border-radius);
-            overflow: hidden;
-            border: 1px solid var(--border-teal);
-            margin-top: 1rem;
-        }
-
-        .map-container iframe {
-            width: 100%;
-            height: 100%;
-            border: 0;
-        }
-
-        /* --- Directory Section --- */
+        .map-container { width: 100%; height: 250px; border-radius: var(--border-radius); overflow: hidden; border: 1px solid var(--border-teal); margin-top: 1rem; }
+        .map-container iframe { width: 100%; height: 100%; border: 0; }
         .staff-directory {
-            margin-top: 2.5rem;
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-teal);
-            border-radius: var(--border-radius);
-            padding: 2.5rem;
+            margin-top: 2.5rem; background-color: var(--bg-card);
+            border: 1px solid var(--border-teal); border-radius: var(--border-radius); padding: 2.5rem;
         }
-
-        .staff-directory h3 {
-            font-size: 1.5rem;
-            color: var(--primary-neon);
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .directory-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.2rem;
-        }
-
+        .staff-directory h3 { font-size: 1.5rem; color: var(--primary-neon); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px; }
+        .directory-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.2rem; }
         .directory-card {
-            background: rgba(2, 12, 27, 0.6);
-            border: 1px solid var(--border-teal);
-            padding: 1.2rem;
-            border-radius: 8px;
-            transition: var(--transition-smooth);
+            background: rgba(2, 12, 27, 0.6); border: 1px solid var(--border-teal);
+            padding: 1.2rem; border-radius: 8px; transition: var(--transition-smooth);
         }
-
-        .directory-card:hover {
-            border-color: var(--primary-neon);
-            transform: translateY(-3px);
-        }
-
-        .directory-card h5 {
-            font-size: 1.05rem;
-            color: var(--text-high-contrast);
-        }
-
-        .directory-card span {
-            font-size: 0.8rem;
-            color: var(--primary-neon);
-            text-transform: uppercase;
-            display: block;
-            margin-bottom: 0.5rem;
-        }
-
-        .directory-card p {
-            font-size: 0.85rem;
-            color: var(--text-muted-teal);
-        }
-
-        /* --- Inquire Us Form Section --- */
+        .directory-card:hover { border-color: var(--primary-neon); transform: translateY(-3px); }
+        .directory-card h5 { font-size: 1.05rem; color: var(--text-high-contrast); }
+        .directory-card span { font-size: 0.8rem; color: var(--primary-neon); text-transform: uppercase; display: block; margin-bottom: 0.5rem; }
+        .directory-card p { font-size: 0.85rem; color: var(--text-muted-teal); }
         .inquiry-card {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-teal);
-            border-radius: var(--border-radius);
-            padding: 2.5rem;
+            background-color: var(--bg-card); border: 1px solid var(--border-teal);
+            border-radius: var(--border-radius); padding: 2.5rem;
         }
-
-        .inquiry-card h3 {
-            font-size: 1.8rem;
-            color: var(--text-high-contrast);
-            margin-bottom: 0.5rem;
-        }
-
-        .inquiry-card p {
-            color: var(--text-muted-teal);
-            font-size: 0.95rem;
-            margin-bottom: 1.8rem;
-        }
-
-        .form-group {
-            margin-bottom: 1.2rem;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 0.9rem;
-            color: var(--text-high-contrast);
-            margin-bottom: 0.4rem;
-            font-weight: 600;
-        }
-
+        .inquiry-card h3 { font-size: 1.8rem; color: var(--text-high-contrast); margin-bottom: 0.5rem; }
+        .inquiry-card p { color: var(--text-muted-teal); font-size: 0.95rem; margin-bottom: 1.8rem; }
+        .form-group { margin-bottom: 1.2rem; }
+        .form-group label { display: block; font-size: 0.9rem; color: var(--text-high-contrast); margin-bottom: 0.4rem; font-weight: 600; }
         .form-control {
-            width: 100%;
-            background: rgba(2, 12, 27, 0.8);
-            border: 1px solid var(--border-teal);
-            border-radius: 8px;
-            padding: 0.8rem 1rem;
-            color: var(--text-high-contrast);
-            font-family: 'Inter', sans-serif;
-            font-size: 0.95rem;
-            outline: none;
+            width: 100%; background: rgba(2, 12, 27, 0.8); border: 1px solid var(--border-teal);
+            border-radius: 8px; padding: 0.8rem 1rem; color: var(--text-high-contrast);
+            font-family: 'Inter', sans-serif; font-size: 0.95rem; outline: none;
             transition: var(--transition-smooth);
         }
-
-        .form-control:focus {
-            border-color: var(--primary-neon);
-            box-shadow: var(--neon-glow);
-        }
-
-        textarea.form-control {
-            resize: vertical;
-            min-height: 120px;
-        }
-
-        /* --- Animations --- */
+        .form-control:focus { border-color: var(--primary-neon); box-shadow: var(--neon-glow); }
+        textarea.form-control { resize: vertical; min-height: 120px; }
         .fade-in-card {
-            opacity: 0;
-            transform: translateY(30px);
+            opacity: 0; transform: translateY(30px);
             transition: opacity 0.6s ease-out, transform 0.6s ease-out;
         }
-
-        .fade-in-card.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* --- Footer Styles --- */
+        .fade-in-card.visible { opacity: 1; transform: translateY(0); }
         footer {
-            background-color: #01060f;
-            border-top: 1px solid var(--border-teal);
-            color: var(--text-muted-teal);
-            padding: 3rem 0 2rem;
-            font-size: 0.9rem;
-            margin-top: auto;
+            background-color: #01060f; border-top: 1px solid var(--border-teal);
+            color: var(--text-muted-teal); padding: 3rem 0 2rem;
+            font-size: 0.9rem; margin-top: auto;
         }
+        footer .footer-info { display: flex; justify-content: space-between; max-width: 1200px; margin: 0 auto 30px; padding: 0 5%; }
+        .footer-info img { height: 16px; margin-right: 12px; vertical-align: middle; }
+        .footer-info h4 { width: 100%; border-bottom: 1px solid var(--primary-neon); margin-bottom: 20px; padding-bottom: 10px; color: var(--text-high-contrast); font-size: 1.1rem; }
+        .contact p { margin-bottom: 10px; display: flex; align-items: center; }
+        .office-hours p { display: flex; justify-content: space-between; gap: 40px; margin-bottom: 6px; }
+        .school-name { display: flex; align-items: center; justify-content: center; max-width: 1200px; margin: 0 auto; padding: 0 5%; }
+        .school-name img.icflogo { height: 100px; }
+        .school-name h1 { text-align: left; margin-left: 20px; font-size: 2.2rem; font-weight: 700; letter-spacing: 0.5px; color: var(--text-high-contrast); line-height: 1.2; }
+        .school-name span { display: inline-block; font-size: 1rem; font-weight: 400; color: var(--primary-neon); text-transform: uppercase; letter-spacing: 1px; }
+        footer .social-icon { display: flex; align-items: center; border-left: 1px solid var(--primary-neon); margin-left: 50px; padding-left: 20px; gap: 12px; }
+        footer .icon img { object-fit: cover; border-radius: 50%; border: 1px solid var(--primary-neon); height: 42px; width: 42px; transition: var(--transition-smooth); }
+        footer .icon img:hover { transform: scale(1.1); box-shadow: var(--neon-glow); }
+        footer .footer-container { align-items: center; margin-top: 30px; text-align: center; }
+        footer .footer-container p { padding-top: 20px; border-top: 1px solid var(--border-teal); }
 
-        footer .footer-info {
-            display: flex;
-            justify-content: space-between;
-            max-width: 1200px;
-            margin: 0 auto 30px;
-            padding: 0 5%;
+        /* Alert Banner */
+        .form-alert {
+            display: none; padding: 12px 16px; border-radius: 8px;
+            margin-bottom: 16px; font-size: 0.9rem; font-weight: 600;
         }
+        .form-alert.success { background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #6ee7b7; }
+        .form-alert.error { background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #fca5a5; }
 
-        .footer-info img {
-            height: 16px;
-            margin-right: 12px;
-            vertical-align: middle;
+        /* Success Modal */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(2, 12, 27, 0.85); backdrop-filter: blur(6px);
+            z-index: 5000; display: flex; align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden;
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
         }
-
-        .footer-info h4 {
-            width: 100%;
-            border-bottom: 1px solid var(--primary-neon);
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            color: var(--text-high-contrast);
-            font-size: 1.1rem;
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .modal-box {
+            background: var(--bg-card); border: 1px solid var(--border-teal);
+            border-radius: var(--border-radius); width: 90%; max-width: 420px;
+            padding: 35px 30px; text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 30px rgba(13, 245, 227, 0.1);
+            transform: translateY(20px) scale(0.95);
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
         }
-
-        .contact p {
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
+        .modal-overlay.active .modal-box { transform: translateY(0) scale(1); }
+        .modal-icon {
+            width: 70px; height: 70px; background: rgba(16, 185, 129, 0.15);
+            border: 2px solid #10b981; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 20px; font-size: 2rem; color: #10b981;
+            animation: popIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
-
-        .office-hours p {
-            display: flex;
-            justify-content: space-between;
-            gap: 40px;
-            margin-bottom: 6px;
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            70% { transform: scale(1.15); }
+            100% { transform: scale(1); opacity: 1; }
         }
+        .modal-box h3 { color: var(--text-high-contrast); font-size: 1.4rem; margin-bottom: 10px; }
+        .modal-box p { color: var(--text-muted-teal); font-size: 0.95rem; margin-bottom: 25px; line-height: 1.5; }
+        .modal-box .btn-primary { height: 44px; padding: 0 2rem; font-size: 0.95rem; }
 
-        .school-name {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 5%;
+        /* Loading spinner on button */
+        .btn-loading { position: relative; color: transparent !important; pointer-events: none; }
+        .btn-loading::after {
+            content: ""; position: absolute; width: 18px; height: 18px;
+            border: 2px solid rgba(255,255,255,0.3); border-top-color: var(--bg-deep-abyss);
+            border-radius: 50%; animation: spin 0.8s linear infinite;
         }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        .school-name img.icflogo {
-            height: 100px;
-        }
-
-        .school-name h1 {
-            text-align: left;
-            margin-left: 20px;
-            font-size: 2.2rem;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            color: var(--text-high-contrast);
-            line-height: 1.2;
-        }
-
-        .school-name span {
-            display: inline-block;
-            font-size: 1rem;
-            font-weight: 400;
-            color: var(--primary-neon);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        footer .social-icon {
-            display: flex;
-            align-items: center;
-            border-left: 1px solid var(--primary-neon);
-            margin-left: 50px;
-            padding-left: 20px;
-            gap: 12px;
-        }
-
-        footer .icon img {
-            object-fit: cover;
-            border-radius: 50%;
-            border: 1px solid var(--primary-neon);
-            height: 42px;
-            width: 42px;
-            transition: var(--transition-smooth);
-        }
-
-        footer .icon img:hover {
-            transform: scale(1.1);
-            box-shadow: var(--neon-glow);
-        }
-
-        footer .footer-container {
-            align-items: center;
-            margin-top: 30px;
-            text-align: center;
-        }
-
-        footer .footer-container p {
-            padding-top: 20px;
-            border-top: 1px solid var(--border-teal);
-        }
-
-        /* --- Responsive Media Queries --- */
         @media (max-width: 992px) {
-            .contact-grid {
-                grid-template-columns: 1fr;
-            }
-            .hero-banner h1 {
-                font-size: 2.4rem;
-            }
-            .school-name {
-                flex-direction: column;
-                text-align: center;
-                gap: 1.5rem;
-            }
-            .school-name h1 {
-                text-align: center;
-                margin-left: 0;
-                font-size: 1.8rem;
-            }
-            footer .social-icon {
-                border-left: none;
-                margin-left: 0;
-                padding-left: 0;
-                justify-content: center;
-                flex-wrap: wrap;
-            }
+            .contact-grid { grid-template-columns: 1fr; }
+            .hero-banner h1 { font-size: 2.4rem; }
+            .school-name { flex-direction: column; text-align: center; gap: 1.5rem; }
+            .school-name h1 { text-align: center; margin-left: 0; font-size: 1.8rem; }
+            footer .social-icon { border-left: none; margin-left: 0; padding-left: 0; justify-content: center; flex-wrap: wrap; }
         }
-
         @media (max-width: 768px) {
-            /* Hide desktop navigation and portal button on small screens */
-            nav.desktop-nav, 
-            .desktop-portal-wrapper {
-                display: none !important;
-            }
-
-            /* Show Hamburger Menu Toggle */
-            .mobile-menu-btn {
-                display: block;
-            }
-
-            .hero-banner {
-                padding: 4rem 0 3rem;
-            }
-
-            footer .footer-info {
-                flex-direction: column;
-                gap: 20px;
-            }
-
-            .portal-box {
-                right: 0;
-            }
+            nav.desktop-nav, .desktop-portal-wrapper { display: none !important; }
+            .mobile-menu-btn { display: block; }
+            .hero-banner { padding: 4rem 0 3rem; }
+            footer .footer-info { flex-direction: column; gap: 20px; }
+            .portal-box { right: 0; }
         }
-
         @media (max-width: 480px) {
-            .logo h2 {
-                font-size: 1.1rem;
-            }
-
-            .logo span {
-                font-size: 0.5rem;
-            }
-
-            .hero-banner h1 {
-                font-size: 1.8rem;
-            }
-
-            .school-name h1 {
-                font-size: 1.4rem;
-            }
-
-            footer .icon img {
-                height: 36px;
-                width: 36px;
-            }
+            .logo h2 { font-size: 1.1rem; }
+            .logo span { font-size: 0.5rem; }
+            .hero-banner h1 { font-size: 1.8rem; }
+            .school-name h1 { font-size: 1.4rem; }
+            footer .icon img { height: 36px; width: 36px; }
         }
     </style>
-<base target="_blank">
 </head>
 <body>
 
-    <!-- Header Navigation -->
     <header>
         <div class="container nav-container">
             <div class="logo">
                 <a href="../index.html"><img src="../BackGroundimage/ICFLogo.png" alt="ICF Logo"></a>
                 <h2>ICF <span>Interworld Colleges Foundation Inc.</span></h2>
             </div>
-
-            <!-- Mobile Hamburger Toggle Button -->
             <button class="mobile-menu-btn" id="menuToggle" aria-label="Toggle Navigation">
                 <i class="fa-solid fa-bars"></i>
             </button>
-
-            <!-- Desktop Navigation Links -->
             <nav class="desktop-nav">
                 <ul class="desktop-nav-links">
                     <li><a href="../index.html"><i class="fa-solid fa-house"></i> Home</a></li>
@@ -849,83 +337,51 @@
                     <li><a href="contact.html" class="active"><i class="fa-solid fa-envelope"></i> Contact</a></li>
                 </ul>
             </nav>
-
-            <!-- Desktop Portal Dropdown Button -->
             <div class="portal-dropdown-wrapper desktop-portal-wrapper">
                 <button id="portalLoginBtn" class="btn btn-secondary">
                     <i class="fa-solid fa-right-to-bracket"></i> Portal Login
                 </button>
-
                 <div id="portalMenu" class="portal-box hidden">
                     <span class="portal-box-title">Select Portal</span>
                     <a href="../admin/login.html" class="portal-option">
                         <i class="fa-solid fa-user-shield"></i>
-                        <div class="option-text">
-                            <strong>ADMIN</strong>
-                            <small>Faculty & Staff Access</small>
-                        </div>
+                        <div class="option-text"><strong>ADMIN</strong><small>Faculty & Staff Access</small></div>
                     </a>
                     <a href="../student/login.html" class="portal-option">
                         <i class="fa-solid fa-user-graduate"></i>
-                        <div class="option-text">
-                            <strong>STUDENT</strong>
-                            <small>Student Portal Access</small>
-                        </div>
+                        <div class="option-text"><strong>STUDENT</strong><small>Student Portal Access</small></div>
                     </a>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- Mobile Sidebar Drawer & Overlay -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
-    
     <aside class="mobile-sidebar" id="mobileSidebar">
-        <!-- Close Button -->
-        <button class="sidebar-close-btn" id="sidebarCloseBtn" aria-label="Close Menu">
-            <i class="fa-solid fa-xmark"></i>
-        </button>
-
-        <!-- Centered ICF Logo -->
-        <div class="sidebar-brand">
-            <img src="../BackGroundimage/ICFLogo.png" alt="ICF Logo">
-        </div>
-
-        <!-- Vertical Mobile Navigation Links -->
+        <button class="sidebar-close-btn" id="sidebarCloseBtn" aria-label="Close Menu"><i class="fa-solid fa-xmark"></i></button>
+        <div class="sidebar-brand"><img src="../BackGroundimage/ICFLogo.png" alt="ICF Logo"></div>
         <ul class="sidebar-nav-links">
             <li><a href="../index.html"><i class="fa-solid fa-house"></i> Home</a></li>
             <li><a href="department.html"><i class="fa-solid fa-building-columns"></i> Department</a></li>
             <li><a href="about.html"><i class="fa-solid fa-circle-info"></i> About</a></li>
             <li><a href="contact.html" class="active"><i class="fa-solid fa-envelope"></i> Contact</a></li>
         </ul>
-
-        <!-- Mobile Scaled Down Portal Login Button -->
         <div class="sidebar-footer-portal portal-dropdown-wrapper">
-            <button id="mobilePortalBtn" class="btn btn-secondary">
-                <i class="fa-solid fa-right-to-bracket"></i> Portal Login
-            </button>
-
+            <button id="mobilePortalBtn" class="btn btn-secondary"><i class="fa-solid fa-right-to-bracket"></i> Portal Login</button>
             <div id="mobilePortalMenu" class="portal-box hidden">
                 <span class="portal-box-title">Select Portal</span>
                 <a href="../admin/login.html" class="portal-option">
                     <i class="fa-solid fa-user-shield"></i>
-                    <div class="option-text">
-                        <strong>ADMIN</strong>
-                        <small>Faculty & Staff Access</small>
-                    </div>
+                    <div class="option-text"><strong>ADMIN</strong><small>Faculty & Staff Access</small></div>
                 </a>
                 <a href="../student/login.html" class="portal-option">
                     <i class="fa-solid fa-user-graduate"></i>
-                    <div class="option-text">
-                        <strong>STUDENT</strong>
-                        <small>Student Portal Access</small>
-                    </div>
+                    <div class="option-text"><strong>STUDENT</strong><small>Student Portal Access</small></div>
                 </a>
             </div>
         </div>
     </aside>
 
-    <!-- Hero Banner -->
     <section class="hero-banner">
         <div class="container">
             <div class="badge"><i class="fa-solid fa-headset"></i> Official Campus Support</div>
@@ -934,50 +390,27 @@
         </div>
     </section>
 
-    <!-- Main Contact Section -->
     <section>
         <div class="container">
             <div class="contact-grid">
-                
-                <!-- Left: Information & Location -->
                 <div class="info-card fade-in-card">
                     <div class="info-item">
                         <div class="info-icon"><i class="fa-solid fa-location-dot"></i></div>
-                        <div class="info-content">
-                            <h4>Physical Address</h4>
-                            <p>Burgos Street, Paniqui, Tarlac, Philippines 2307</p>
-                        </div>
+                        <div class="info-content"><h4>Physical Address</h4><p>Burgos Street, Paniqui, Tarlac, Philippines 2307</p></div>
                     </div>
-
                     <div class="info-item">
                         <div class="info-icon"><i class="fa-solid fa-phone"></i></div>
-                        <div class="info-content">
-                            <h4>Main Phone / Mobile</h4>
-                            <p><a href="tel:+639305363258">+63 930 536 3258</a></p>
-                        </div>
+                        <div class="info-content"><h4>Main Phone / Mobile</h4><p><a href="tel:+639305363258">+63 930 536 3258</a></p></div>
                     </div>
-
                     <div class="info-item">
                         <div class="info-icon"><i class="fa-solid fa-envelope"></i></div>
-                        <div class="info-content">
-                            <h4>Dedicated School Inbox</h4>
-                            <p><a href="mailto:admin@icfpaniqui.edu.ph">admin@icfpaniqui.edu.ph</a></p>
-                        </div>
+                        <div class="info-content"><h4>Dedicated School Inbox</h4><p><a href="mailto:admin@icfpaniqui.edu.ph">admin@icfpaniqui.edu.ph</a></p></div>
                     </div>
-
                     <div class="info-item">
                         <div class="info-icon"><i class="fa-solid fa-wheelchair"></i></div>
-                        <div class="info-content">
-                            <h4>Accessibility & Campus Access</h4>
-                            <p>Wheelchair-accessible ground entrances and designated administrative assistance kiosks.</p>
-                        </div>
+                        <div class="info-content"><h4>Accessibility & Campus Access</h4><p>Wheelchair-accessible ground entrances and designated administrative assistance kiosks.</p></div>
                     </div>
-
-                    <div class="response-note">
-                        <i class="fa-solid fa-clock-rotate-left"></i> <strong>Response Time:</strong> Inquiry submissions are typically reviewed and addressed within 1–2 business days.
-                    </div>
-
-                    <!-- Interactive Map -->
+                    <div class="response-note"><i class="fa-solid fa-clock-rotate-left"></i> <strong>Response Time:</strong> Inquiry submissions are typically reviewed and addressed within 1–2 business days.</div>
                     <div>
                         <h4 style="color: var(--text-high-contrast); margin-bottom: 0.5rem; font-size: 1rem;">Campus Location Map</h4>
                         <div class="map-container">
@@ -986,68 +419,56 @@
                     </div>
                 </div>
 
-                <!-- Right: Inquire Us Form -->
                 <div class="inquiry-card fade-in-card">
                     <h3>Inquire Us</h3>
                     <p>Send an official message directly to our administrative team.</p>
+                    <div id="formAlert" class="form-alert"></div>
 
-                    <div id="formAlert" style="display:none; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 0.9rem; font-weight: 600;"></div>
-
-                    <form id="inquiryForm" action="submit_inquiry.php" method="POST">
+                    <form id="inquiryForm" action="../backend/AdminDB/submit_inquiry.php" method="POST">
                         <div class="form-group">
                             <label for="fullname">Full Name</label>
                             <input type="text" id="fullname" name="fullname" class="form-control" placeholder="e.g. Juan Dela Cruz" autocomplete="none" required>
                         </div>
-
                         <div class="form-group">
                             <label for="email">Email Address</label>
                             <input type="email" id="email" name="email" class="form-control" placeholder="name@example.com" autocomplete="off" required>
                         </div>
-
                         <div class="form-group">
                             <label for="subject">Subject</label>
                             <input type="text" id="subject" name="subject" class="form-control" placeholder="e.g. Admission Inquiry / Prospectus Request" autocomplete="none" required>
                         </div>
-
                         <div class="form-group">
                             <label for="concern">Concern</label>
                             <textarea id="concern" name="concern" class="form-control" placeholder="Please describe your message or concern here..." required></textarea>
                         </div>
-
-                        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+                        <button type="submit" class="btn btn-primary" id="submitBtn" style="width: 100%; margin-top: 1rem;">
                             <i class="fa-solid fa-paper-plane"></i> Send Message
                         </button>
                     </form>
                 </div>
-
             </div>
 
-            <!-- Key Staff Contacts Directory -->
             <div class="staff-directory fade-in-card">
                 <h3><i class="fa-solid fa-sitemap"></i> Key Department Contacts & Key Staff Directory</h3>
                 <div class="directory-grid">
-                    <div class="directory-card">
-                        <h5>Ms. Eleanor C. Coliamco</h5>
-                        <span>Office of the President</span>
-                        <p><i class="fa-solid fa-envelope"></i> admin@icfpaniqui.edu.ph</p>
-                    </div>
-                    <div class="directory-card">
-                        <h5>Ms. Mary Ann C. Pabalan</h5>
-                        <span>Dean of Academics</span>
-                        <p><i class="fa-solid fa-envelope"></i> academics@icfpaniqui.edu.ph</p>
-                    </div>
-                    <div class="directory-card">
-                        <h5>Queencess Arzelle G. Fernandez</h5>
-                        <span>Director of Guidance</span>
-                        <p><i class="fa-solid fa-envelope"></i> guidance@icfpaniqui.edu.ph</p>
-                    </div>
+                    <div class="directory-card"><h5>Ms. Eleanor C. Coliamco</h5><span>Office of the President</span><p><i class="fa-solid fa-envelope"></i> admin@icfpaniqui.edu.ph</p></div>
+                    <div class="directory-card"><h5>Ms. Mary Ann C. Pabalan</h5><span>Dean of Academics</span><p><i class="fa-solid fa-envelope"></i> academics@icfpaniqui.edu.ph</p></div>
+                    <div class="directory-card"><h5>Queencess Arzelle G. Fernandez</h5><span>Director of Guidance</span><p><i class="fa-solid fa-envelope"></i> guidance@icfpaniqui.edu.ph</p></div>
                 </div>
             </div>
-
         </div>
     </section>
 
-    <!-- Footer -->
+    <!-- Success Modal -->
+    <div class="modal-overlay" id="successModal">
+        <div class="modal-box">
+            <div class="modal-icon"><i class="fa-solid fa-check"></i></div>
+            <h3>Message Sent!</h3>
+            <p>Thank you for reaching out. Your inquiry has been received and our administrative team will review it shortly.</p>
+            <button class="btn btn-primary" onclick="closeSuccessModal()">Got it</button>
+        </div>
+    </div>
+
     <footer>
         <div class="footer-info">
             <div class="contact">
@@ -1069,153 +490,120 @@
                 <p>Saturday <span>8:00am - 12:00pm</span></p>
             </div>
         </div> 
-
         <div class="school-name">
             <img class="icflogo" src="../BackGroundimage/ICFLogo.png" alt="ICF Logo">
             <h1>ICF <span>INTERWORLD</span> <span>COLLEGES</span> <span>INC.</span></h1>
-
             <div class="social-icon">
-                <div class="icon">
-                    <a href="https://web.facebook.com/ICFPaniquiOfficial"><img src="../BackGroundimage/Icon/FacebookLogo.png" alt="Facebook"></a>
-                </div>
-                <div class="icon">
-                    <a href="#"><img src="../BackGroundimage/Icon/YoutubeLogo.jpg" alt="YouTube"></a>
-                </div>
-                <div class="icon">
-                    <a href="#"><img src="../BackGroundimage/Icon/TwitterLogo.jpg" alt="Twitter"></a>
-                </div>
-                <div class="icon">
-                    <a href="#"><img src="../BackGroundimage/Icon/tiktokLogo.jpg" alt="TikTok"></a>
-                </div>
-                <div class="icon">
-                    <a href="#"><img src="../BackGroundimage/Icon/Pinterestlogo.jpg" alt="Pinterest"></a>
-                </div>
-                <div class="icon">
-                    <a href="#"><img src="../BackGroundimage/Icon/InstagramLogo.png" alt="Instagram"></a>
-                </div>
+                <div class="icon"><a href="https://web.facebook.com/ICFPaniquiOfficial"><img src="../BackGroundimage/Icon/FacebookLogo.png" alt="Facebook"></a></div>
+                <div class="icon"><a href="#"><img src="../BackGroundimage/Icon/YoutubeLogo.jpg" alt="YouTube"></a></div>
+                <div class="icon"><a href="#"><img src="../BackGroundimage/Icon/TwitterLogo.jpg" alt="Twitter"></a></div>
+                <div class="icon"><a href="#"><img src="../BackGroundimage/Icon/tiktokLogo.jpg" alt="TikTok"></a></div>
+                <div class="icon"><a href="#"><img src="../BackGroundimage/Icon/Pinterestlogo.jpg" alt="Pinterest"></a></div>
+                <div class="icon"><a href="#"><img src="../BackGroundimage/Icon/InstagramLogo.png" alt="Instagram"></a></div>
             </div>
         </div>
-
         <div class="container footer-container">
             <p>&copy; 2026 ICF Interworld Colleges Foundation Inc. All rights reserved.</p>
         </div>
     </footer>
 
-    <!-- Interactive Scripts -->
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            /* Off-Canvas Sidebar Drawer Controls */
+            /* Sidebar */
             const menuToggle = document.getElementById("menuToggle");
             const mobileSidebar = document.getElementById("mobileSidebar");
             const sidebarOverlay = document.getElementById("sidebarOverlay");
             const sidebarCloseBtn = document.getElementById("sidebarCloseBtn");
-
-            const openSidebar = () => {
-                mobileSidebar.classList.add("active");
-                sidebarOverlay.classList.add("active");
-            };
-
-            const closeSidebar = () => {
-                mobileSidebar.classList.remove("active");
-                sidebarOverlay.classList.remove("active");
-            };
-
+            const openSidebar = () => { mobileSidebar.classList.add("active"); sidebarOverlay.classList.add("active"); };
+            const closeSidebar = () => { mobileSidebar.classList.remove("active"); sidebarOverlay.classList.remove("active"); };
             if (menuToggle && mobileSidebar && sidebarOverlay && sidebarCloseBtn) {
                 menuToggle.addEventListener("click", openSidebar);
                 sidebarCloseBtn.addEventListener("click", closeSidebar);
                 sidebarOverlay.addEventListener("click", closeSidebar);
             }
 
-            /* Portal Dropdown Menu Handlers (Desktop & Mobile) */
+            /* Portal Dropdowns */
             const setupPortalDropdown = (btnId, menuId) => {
                 const btn = document.getElementById(btnId);
                 const menu = document.getElementById(menuId);
-
                 if (btn && menu) {
-                    btn.addEventListener("click", (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        menu.classList.toggle("show");
-                        menu.classList.toggle("hidden");
-                    });
-
-                    document.addEventListener("click", (e) => {
-                        if (!menu.contains(e.target) && e.target !== btn) {
-                            menu.classList.remove("show");
-                            menu.classList.add("hidden");
-                        }
-                    });
+                    btn.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); menu.classList.toggle("show"); menu.classList.toggle("hidden"); });
+                    document.addEventListener("click", (e) => { if (!menu.contains(e.target) && e.target !== btn) { menu.classList.remove("show"); menu.classList.add("hidden"); } });
                 }
             };
-
             setupPortalDropdown("portalLoginBtn", "portalMenu");
             setupPortalDropdown("mobilePortalBtn", "mobilePortalMenu");
 
-            /* Scroll-triggered Fade-In Animation */
+            /* Fade In */
             const fadeCards = document.querySelectorAll(".fade-in-card");
             const cardObserver = new IntersectionObserver((entries) => {
-                entries.forEach((entry) => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add("visible");
-                    }
-                });
+                entries.forEach((entry) => { if (entry.isIntersecting) entry.target.classList.add("visible"); });
             }, { threshold: 0.15 });
-
             fadeCards.forEach((card) => cardObserver.observe(card));
 
-            /* Form Submission Handler & URL Alert Display */
+            /* AJAX Form Submission */
             const inquiryForm = document.getElementById("inquiryForm");
             const formAlert = document.getElementById("formAlert");
+            const submitBtn = document.getElementById("submitBtn");
+            const successModal = document.getElementById("successModal");
 
-            // Show alerts based on URL parameters
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.has('success')) {
+            function showAlert(type, message) {
+                formAlert.className = 'form-alert ' + type;
                 formAlert.style.display = 'block';
-                formAlert.style.background = 'rgba(16, 185, 129, 0.15)';
-                formAlert.style.border = '1px solid #10b981';
-                formAlert.style.color = '#6ee7b7';
-                formAlert.innerHTML = '<i class="fa-solid fa-circle-check"></i> Thank you! Your inquiry has been sent successfully. Our team will review it shortly.';
-                if(window.history.replaceState) window.history.replaceState({}, document.title, window.location.pathname);
-            } else if (urlParams.has('error')) {
-                const err = urlParams.get('error');
-                formAlert.style.display = 'block';
-                formAlert.style.background = 'rgba(239, 68, 68, 0.15)';
-                formAlert.style.border = '1px solid #ef4444';
-                formAlert.style.color = '#fca5a5';
-                let msg = 'Something went wrong. Please try again.';
-                if (err === 'empty') msg = 'Please fill in all required fields.';
-                if (err === 'email') msg = 'Please enter a valid email address.';
-                if (err === 'db') msg = 'Server error. Please try again later.';
-                formAlert.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> ' + msg;
-                if(window.history.replaceState) window.history.replaceState({}, document.title, window.location.pathname);
+                formAlert.innerHTML = '<i class="fa-solid fa-circle-' + (type === 'success' ? 'check' : 'exclamation') + '"></i> ' + message;
             }
+            function hideAlert() { formAlert.style.display = 'none'; }
+
+            function openSuccessModal() { successModal.classList.add("active"); }
+            window.closeSuccessModal = function() { successModal.classList.remove("active"); };
+
+            // Close modal on overlay click
+            successModal.addEventListener("click", (e) => { if (e.target === successModal) closeSuccessModal(); });
 
             if (inquiryForm) {
-                inquiryForm.addEventListener("submit", (e) => {
+                inquiryForm.addEventListener("submit", async (e) => {
+                    e.preventDefault();
+                    hideAlert();
+
                     const fullname = document.getElementById("fullname").value.trim();
                     const email = document.getElementById("email").value.trim();
                     const subject = document.getElementById("subject").value.trim();
                     const concern = document.getElementById("concern").value.trim();
 
                     if (!fullname || !email || !subject || !concern) {
-                        e.preventDefault();
-                        formAlert.style.display = 'block';
-                        formAlert.style.background = 'rgba(239, 68, 68, 0.15)';
-                        formAlert.style.border = '1px solid #ef4444';
-                        formAlert.style.color = '#fca5a5';
-                        formAlert.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Please fill in all required fields.';
+                        showAlert('error', 'Please fill in all required fields.');
+                        return;
+                    }
+                    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                        showAlert('error', 'Please enter a valid email address.');
                         return;
                     }
 
-                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                    if (!emailRegex.test(email)) {
-                        e.preventDefault();
-                        formAlert.style.display = 'block';
-                        formAlert.style.background = 'rgba(239, 68, 68, 0.15)';
-                        formAlert.style.border = '1px solid #ef4444';
-                        formAlert.style.color = '#fca5a5';
-                        formAlert.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Please enter a valid email address.';
-                        return;
+                    // Loading state
+                    submitBtn.classList.add("btn-loading");
+                    const originalText = submitBtn.innerHTML;
+                    submitBtn.innerHTML = '';
+
+                    const formData = new FormData(inquiryForm);
+
+                    try {
+                        const response = await fetch(inquiryForm.action, {
+                            method: 'POST',
+                            body: formData
+                        });
+                        const result = await response.json();
+
+                        if (result.success) {
+                            inquiryForm.reset();
+                            openSuccessModal();
+                        } else {
+                            showAlert('error', result.message || 'Failed to send message. Please try again.');
+                        }
+                    } catch (err) {
+                        showAlert('error', 'Network error. Please check your connection and try again.');
+                    } finally {
+                        submitBtn.classList.remove("btn-loading");
+                        submitBtn.innerHTML = originalText;
                     }
                 });
             }

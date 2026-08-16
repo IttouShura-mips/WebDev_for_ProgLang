@@ -184,65 +184,85 @@
         </form>
     </div>
 
-    <script>
-    (function() {
-        const form   = document.getElementById('loginForm');
-        const user   = document.getElementById('username');
-        const pass   = document.getElementById('password');
-        const errBox = document.getElementById('loginErrorMsg');
-        const btn    = document.getElementById('loginBtn');
+  <script>
+(function() {
+    const form   = document.getElementById('loginForm');
+    const user   = document.getElementById('username');
+    const pass   = document.getElementById('password');
+    const errBox = document.getElementById('loginErrorMsg');
+    const btn    = document.getElementById('loginBtn');
 
-        // Show error if redirected back with ?error=...
-        const params = new URLSearchParams(window.location.search);
-        if (params.has('error')) {
-            user.classList.add('input-error');
-            pass.classList.add('input-error');
-            errBox.textContent = 'Invalid credentials. Please try again.';
-            errBox.style.display = 'block';
-            window.history.replaceState({}, document.title, window.location.pathname);
-        }
+    // Show error if the page was reloaded with ?error=… (non-JS fallback)
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('error')) {
+        user.classList.add('input-error');
+        pass.classList.add('input-error');
+        errBox.textContent = 'Invalid credentials. Please try again.';
+        errBox.style.display = 'block';
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
 
-        form.addEventListener('submit', async function(e) {
-            e.preventDefault();
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
 
-            // Reset states
-            user.classList.remove('input-error');
-            pass.classList.remove('input-error');
-            errBox.style.display = 'none';
-            errBox.textContent = '';
+        // Reset error state
+        user.classList.remove('input-error');
+        pass.classList.remove('input-error');
+        errBox.style.display = 'none';
+        errBox.textContent = '';
 
-            const originalText = btn.textContent;
-            btn.disabled = true;
-            btn.textContent = 'Logging in...';
+        const originalText = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'Logging in…';
 
-            try {
-                const res = await fetch(form.action, {
-                    method: 'POST',
-                    body: new FormData(form),
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                });
-                const data = await res.json();
+        try {
+            // Resolve the form action against the current page
+            const actionUrl = new URL(form.action, window.location.href);
 
-                if (data.success) {
-                    window.location.href = data.redirect;
-                } else {
-                    user.classList.add('input-error');
-                    pass.classList.add('input-error');
-                    errBox.textContent = data.message || 'Invalid credentials. Please try again.';
-                    errBox.style.display = 'block';
-                    btn.disabled = false;
-                    btn.textContent = originalText;
+            const res = await fetch(actionUrl.href, {
+                method: 'POST',
+                body: new FormData(form),
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
                 }
-            } catch (ex) {
+            });
+
+            // If PHP accidentally sent a redirect, fetch followed it.
+            // We grab the final URL so we can still resolve relative paths correctly.
+            const finalUrl = new URL(res.url);
+
+            // If the server returned HTML (non-AJAX path), just navigate to what came back
+            const contentType = res.headers.get('content-type') || '';
+            if (!contentType.includes('application/json')) {
+                window.location.href = finalUrl.href;
+                return;
+            }
+
+            const data = await res.json();
+
+            if (data.success) {
+                // Resolve the redirect URL relative to adminlogin.php, NOT login.html
+                const redirectUrl = new URL(data.redirect, finalUrl);
+                window.location.href = redirectUrl.href;
+            } else {
                 user.classList.add('input-error');
                 pass.classList.add('input-error');
-                errBox.textContent = 'Something went wrong. Please try again.';
+                errBox.textContent = data.message || 'Invalid credentials. Please try again.';
                 errBox.style.display = 'block';
                 btn.disabled = false;
                 btn.textContent = originalText;
             }
-        });
-    })();
-    </script>
+        } catch (ex) {
+            user.classList.add('input-error');
+            pass.classList.add('input-error');
+            errBox.textContent = 'Something went wrong. Please try again.';
+            errBox.style.display = 'block';
+            btn.disabled = false;
+            btn.textContent = originalText;
+        }
+    });
+})();
+</script>
 </body>
 </html>

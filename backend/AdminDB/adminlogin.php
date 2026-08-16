@@ -12,12 +12,21 @@ require 'db.php';
 define('ADMIN_USER', 'admin');
 define('ADMIN_PASS', 'admin123');
 
+$isAjax = isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest';
+
+function jsonResponse($success, $message = '', $redirect = '') {
+    header('Content-Type: application/json');
+    echo json_encode(['success' => $success, 'message' => $message, 'redirect' => $redirect]);
+    exit();
+}
+
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $username = trim($_POST['username'] ?? '');
     $password = trim($_POST['password'] ?? '');
 
     if (empty($username) || empty($password)) {
-        echo "<script>alert('Please fill in all required fields.'); window.history.back();</script>";
+        if ($isAjax) jsonResponse(false, 'Please fill in all required fields.');
+        header("Location: login.html?error=empty");
         exit();
     }
 
@@ -34,6 +43,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $_SESSION['admin_name'] = $admin['full_name'] ?? $admin['username'];
             $_SESSION['admin_role'] = $admin['role'];
             $_SESSION['admin_id'] = $admin['id'];
+            if ($isAjax) jsonResponse(true, '', 'adminpanel.php');
             header("Location: adminpanel.php");
             exit();
         }
@@ -44,12 +54,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $_SESSION['admin_user'] = $username;
         $_SESSION['admin_name'] = 'System Administrator';
         $_SESSION['admin_role'] = 'superadmin';
+        if ($isAjax) jsonResponse(true, '', 'adminpanel.php');
         header("Location: adminpanel.php");
         exit();
     }
 
     // 3. Student Verification (username = email)
-    // Check if password column exists
     $hasPassword = false;
     $colCheck = $conn->query("SHOW COLUMNS FROM enrolled LIKE 'password'");
     if ($colCheck && $colCheck->num_rows > 0) {
@@ -67,17 +77,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             if (password_verify($password, $student['password'])) {
                 $_SESSION['student_id'] = $student['student_id'];
                 $_SESSION['student_name'] = $student['firstname'] . ' ' . $student['lastname'];
-                // Update last login
                 $upd = $conn->prepare("UPDATE enrolled SET last_login = NOW(), status = 'online', ip_address = ? WHERE student_id = ?");
                 $ip = $_SERVER['REMOTE_ADDR'] ?? 'Unknown';
                 $upd->bind_param("si", $ip, $student['student_id']);
                 $upd->execute();
+                if ($isAjax) jsonResponse(true, '', '../student/dashboard.php');
                 header("Location: ../student/dashboard.php");
                 exit();
             }
         }
     } else {
-        // Legacy mode: no password column yet
         $stmt = $conn->prepare("SELECT student_id, firstname, lastname FROM enrolled WHERE email = ?");
         $stmt->bind_param("s", $username);
         $stmt->execute();
@@ -87,12 +96,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $student = $result->fetch_assoc();
             $_SESSION['student_id'] = $student['student_id'];
             $_SESSION['student_name'] = $student['firstname'] . ' ' . $student['lastname'];
+            if ($isAjax) jsonResponse(true, '', '../student/dashboard.php');
             header("Location: ../student/dashboard.php");
             exit();
         }
     }
 
-    echo "<script>alert('Invalid credentials. Please try again.'); window.location.href='login.html';</script>";
+    if ($isAjax) jsonResponse(false, 'Invalid credentials. Please try again.');
+    header("Location: login.html?error=invalid");
     exit();
 }
 ?>

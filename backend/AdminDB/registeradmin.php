@@ -41,7 +41,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $stmt->bind_param("ssss", $full_name, $username, $email, $hashed_password);
 
     if ($stmt->execute()) {
-        echo "<script>alert('Admin account created successfully! Please log in.'); window.location.href='login.html';</script>";
+        echo "<script>alert('Admin account created successfully! Please log in.'); window.location.href='../admin/login.html';</script>";
         exit();
     } else {
         echo "<script>alert('Error creating account: " . addslashes($stmt->error) . "'); window.history.back();</script>";

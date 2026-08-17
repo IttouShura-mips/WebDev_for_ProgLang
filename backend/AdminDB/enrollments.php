@@ -232,7 +232,7 @@ while ($row = $result->fetch_assoc()) {
       sections.forEach(sec => {
         html += `<div class="view-modal-section"><h4>${sec.title}</h4><div class="view-modal-grid">`;
         sec.fields.forEach(([label, value]) => {
-          html += `<div class="view-modal-row"><span class="view-modal-label">${label}:</span><span class="view-modal-value">${value || 'N/A'}</span></div>`;
+          html += `<div class="view-modal-row"><span class="view-modal-label">${label}:</span><span class="view-modal-value">${(value !== null && value !== undefined && String(value).trim() !== '') ? value : 'N/A'}</span></div>`;
         });
         html += '</div></div>';
       });

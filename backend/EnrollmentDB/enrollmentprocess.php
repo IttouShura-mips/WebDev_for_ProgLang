@@ -15,7 +15,7 @@ $conn->set_charset("utf8mb4");
 
 // Only process POST requests
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-    header("Location: enrollmentpage.html");
+    header("Location: enrollment_success.php?status=error&message=" . urlencode("Invalid request method."));
     exit();
 }
 
@@ -83,7 +83,6 @@ $enrollment_status = 'pending';
 // --- 2. Handle file uploads (requirements) ---
 $requirements_files = null;
 if (!empty($_FILES['requirementFiles']['name'][0])) {
-    // Create upload directory relative to this script's location
     $uploadDir = __DIR__ . '/../../uploads/requirements/';
     if (!is_dir($uploadDir)) {
         mkdir($uploadDir, 0755, true);
@@ -101,16 +100,14 @@ if (!empty($_FILES['requirementFiles']['name'][0])) {
         $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
 
         if (!in_array($ext, $allowedExts)) {
-            continue; // skip invalid files
+            continue;
         }
 
-        // Generate safe unique filename
         $safeName = preg_replace('/[^a-zA-Z0-9._-]/', '_', pathinfo($originalName, PATHINFO_FILENAME));
         $newName  = uniqid() . '_' . $safeName . '.' . $ext;
         $destPath = $uploadDir . $newName;
 
         if (move_uploaded_file($tmpName, $destPath)) {
-            // Store relative path for web access
             $filePaths[] = 'uploads/requirements/' . $newName;
         }
     }
@@ -130,10 +127,10 @@ $sql = "INSERT INTO enrolled (
 
 $stmt = $conn->prepare($sql);
 if (!$stmt) {
-    die("Prepare failed: " . $conn->error);
+    header("Location: enrollment_success.php?status=error&message=" . urlencode("Prepare failed: " . $conn->error));
+    exit();
 }
 
-// Bind 28 string parameters
 $types = str_repeat('s', 28);
 $stmt->bind_param($types,
     $firstname, $middlename, $lastname, $suffix, $gender, $birthday, $birthplace, $citizenship,
@@ -143,12 +140,13 @@ $stmt->bind_param($types,
 );
 
 if ($stmt->execute()) {
-    // Success - redirect back to enrollment page with success flag
-    header("Location: ../pages/enrollmentpage.html?success=1");
+    // Success - redirect to the dedicated success page with student info
+    $studentName = urlencode(trim($firstname . ' ' . $lastname));
+    $courseName  = urlencode($course);
+    header("Location: enrollment_success.php?status=success&name=" . $studentName . "&course=" . $courseName);
     exit();
 } else {
-    // Error - redirect back with error flag
-    header("Location: ../pages/enrollmentpage.html?error=1");
+    header("Location: enrollment_success.php?status=error&message=" . urlencode($stmt->error));
     exit();
 }
 ?>

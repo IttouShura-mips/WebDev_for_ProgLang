@@ -80,6 +80,19 @@ if (!$composedTable) {
 }
 
 $statusFilter = $_GET['status'] ?? 'all';
+
+// AJAX endpoint: mark inbox message as read
+if (isset($_GET['mark_read'])) {
+    header('Content-Type: application/json; charset=utf-8');
+    $id = intval($_GET['mark_read']);
+    if ($receivedTable) {
+        $stmt = $conn->prepare("UPDATE received_mail SET status = 'read' WHERE id = ?");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+    }
+    echo json_encode(['success' => true]);
+    exit();
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -157,7 +170,7 @@ $statusFilter = $_GET['status'] ?? 'all';
             <?php foreach ($received as $mail): 
               $badgeClass = $mail['status'] === 'read' ? 'success' : ($mail['status'] === 'urgent' ? 'danger' : 'warning');
             ?>
-            <tr data-status="<?php echo $mail['status']; ?>" data-subject="<?php echo htmlspecialchars($mail['subject']); ?>" data-message="<?php echo htmlspecialchars($mail['message']); ?>" data-sender="<?php echo htmlspecialchars($mail['sender_name']); ?>" data-email="<?php echo htmlspecialchars($mail['email']); ?>" data-date="<?php echo $mail['date_received']; ?>">
+            <tr data-id="<?php echo $mail['id']; ?>" data-status="<?php echo $mail['status']; ?>" data-subject="<?php echo htmlspecialchars($mail['subject']); ?>" data-message="<?php echo htmlspecialchars($mail['message']); ?>" data-sender="<?php echo htmlspecialchars($mail['sender_name']); ?>" data-email="<?php echo htmlspecialchars($mail['email']); ?>" data-date="<?php echo $mail['date_received']; ?>">
               <td><?php echo htmlspecialchars($mail['email']); ?></td>
               <td><?php echo htmlspecialchars($mail['sender_name']); ?></td>
               <td><?php echo htmlspecialchars($mail['subject']); ?></td>
@@ -283,6 +296,26 @@ $statusFilter = $_GET['status'] ?? 'all';
     function viewMessage(btn, type) {
       const row = btn.closest('tr');
       if (type === 'inbox') {
+        // Mark as read if currently unread
+        if (row.dataset.status === 'unread') {
+          const msgId = row.dataset.id;
+          if (msgId) {
+            fetch('received-mail.php?mark_read=' + msgId)
+              .then(r => r.json())
+              .then(data => {
+                if (data.success) {
+                  row.dataset.status = 'read';
+                  const badge = row.querySelector('.badge');
+                  if (badge) {
+                    badge.classList.remove('warning');
+                    badge.classList.add('success');
+                    badge.textContent = 'Read';
+                  }
+                }
+              })
+              .catch(() => {});
+          }
+        }
         document.getElementById('viewLabelContact').textContent = 'Sender Name:';
         document.getElementById('viewEmailVal').textContent = row.dataset.email || row.cells[0].textContent;
         document.getElementById('viewContactVal').textContent = row.dataset.sender || row.cells[1].textContent;

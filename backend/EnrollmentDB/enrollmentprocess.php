@@ -1,158 +1,154 @@
 <?php
-// Database credentials
-$host     = "localhost";
-$dbname   = "enrollmentdb";
-$username = "root";
-$password = "";
+session_start();
 
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    die("<h2 style='color:red;'>Database Connection Failed: " . $e->getMessage() . "</h2>");
+// Database connection (same credentials as your db.php)
+$host = "127.0.0.1";
+$user = "root";
+$pass = "";
+$dbname = "enrollmentdb";
+
+$conn = new mysqli($host, $user, $pass, $dbname);
+if ($conn->connect_error) {
+    die("Database connection failed: " . $conn->connect_error);
+}
+$conn->set_charset("utf8mb4");
+
+// Only process POST requests
+if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+    header("Location: enrollmentpage.html");
+    exit();
 }
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
+// Helper: clean phone numbers (remove non-digits, normalize +63 to 09)
+function cleanPhone($phone) {
+    $digits = preg_replace('/[^0-9]/', '', $phone);
+    if (strlen($digits) === 12 && strpos($digits, '63') === 0) {
+        $digits = '0' . substr($digits, 2);
+    }
+    if (strlen($digits) === 10 && $digits[0] === '9') {
+        $digits = '0' . $digits;
+    }
+    return $digits;
+}
 
-    function clean_input($data) {
-        return trim(htmlspecialchars($data ?? ''));
+// Helper: sanitize string input
+function getPost($key, $default = '') {
+    return isset($_POST[$key]) ? trim($_POST[$key]) : $default;
+}
+
+// --- 1. Collect & map form fields to DB columns ---
+$firstname     = getPost('first_name');
+$middlename    = getPost('middle_name');
+$lastname      = getPost('last_name');
+$suffix        = getPost('suffix');
+$gender        = getPost('gender');
+$birthplace    = getPost('birthplace');
+$citizenship   = getPost('citizenship');
+$civilstatus   = getPost('civil-status');
+$employment    = getPost('employment-status');
+$mother        = getPost('mother_name');
+$father        = getPost('father_name');
+$guardian      = getPost('guardian_name');
+$course        = getPost('program');
+$major         = getPost('major');
+$school_address= getPost('school_address');
+$academic_year = getPost('academic_year');
+$full_address  = getPost('address');
+$email         = getPost('email');
+
+// Phone numbers: clean and validate
+$mphone_number = cleanPhone(getPost('mphone_number'));
+$fphone_number = cleanPhone(getPost('fphone_number'));
+$gphone_number = cleanPhone(getPost('gphone_number'));
+$mobile_number = cleanPhone(getPost('mobile_number'));
+
+// Birthday: combine three selects into YYYY-MM-DD
+$birth_year  = getPost('birth_year');
+$birth_month = getPost('birth_month');
+$birth_day   = getPost('birth_day');
+$birthday = $birth_year . '-' . str_pad($birth_month, 2, '0', STR_PAD_LEFT) . '-' . str_pad($birth_day, 2, '0', STR_PAD_LEFT);
+
+// Scholarship: use 'other' text if scholarship is 'none' and other is filled
+$scholarship = getPost('scholarship', 'none');
+$scholarship_other = getPost('scholarship_other');
+if ($scholarship === 'none' && !empty($scholarship_other)) {
+    $scholarship = $scholarship_other;
+}
+
+// IP & defaults
+$ip_address = $_SERVER['REMOTE_ADDR'] ?? null;
+$status = 'offline';
+$enrollment_status = 'pending';
+
+// --- 2. Handle file uploads (requirements) ---
+$requirements_files = null;
+if (!empty($_FILES['requirementFiles']['name'][0])) {
+    // Create upload directory relative to this script's location
+    $uploadDir = __DIR__ . '/../../uploads/requirements/';
+    if (!is_dir($uploadDir)) {
+        mkdir($uploadDir, 0755, true);
     }
 
-    // Capture HTML inputs
-    $firstname      = clean_input($_POST['first_name'] ?? '');
-    $middlename     = clean_input($_POST['middle_name'] ?? '');
-    $lastname       = clean_input($_POST['last_name'] ?? '');
-    $suffix         = clean_input($_POST['suffix'] ?? '');
-    $gender         = clean_input($_POST['gender'] ?? '');
+    $allowedExts = ['docx', 'pdf', 'jpg', 'jpeg', 'png'];
+    $filePaths = [];
 
-    // Format Date: YYYY-MM-DD
-    $birth_year     = clean_input($_POST['birth_year'] ?? '');
-    $birth_month    = clean_input($_POST['birth_month'] ?? '');
-    $birth_day      = clean_input($_POST['birth_day'] ?? '');
-
-    $birth_month    = str_pad($birth_month, 2, '0', STR_PAD_LEFT);
-    $birth_day      = str_pad($birth_day, 2, '0', STR_PAD_LEFT);
-    $birthday       = "$birth_year-$birth_month-$birth_day";
-
-    // Validate date
-    if (!checkdate((int)$birth_month, (int)$birth_day, (int)$birth_year)) {
-        header("Location: enrollment_success.php?status=error&message=" . urlencode("Invalid birth date provided."));
-        exit();
-    }
-
-    $birthplace     = clean_input($_POST['birthplace'] ?? '');
-    $citizenship    = clean_input($_POST['citizenship'] ?? '');
-    $civilstatus    = clean_input($_POST['civil_status'] ?? '');
-    $employment     = clean_input($_POST['employment_status'] ?? '');
-
-    $mother         = clean_input($_POST['mother_name'] ?? '');
-    $mphone_number  = clean_input($_POST['mother_mobile'] ?? '');
-
-    $father         = clean_input($_POST['father_name'] ?? '');
-    $fphone_number  = clean_input($_POST['father_mobile'] ?? '');
-
-    $guardian       = clean_input($_POST['guardian_name'] ?? '');
-    $gphone_number  = clean_input($_POST['guardian_mobile'] ?? '');
-
-    $course         = clean_input($_POST['program'] ?? '');
-    $major          = clean_input($_POST['major'] ?? '');
-    $school_address = clean_input($_POST['school_address'] ?? '');
-    $academic_year  = clean_input($_POST['academic_year'] ?? '');
-
-    $scholarship       = clean_input($_POST['scholarship'] ?? '');
-    $scholarship_other = clean_input($_POST['scholarship_other'] ?? '');
-    if (!empty($scholarship_other)) {
-        $scholarship   = $scholarship_other;
-    }
-
-    $full_address   = clean_input($_POST['address'] ?? '');
-    $mobile_number  = clean_input($_POST['mobile_number'] ?? '');
-    $email          = clean_input($_POST['email'] ?? '');
-
-    // Handle file uploads (requirements)
-    $uploaded_files = [];
-    if (!empty($_FILES['requirementFiles']['name'][0])) {
-        $uploadDir = 'uploads/requirements/';
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0755, true);
+    foreach ($_FILES['requirementFiles']['name'] as $key => $originalName) {
+        if ($_FILES['requirementFiles']['error'][$key] !== UPLOAD_ERR_OK) {
+            continue;
         }
 
-        $allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/jpeg', 'image/jpg', 'image/png'];
-        $fileCount = count($_FILES['requirementFiles']['name']);
+        $tmpName = $_FILES['requirementFiles']['tmp_name'][$key];
+        $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
 
-        for ($i = 0; $i < $fileCount; $i++) {
-            if ($_FILES['requirementFiles']['error'][$i] === UPLOAD_ERR_OK) {
-                $tmpName = $_FILES['requirementFiles']['tmp_name'][$i];
-                $originalName = basename($_FILES['requirementFiles']['name'][$i]);
-                $fileType = $_FILES['requirementFiles']['type'][$i];
+        if (!in_array($ext, $allowedExts)) {
+            continue; // skip invalid files
+        }
 
-                if (!in_array($fileType, $allowedTypes)) {
-                    continue; // Skip invalid file types
-                }
+        // Generate safe unique filename
+        $safeName = preg_replace('/[^a-zA-Z0-9._-]/', '_', pathinfo($originalName, PATHINFO_FILENAME));
+        $newName  = uniqid() . '_' . $safeName . '.' . $ext;
+        $destPath = $uploadDir . $newName;
 
-                $safeName = time() . '_' . $i . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $originalName);
-                $targetPath = $uploadDir . $safeName;
-
-                if (move_uploaded_file($tmpName, $targetPath)) {
-                    $uploaded_files[] = $safeName;
-                }
-            }
+        if (move_uploaded_file($tmpName, $destPath)) {
+            // Store relative path for web access
+            $filePaths[] = 'uploads/requirements/' . $newName;
         }
     }
 
-    $sql = "INSERT INTO enrolled (
-        firstname, middlename, lastname, suffix, gender, birthday, birthplace, 
-        citizenship, civilstatus, employment, mother, mphone_number, father, 
-        fphone_number, guardian, gphone_number, course, major, school_address, 
-        academic_year, scholarship, full_address, mobile_number, email
-    ) VALUES (
-        :firstname, :middlename, :lastname, :suffix, :gender, :birthday, :birthplace, 
-        :citizenship, :civilstatus, :employment, :mother, :mphone_number, :father, 
-        :fphone_number, :guardian, :gphone_number, :course, :major, :school_address, 
-        :academic_year, :scholarship, :full_address, :mobile_number, :email
-    )";
-
-    try {
-        $stmt = $pdo->prepare($sql);
-
-        $stmt->execute([
-            ':firstname'      => $firstname,
-            ':middlename'     => $middlename,
-            ':lastname'       => $lastname,
-            ':suffix'         => $suffix,
-            ':gender'         => $gender,
-            ':birthday'       => $birthday,
-            ':birthplace'     => $birthplace,
-            ':citizenship'    => $citizenship,
-            ':civilstatus'    => $civilstatus,
-            ':employment'     => $employment,
-            ':mother'         => $mother,
-            ':mphone_number'  => $mphone_number,
-            ':father'         => $father,
-            ':fphone_number'  => $fphone_number,
-            ':guardian'       => $guardian,
-            ':gphone_number'  => $gphone_number,
-            ':course'         => $course,
-            ':major'          => $major,
-            ':school_address' => $school_address,
-            ':academic_year'  => $academic_year,
-            ':scholarship'    => $scholarship,
-            ':full_address'   => $full_address,
-            ':mobile_number'  => $mobile_number,
-            ':email'          => $email
-        ]);
-
-        // Redirect to success page with student info
-        header("Location: enrollment_success.php?status=success&name=" . urlencode($firstname . " " . $lastname) . "&course=" . urlencode($course));
-        exit();
-
-    } catch (PDOException $e) {
-        header("Location: enrollment_success.php?status=error&message=" . urlencode($e->getMessage()));
-        exit();
+    if (!empty($filePaths)) {
+        $requirements_files = json_encode($filePaths);
     }
+}
 
+// --- 3. Insert into database ---
+$sql = "INSERT INTO enrolled (
+    firstname, middlename, lastname, suffix, gender, birthday, birthplace, citizenship,
+    civilstatus, employment, mother, mphone_number, father, fphone_number, guardian,
+    gphone_number, course, major, school_address, academic_year, scholarship,
+    full_address, mobile_number, email, ip_address, status, enrollment_status, requirements_files
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+$stmt = $conn->prepare($sql);
+if (!$stmt) {
+    die("Prepare failed: " . $conn->error);
+}
+
+// Bind 28 string parameters
+$types = str_repeat('s', 28);
+$stmt->bind_param($types,
+    $firstname, $middlename, $lastname, $suffix, $gender, $birthday, $birthplace, $citizenship,
+    $civilstatus, $employment, $mother, $mphone_number, $father, $fphone_number, $guardian,
+    $gphone_number, $course, $major, $school_address, $academic_year, $scholarship,
+    $full_address, $mobile_number, $email, $ip_address, $status, $enrollment_status, $requirements_files
+);
+
+if ($stmt->execute()) {
+    // Success - redirect back to enrollment page with success flag
+    header("Location: ../pages/enrollmentpage.html?success=1");
+    exit();
 } else {
-    header("Location: enrollmentpage.html");
+    // Error - redirect back with error flag
+    header("Location: ../pages/enrollmentpage.html?error=1");
     exit();
 }
 ?>

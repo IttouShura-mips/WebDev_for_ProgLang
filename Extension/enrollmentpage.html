@@ -887,7 +887,60 @@
                 width: 36px;
             }
         }
+        /* Success / Error Banners */
+        .success-banner, .error-banner {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 1.2rem 1.5rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 2rem;
+            animation: slideDown 0.4s ease;
+            position: relative;
+        }
+        .success-banner {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #10b981;
+        }
+        .error-banner {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+        .success-banner i:first-child, .error-banner i:first-child {
+            font-size: 1.4rem;
+            margin-top: 2px;
+        }
+        .success-banner strong, .error-banner strong {
+            display: block;
+            font-size: 1rem;
+            margin-bottom: 4px;
+        }
+        .success-banner p, .error-banner p {
+            font-size: 0.85rem;
+            margin: 0;
+            opacity: 0.9;
+        }
+        .success-close, .error-close {
+            position: absolute;
+            top: 10px;
+            right: 12px;
+            background: transparent;
+            border: none;
+            color: inherit;
+            font-size: 1rem;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        .success-close:hover, .error-close:hover { opacity: 1; }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
+<base target="_blank">
 <base target="_blank">
 </head>
 <body>
@@ -995,7 +1048,29 @@
     <!-- Registration Form Section -->
     <section class="enrollment-section">
         <div class="container form-container">
-            <form id="enrollmentForm" action="../backend/EnrollmentDB/enrollmentprocess.php" method="POST" autocomplete="none" enctype="multipart/form-data">
+            <!-- Success Message Banner -->
+            <div id="successBanner" class="success-banner" style="display:none;">
+                <i class="fa-solid fa-circle-check"></i>
+                <div>
+                    <strong>Enrollment Submitted Successfully!</strong>
+                    <p>Your application has been received. Please check your email for updates.</p>
+                </div>
+                <button onclick="document.getElementById('successBanner').style.display='none';" class="success-close">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <!-- Error Message Banner -->
+            <div id="errorBanner" class="error-banner" style="display:none;">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <div>
+                    <strong>Submission Failed</strong>
+                    <p>Something went wrong. Please try again or contact support.</p>
+                </div>
+                <button onclick="document.getElementById('errorBanner').style.display='none';" class="error-close">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <form id="enrollmentForm" action="../backend/EnrollmentDB/enrollmentprocess.php" method="POST" autocomplete="off" enctype="multipart/form-data">
                 
                 <!-- 1. Personal Information -->
                 <div class="form-card">
@@ -1007,19 +1082,19 @@
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="firstName">First Name</label>
-                            <input type="text" id="firstName" name="first_name" class="form-control" placeholder="First Name" autocomplete="none" required>
+                            <input type="text" id="firstName" name="first_name" class="form-control" placeholder="First Name" autocomplete="off" required>
                         </div>
                         <div class="form-group">
                             <label for="lastName">Last Name</label>
-                            <input type="text" id="lastName" name="last_name" class="form-control" placeholder="Last Name" autocomplete="none" required>
+                            <input type="text" id="lastName" name="last_name" class="form-control" placeholder="Last Name" autocomplete="off" required>
                         </div>
                         <div class="form-group">
                             <label for="middleName">Middle Name</label>
-                            <input type="text" id="middleName" name="middle_name" class="form-control" placeholder="Middle Name" autocomplete="none">
+                            <input type="text" id="middleName" name="middle_name" class="form-control" placeholder="Middle Name" autocomplete="off">
                         </div>
                         <div class="form-group">
                             <label for="suffix">Suffix</label>
-                            <input type="text" id="suffix" name="suffix" class="form-control" placeholder="Jr., Sr., III (Optional)" autocomplete="none">
+                            <input type="text" id="suffix" name="suffix" class="form-control" placeholder="Jr., Sr., III (Optional)" autocomplete="off">
                         </div>
 
                         <div class="form-group full-width">
@@ -1073,12 +1148,12 @@
 
                         <div class="form-group">
                             <label for="birthplace">Birthplace</label>
-                            <input type="text" id="birthplace" name="birthplace" class="form-control" placeholder="City / Municipality" autocomplete="none" required>
+                            <input type="text" id="birthplace" name="birthplace" class="form-control" placeholder="City / Municipality" autocomplete="off" required>
                         </div>
 
                         <div class="form-group">
                             <label for="citizenship">Citizenship</label>
-                            <input type="text" id="citizenship" name="citizenship" class="form-control" placeholder="e.g. Filipino" autocomplete="none" required>
+                            <input type="text" id="citizenship" name="citizenship" class="form-control" placeholder="e.g. Filipino" autocomplete="off" required>
                         </div>
 
                         <div class="form-group full-width">
@@ -1102,67 +1177,67 @@
 
                         <div class="form-group">
                             <label for="mothername">Name of Mother</label>
-                            <input type="text" id="mothername" name="mother_name" class="form-control" autocomplete="none" required>
+                            <input type="text" id="mothername" name="mother_name" class="form-control" autocomplete="off" required>
                         </div>
                         <div class="form-group">
                             <label for="motherMobile">Mother's Mobile No.</label>
                             <input 
                                 type="tel" 
                                 id="motherMobile" 
+                                name="mphone_number"
                                 value="+63 9"
                                 class="form-control" 
-                                pattern="^(09|\+639|639) \d {9$}"
-
+                                pattern="^\+63 9\d{2} \d{3} \d{4}$"
                                 oninput="formatPhoneNumber(this)"
                                 onkeydown="preventPrefixDelete(event, this)"
                                 onfocus="moveCursorToEnd(this)"
                                 onclick="moveCursorToEnd(this)"
                                 maxlength="16"
-                                autocomplete="none" 
+                                autocomplete="off" 
                                 required>
                         </div>
 
                         <div class="form-group">
                             <label for="fathername">Name of Father</label>
-                            <input type="text" id="fathername" name="father_name" class="form-control" autocomplete="none" required>
+                            <input type="text" id="fathername" name="father_name" class="form-control" autocomplete="off" required>
                         </div>
                         <div class="form-group">
                             <label for="fatherMobile">Father's Mobile No.</label>
                             <input 
                                 type="tel" 
-                                id="motherMobile" 
+                                id="fatherMobile" 
+                                name="fphone_number"
                                 value="+63 9"
                                 class="form-control" 
-                                pattern="^(09|\+639|639) \d {9$}"
-
+                                pattern="^\+63 9\d{2} \d{3} \d{4}$"
                                 oninput="formatPhoneNumber(this)"
                                 onkeydown="preventPrefixDelete(event, this)"
                                 onfocus="moveCursorToEnd(this)"
                                 onclick="moveCursorToEnd(this)"
                                 maxlength="16"
-                                autocomplete="none" 
+                                autocomplete="off" 
                                 required>
                         </div>
 
                         <div class="form-group">
                             <label for="guardianname">Name of Guardian</label>
-                            <input type="text" id="guardianname" name="guardian_name" class="form-control" autocomplete="none" required>
+                            <input type="text" id="guardianname" name="guardian_name" class="form-control" autocomplete="off" required>
                         </div>
                         <div class="form-group">
                             <label for="guardianMobile">Guardian's Mobile No.</label>
                             <input 
                                 type="tel" 
-                                id="motherMobile" 
+                                id="guardianMobile" 
+                                name="gphone_number"
                                 value="+63 9"
                                 class="form-control" 
-                                pattern="^(09|\+639|639) \d {9$}"
-
+                                pattern="^\+63 9\d{2} \d{3} \d{4}$"
                                 oninput="formatPhoneNumber(this)"
                                 onkeydown="preventPrefixDelete(event, this)"
                                 onfocus="moveCursorToEnd(this)"
                                 onclick="moveCursorToEnd(this)"
                                 maxlength="16"
-                                autocomplete="none" 
+                                autocomplete="off" 
                                 required>
                         </div>
                     </div>
@@ -1206,7 +1281,7 @@
 
                         <div class="form-group full-width">
                             <label for="schooladdress">Previous School Address</label>
-                            <input type="text" id="schooladdress" name="school_address" class="form-control" placeholder="Street, Barangay, Municipality, City" autocomplete="none" required>
+                            <input type="text" id="schooladdress" name="school_address" class="form-control" placeholder="Street, Barangay, Municipality, City" autocomplete="off" required>
                         </div>
 
                         <div class="form-group">
@@ -1242,7 +1317,7 @@
                     </div>
                     <div class="form-group full-width" style="margin-top: 1rem;">
                         <label for="scholarshipOther">Others (Please specify)</label>
-                        <input type="text" id="scholarshipOther" name="scholarship_other" class="form-control" placeholder="Specify scholarship if not listed above" autocomplete="none">
+                        <input type="text" id="scholarshipOther" name="scholarship_other" class="form-control" placeholder="Specify scholarship if not listed above" autocomplete="off">
                     </div>
                 </div>
 
@@ -1256,30 +1331,30 @@
                     <div class="form-grid">
                         <div class="form-group full-width">
                             <label for="address">Full Home Address</label>
-                            <input type="text" id="address" name="address" class="form-control" placeholder="House No., Street, Barangay, City/Municipality, Province" autocomplete="none" required>
+                            <input type="text" id="address" name="address" class="form-control" placeholder="House No., Street, Barangay, City/Municipality, Province" autocomplete="off" required>
                         </div>
 
                         <div class="form-group">
                             <label for="mobileNo">Mobile Number</label>
                             <input 
                                 type="tel" 
-                                id="motherMobile" 
+                                id="mobileNo" 
+                                name="mobile_number"
                                 value="+63 9"
                                 class="form-control" 
-                                pattern="^(09|\+639|639) \d {9$}"
-
+                                pattern="^\+63 9\d{2} \d{3} \d{4}$"
                                 oninput="formatPhoneNumber(this)"
                                 onkeydown="preventPrefixDelete(event, this)"
                                 onfocus="moveCursorToEnd(this)"
                                 onclick="moveCursorToEnd(this)"
                                 maxlength="16"
-                                autocomplete="none" 
+                                autocomplete="off" 
                                 required>
                         </div>
 
                         <div class="form-group">
                             <label for="email">Email Address</label>
-                            <input type="email" id="email" name="email" class="form-control" placeholder="e.g. name@domain.com" autocomplete="none" required>
+                            <input type="email" id="email" name="email" class="form-control" placeholder="e.g. name@domain.com" autocomplete="off" required>
                         </div>
                     </div>
                 </div>
@@ -1622,6 +1697,20 @@
                     submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Processing...';
                 }
             });
+
+            /* Show success/error banners based on URL parameters */
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('success') === '1') {
+                const banner = document.getElementById('successBanner');
+                if (banner) banner.style.display = 'flex';
+                // Clear the URL param without reloading
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+            if (urlParams.get('error') === '1') {
+                const banner = document.getElementById('errorBanner');
+                if (banner) banner.style.display = 'flex';
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
         });
     </script>
 </body>

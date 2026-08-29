@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Admin Control Panel - Enrollments</title>
-  <!-- Font Awesome Icons for the button icon -->
+  <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <style>
       * {
@@ -15,14 +15,14 @@
     }
 
     :root {
-      --bg-deep-abyss: #020c1b;      /* Deep dark oceanic background */
-      --bg-card: #0a192f;            /* Dark teal-tinted card background */
-      --bg-card-hover: #112240;      /* Elevated glass depth background */
-      --primary-neon: #0df5e3;       /* Bioluminescent vibrant teal */
-      --primary-neon-hover: #00cbb9; /* Slightly darker neon active */
-      --text-high-contrast: #e2e8f0; /* Crisp white-silver */
-      --text-muted-teal: #8892b0;    /* Soft teal gray */
-      --border-teal: #172a45;        /* Subdued border color */
+      --bg-deep-abyss: #020c1b;      
+      --bg-card: #0a192f;            
+      --bg-card-hover: #112240;      
+      --primary-neon: #0df5e3;       
+      --primary-neon-hover: #00cbb9; 
+      --text-high-contrast: #e2e8f0; 
+      --text-muted-teal: #8892b0;    
+      --border-teal: #172a45;        
       --success-green: #10b981;      
       --border-radius: 12px;
       --transition-smooth: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -44,7 +44,7 @@
       color: var(--text-high-contrast);
       display: flex;
       flex-direction: column;
-      justify-content: space-between; /* Ensures the footer stays at the bottom */
+      justify-content: space-between; 
     }
 
     .brand {
@@ -81,7 +81,6 @@
       font-weight: 700;
     }
 
-    /* Sidebar Bottom Go Back Button */
     .sidebar-footer {
       padding: 20px 30px;
       border-top: 1px solid var(--border-teal);
@@ -111,14 +110,12 @@
       box-shadow: var(--neon-glow);
     }
 
-    /* Header Right Alignment */
     .header-right {
       display: flex;
       align-items: center;
       gap: 20px;
     }
 
-    /* Search Box Container */
     .search-container {
       position: relative;
       width: 260px;
@@ -141,69 +138,6 @@
       box-shadow: var(--neon-glow);
     }
 
-    /* Live Search Results Dropdown */
-    .search-results-dropdown {
-      position: absolute;
-      top: calc(100% + 8px);
-      left: 0;
-      right: 0;
-      background-color: var(--bg-card);
-      border: 1px solid var(--border-teal);
-      border-radius: 8px;
-      max-height: 280px;
-      overflow-y: auto;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-      z-index: 1000;
-      display: none; /* Shown dynamically via JS */
-    }
-
-    .search-results-dropdown.active {
-      display: block;
-    }
-
-    /* Search Item Card */
-    .search-result-item {
-      padding: 10px 14px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid var(--border-teal);
-      cursor: pointer;
-      transition: background-color 0.2s ease;
-    }
-
-    .search-result-item:last-child {
-      border-bottom: none;
-    }
-
-    .search-result-item:hover {
-      background-color: var(--bg-card-hover);
-    }
-
-    .search-result-info {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .search-result-name {
-      font-weight: 600;
-      font-size: 0.88rem;
-      color: var(--text-high-contrast);
-    }
-
-    .search-result-role {
-      font-size: 0.75rem;
-      color: var(--text-muted-teal);
-    }
-
-    .no-results {
-      padding: 12px 14px;
-      font-size: 0.85rem;
-      color: var(--text-muted-teal);
-      text-align: center;
-    }
-
-    /* Main Layout */
     .main-content {
       flex: 1;
       padding: 30px;
@@ -270,13 +204,7 @@
       color: var(--bg-deep-abyss);
     }
 
-    /* Tables Section */
-    .tables-container {
-      display: flex;
-      flex-direction: column;
-      gap: 30px;
-    }
-
+    /* Table Card */
     .table-card {
       background: var(--text-high-contrast);
       border-radius: 8px;
@@ -296,14 +224,12 @@
       color: var(--bg-deep-abyss);
     }
 
-    /* Header Actions Controls */
     .table-actions {
       display: flex;
       align-items: center;
       gap: 12px;
     }
 
-    /* Filter Select Styling */
     .filter-select {
       padding: 8px 12px;
       background-color: #f8fafc;
@@ -346,7 +272,7 @@
     }
 
     tr:hover {
-      background-color: var(--text-muted-teal);
+      background-color: #e2e8f0;
     }
 
     /* Status Badges */
@@ -364,7 +290,7 @@
     }
 
     .badge.warning {
-      background-color: #e0bb6b;
+      background-color: #f59e0b;
       color: #623e0b;
     }
 
@@ -398,11 +324,7 @@
       background: #1d4ed8;
     }
 
-    .action-group {
-      display: flex;
-      gap: 6px;
-    }
-
+    /* Action Buttons */
     .btn-action {
       padding: 4px 10px;
       background: transparent;
@@ -418,6 +340,16 @@
       color: white;
     }
 
+    .btn-action.accept {
+      border-color: #10b981;
+      color: #10b981;
+    }
+
+    .btn-action.accept:hover {
+      background: #10b981;
+      color: white;
+    }
+
     .btn-action.decline {
       border-color: #dc2626;
       color: #dc2626;
@@ -428,25 +360,504 @@
       color: white;
     }
 
-    .payment-cell {
+    .action-group {
+      display: flex;
+      gap: 6px;
+    }
+
+    /* ===== ACCEPT MODAL (COR Style) ===== */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(2, 12, 27, 0.9);
+      backdrop-filter: blur(6px);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-container {
+      background: #ffffff;
+      color: #333;
+      border-radius: 8px;
+      width: 100%;
+      max-width: 1100px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      position: relative;
+      animation: modalFadeIn 0.3s ease;
+      padding: 30px;
+    }
+
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      background: transparent;
+      border: none;
+      color: #666;
+      font-size: 28px;
+      cursor: pointer;
+      z-index: 10;
+      transition: color 0.3s;
+    }
+
+    .modal-close:hover {
+      color: #ef4444;
+    }
+
+    /* COR Header */
+    .cor-header {
+      text-align: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #333;
+    }
+
+    .cor-header-top {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 10px;
+    }
+
+    .cor-logo {
+      width: 70px;
+      height: 70px;
+      object-fit: contain;
+    }
+
+    .cor-school-name {
+      font-size: 24px;
+      font-weight: 800;
+      color: #333;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .cor-address {
+      font-size: 13px;
+      color: #666;
+      margin-top: 4px;
+    }
+
+    .cor-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #333;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-top: 10px;
+    }
+
+    .cor-session {
+      font-size: 14px;
+      color: #666;
+      margin-top: 5px;
+      font-style: italic;
+    }
+
+    /* Student Info */
+    .student-info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+      background: #f8f9fa;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 15px;
+    }
+
+    .student-info-left, .student-info-right {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .student-info-right {
+      align-items: flex-end;
+      text-align: right;
+    }
+
+    .info-line {
+      font-size: 14px;
+      color: #555;
+    }
+
+    .info-line strong {
+      color: #333;
+      font-weight: 600;
+    }
+
+    .info-line .highlight {
+      color: #2563eb;
+      font-weight: 700;
+    }
+
+    /* Main Modal Body */
+    .modal-sections {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+      margin-bottom: 20px;
+    }
+
+    /* Section Titles */
+    .section-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #333;
+      text-transform: uppercase;
+      border-bottom: 2px solid #2563eb;
+      padding-bottom: 8px;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title i {
+      color: #2563eb;
+    }
+
+    /* Add Subject Button */
+    .btn-add-subject {
+      color: var(--bg-deep-abyss);
+      border: none;
+      width: 40px;
+      height: 40px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .btn-add-subject:hover {
+      transform: scale(1.4);
+    }
+
+    /* ===== STUDENT PORTAL ACCOUNT SECTION ===== */
+    .student-portal-section {
+      background: #f8f9fa;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+
+    .student-portal-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+    }
+
+    .portal-form-group {
+      margin-bottom: 10px;
+    }
+
+    .portal-form-group label {
+      display: block;
+      font-size: 12px;
+      color: #555;
+      font-weight: 600;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    .portal-form-group input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    .portal-form-group input:focus {
+      border-color: #2563eb;
+    }
+
+    /* Subject Assignment Table */
+    .subject-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    .subject-table th, .subject-table td {
+      padding: 10px 8px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+
+    .subject-table th {
+      background-color: #f1f5f9;
+      color: #333;
+      font-weight: 600;
+    }
+
+    .subject-table input, .subject-table select {
+      width: 100%;
+      padding: 6px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      outline: none;
+    }
+
+    .subject-table input:focus, .subject-table select:focus {
+      border-color: #2563eb;
+    }
+
+    /* Assessment Table */
+    .assessment-table {
+      width: 100%;
+      max-width: 600px;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    .assessment-table td {
+      padding: 10px 8px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .assessment-table td:last-child {
+      text-align: right;
+      width: 120px;
+    }
+
+    .assessment-table input {
+      width: 100%;
+      padding: 6px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      text-align: right;
+      outline: none;
+    }
+
+    .assessment-table input:focus {
+      border-color: #2563eb;
+    }
+
+    .assessment-table .total-row td {
+      font-weight: 800;
+      font-size: 16px;
+      border-top: 2px solid #333;
+      padding-top: 12px;
+    }
+
+    .assessment-table .total-row td:last-child {
+      color: #2563eb;
+    }
+
+    /* Modal Footer */
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      border-top: 1px solid #ddd;
+      padding-top: 20px;
+    }
+
+    .btn-cancel {
+      background: #f1f5f9;
+      color: #333;
+      border: 1px solid #ccc;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .btn-cancel:hover {
+      background: #e2e8f0;
+    }
+
+    .btn-confirm-accept {
+      background: #10b981;
+      color: white;
+      border: none;
+      padding: 10px 25px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .btn-confirm-accept:hover {
+      background: #059669;
+    }
+
+    /* ===== SEND MESSAGE MODAL ===== */
+    .modal-overlay-sm {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(2, 12, 27, 0.9);
+      backdrop-filter: blur(6px);
+      z-index: 3000;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .modal-overlay-sm.active {
+      display: flex;
+    }
+
+    .modal-container-sm {
+      background: #ffffff;
+      color: #333;
+      border-radius: 8px;
+      width: 100%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      position: relative;
+      animation: modalFadeIn 0.3s ease;
+      padding: 30px;
+    }
+
+    .modal-header-sm {
+      border-bottom: 2px solid #2563eb;
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+
+    .modal-header-sm h3 {
+      font-size: 18px;
+      color: #2563eb;
       display: flex;
       align-items: center;
       gap: 10px;
     }
 
-    .btn-mark {
-      padding: 2px 6px;
-      font-size: 0.7rem;
-      background: #f1f5f9;
-      border: 1px solid #cbd5e1;
-      border-radius: 3px;
-      cursor: pointer;
-      color: var(--bg-deep-abyss);
-      transition: all 0.2s ease;
+    .message-info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 20px;
     }
 
-    .btn-mark:hover {
-      background: #cbd5e1;
+    .message-info-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .message-info-item label {
+      font-size: 11px;
+      color: #666;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .message-info-item input {
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      background: #f8f9fa;
+      outline: none;
+    }
+
+    .message-form-group {
+      margin-bottom: 15px;
+    }
+
+    .message-form-group label {
+      display: block;
+      font-size: 12px;
+      color: #555;
+      font-weight: 600;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    .message-form-group textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      resize: vertical;
+      min-height: 250px;
+      outline: none;
+      line-height: 1.6;
+    }
+
+    .message-form-group textarea:focus {
+      border-color: #2563eb;
+    }
+
+    .modal-footer-sm {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      border-top: 1px solid #ddd;
+      padding-top: 15px;
+    }
+
+    .btn-send-email {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 10px 25px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .btn-send-email:hover {
+      background: #1d4ed8;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .student-info-grid {
+        grid-template-columns: 1fr;
+      }
+      .student-info-right {
+        align-items: flex-start;
+        text-align: left;
+      }
+      .assessment-table {
+        max-width: 100%;
+      }
+      .student-portal-grid {
+        grid-template-columns: 1fr;
+      }
+      .message-info-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -458,15 +869,16 @@
       <div class="brand">
         <h2>Admin Panel</h2>
       </div>
-      <ul class="nav-links">
-        <li><a href="adminpanel.html">Dashboard</a></li>
-        <li><a href="user.html">Users</a></li>
-        <li class="active"><a href="enrollments.html">Enrollments</a></li>
-        <li><a href="received-mail.html">Received Mail</a></li>
-      </ul>
+        <ul class="nav-links">
+          <li><a href="adminpanel.html">Dashboard</a></li>
+          <li><a href="user.html">Users</a></li>
+          <li class="active"><a href="enrollments.html">Enrollments</a></li>
+          <li><a href="enrolled.html">Enrolled</a></li>
+          <li><a href="instructors.html">Instructors</a></li>
+          <li><a href="received-mail.html">Received Mail</a></li>
+        </ul>
     </div>
 
-    <!-- Go Back to Homepage Button -->
     <div class="sidebar-footer">
       <a href="../../index.html" class="btn-homepage">
         <i class="fa-solid fa-arrow-left"></i> Back to Homepage
@@ -482,7 +894,6 @@
       <h1>Enrollment List</h1>
 
       <div class="header-right">
-        <!-- Live User Search Container -->
         <div class="search-container">
           <input 
             type="text" 
@@ -490,7 +901,6 @@
             placeholder="Search users..." 
             autocomplete="off"
           />
-          <div id="searchResults" class="search-results-dropdown"></div>
         </div>
 
         <div class="user-profile">
@@ -500,7 +910,7 @@
       </div>
     </header>
 
-    <!-- Table 2: Enrollment System Table -->
+    <!-- Enrollment System Table -->
     <div class="table-card">
       <div class="table-header">
         <h2>Enrollment Records</h2>
@@ -508,8 +918,8 @@
           <!-- Filter Dropdown for Payment Status -->
           <select id="statusFilter" class="filter-select">
             <option value="all">All Statuses</option>
-            <option value="paid">Paid</option>
-            <option value="pending">Pending</option>
+            <option value="full-payment">Full Payment</option>
+            <option value="partial-payment">Partial Payment</option>
             <option value="declined">Declined</option>
           </select>
           <button class="btn primary">+ New Enrollment</button>
@@ -519,7 +929,7 @@
         <table id="enrollmentTable">
           <thead>
             <tr>
-              <th>Enrollment ID</th>
+              <th>Student ID</th>
               <th>Student Name</th>
               <th>Course</th>
               <th>Date Enrolled</th>
@@ -528,171 +938,146 @@
             </tr>
           </thead>
           <tbody>
-            <tr data-status="paid">
-              <td>#ENR-8901</td>
+            <!-- Full Payment Example -->
+            <tr data-status="full-payment" data-id="2025-0001">
+              <td>2025-0001</td>
               <td>Sarah Jenkins</td>
               <td>Computer Science 101</td>
               <td>2026-07-15</td>
               <td>
-                <div class="payment-cell">
-                  <span class="badge success">Paid</span>
-                  <div style="display:flex; gap:4px;">
-                    <button class="btn-mark" onclick="updatePayment(this, 'pending', 'warning', 'Pending')">Mark Pending</button>
-                  </div>
-                </div>
+                <span class="badge success">Full Payment</span>
               </td>
               <td>
                 <div class="action-group">
                   <button class="btn-action">View</button>
-                  <button class="btn-action">Edit</button>
-                  <button class="btn-action decline" onclick="updatePayment(this, 'declined', 'danger', 'Declined')">Decline</button>
+                  <button class="btn-action accept" onclick="openAcceptModal(this)">Accept</button>
+                  <button class="btn-action decline" onclick="declineEnrollment(this)">Decline</button>
                 </div>
               </td>
             </tr>
-            <tr data-status="pending">
-              <td>#ENR-8902</td>
+            
+            <!-- Partial Payment Example -->
+            <tr data-status="partial-payment" data-id="2025-0002">
+              <td>2025-0002</td>
               <td>Michael Chang</td>
               <td>Data Structures</td>
               <td>2026-07-18</td>
               <td>
-                <div class="payment-cell">
-                  <span class="badge warning">Pending</span>
-                  <div style="display:flex; gap:4px;">
-                    <button class="btn-mark" onclick="updatePayment(this, 'paid', 'success', 'Paid')">Mark Paid</button>
-                  </div>
-                </div>
+                <span class="badge warning">Partial Payment</span>
               </td>
               <td>
                 <div class="action-group">
                   <button class="btn-action">View</button>
-                  <button class="btn-action">Edit</button>
-                  <button class="btn-action decline" onclick="updatePayment(this, 'declined', 'danger', 'Declined')">Decline</button>
+                  <button class="btn-action accept" onclick="openAcceptModal(this)">Accept</button>
+                  <button class="btn-action decline" onclick="declineEnrollment(this)">Decline</button>
                 </div>
               </td>
             </tr>
-            <tr data-status="paid">
-              <td>#ENR-8903</td>
+
+            <!-- Full Payment Example -->
+            <tr data-status="full-payment" data-id="2025-0003">
+              <td>2025-0003</td>
               <td>Emily Davis</td>
               <td>Web Development</td>
               <td>2026-07-20</td>
               <td>
-                <div class="payment-cell">
-                  <span class="badge success">Paid</span>
-                  <div style="display:flex; gap:4px;">
-                    <button class="btn-mark" onclick="updatePayment(this, 'pending', 'warning', 'Pending')">Mark Pending</button>
-                  </div>
-                </div>
+                <span class="badge success">Full Payment</span>
               </td>
               <td>
                 <div class="action-group">
                   <button class="btn-action">View</button>
-                  <button class="btn-action">Edit</button>
-                  <button class="btn-action decline" onclick="updatePayment(this, 'declined', 'danger', 'Declined')">Decline</button>
+                  <button class="btn-action accept" onclick="openAcceptModal(this)">Accept</button>
+                  <button class="btn-action decline" onclick="declineEnrollment(this)">Decline</button>
                 </div>
               </td>
             </tr>
-            <tr data-status="paid">
-              <td>#ENR-8904</td>
-              <td>Sarah Jenkins</td>
-              <td>Computer Science 101</td>
-              <td>2026-07-15</td>
+
+            <!-- Partial Payment Example -->
+            <tr data-status="partial-payment" data-id="2025-0004">
+              <td>2025-0004</td>
+              <td>James Wilson</td>
+              <td>Graphic Design</td>
+              <td>2026-07-22</td>
               <td>
-                <div class="payment-cell">
-                  <span class="badge success">Paid</span>
-                  <div style="display:flex; gap:4px;">
-                    <button class="btn-mark" onclick="updatePayment(this, 'pending', 'warning', 'Pending')">Mark Pending</button>
-                  </div>
-                </div>
+                <span class="badge warning">Partial Payment</span>
               </td>
               <td>
                 <div class="action-group">
                   <button class="btn-action">View</button>
-                  <button class="btn-action">Edit</button>
-                  <button class="btn-action decline" onclick="updatePayment(this, 'declined', 'danger', 'Declined')">Decline</button>
+                  <button class="btn-action accept" onclick="openAcceptModal(this)">Accept</button>
+                  <button class="btn-action decline" onclick="declineEnrollment(this)">Decline</button>
                 </div>
               </td>
             </tr>
-            <tr data-status="paid">
-              <td>#ENR-8905</td>
-              <td>Sarah Jenkins</td>
-              <td>Computer Science 101</td>
-              <td>2026-07-15</td>
+
+            <!-- Full Payment Example -->
+            <tr data-status="full-payment" data-id="2025-0005">
+              <td>2025-0005</td>
+              <td>Olivia Brown</td>
+              <td>Business Administration</td>
+              <td>2026-07-25</td>
               <td>
-                <div class="payment-cell">
-                  <span class="badge success">Paid</span>
-                  <div style="display:flex; gap:4px;">
-                    <button class="btn-mark" onclick="updatePayment(this, 'pending', 'warning', 'Pending')">Mark Pending</button>
-                  </div>
-                </div>
+                <span class="badge success">Full Payment</span>
               </td>
               <td>
                 <div class="action-group">
                   <button class="btn-action">View</button>
-                  <button class="btn-action">Edit</button>
-                  <button class="btn-action decline" onclick="updatePayment(this, 'declined', 'danger', 'Declined')">Decline</button>
+                  <button class="btn-action accept" onclick="openAcceptModal(this)">Accept</button>
+                  <button class="btn-action decline" onclick="declineEnrollment(this)">Decline</button>
                 </div>
               </td>
             </tr>
-            <tr data-status="paid">
-              <td>#ENR-8906</td>
-              <td>Sarah Jenkins</td>
-              <td>Computer Science 101</td>
-              <td>2026-07-15</td>
+
+            <!-- Partial Payment Example -->
+            <tr data-status="partial-payment" data-id="2025-0006">
+              <td>2025-0006</td>
+              <td>Liam Martinez</td>
+              <td>Networking</td>
+              <td>2026-07-28</td>
               <td>
-                <div class="payment-cell">
-                  <span class="badge success">Paid</span>
-                  <div style="display:flex; gap:4px;">
-                    <button class="btn-mark" onclick="updatePayment(this, 'pending', 'warning', 'Pending')">Mark Pending</button>
-                  </div>
-                </div>
+                <span class="badge warning">Partial Payment</span>
               </td>
               <td>
                 <div class="action-group">
                   <button class="btn-action">View</button>
-                  <button class="btn-action">Edit</button>
-                  <button class="btn-action decline" onclick="updatePayment(this, 'declined', 'danger', 'Declined')">Decline</button>
+                  <button class="btn-action accept" onclick="openAcceptModal(this)">Accept</button>
+                  <button class="btn-action decline" onclick="declineEnrollment(this)">Decline</button>
                 </div>
               </td>
             </tr>
-            <tr data-status="paid">
-              <td>#ENR-8907</td>
-              <td>Sarah Jenkins</td>
-              <td>Computer Science 101</td>
-              <td>2026-07-15</td>
+
+            <!-- Full Payment Example -->
+            <tr data-status="full-payment" data-id="2025-0007">
+              <td>2025-0007</td>
+              <td>Sophia Garcia</td>
+              <td>Accounting</td>
+              <td>2026-08-01</td>
               <td>
-                <div class="payment-cell">
-                  <span class="badge success">Paid</span>
-                  <div style="display:flex; gap:4px;">
-                    <button class="btn-mark" onclick="updatePayment(this, 'pending', 'warning', 'Pending')">Mark Pending</button>
-                  </div>
-                </div>
+                <span class="badge success">Full Payment</span>
               </td>
               <td>
                 <div class="action-group">
                   <button class="btn-action">View</button>
-                  <button class="btn-action">Edit</button>
-                  <button class="btn-action decline" onclick="updatePayment(this, 'declined', 'danger', 'Declined')">Decline</button>
+                  <button class="btn-action accept" onclick="openAcceptModal(this)">Accept</button>
+                  <button class="btn-action decline" onclick="declineEnrollment(this)">Decline</button>
                 </div>
               </td>
             </tr>
-            <tr data-status="paid">
-              <td>#ENR-8908</td>
-              <td>Sarah Jenkins</td>
+
+            <!-- Partial Payment Example -->
+            <tr data-status="partial-payment" data-id="2025-0008">
+              <td>2025-0008</td>
+              <td>Ethan Thompson</td>
               <td>Computer Science 101</td>
-              <td>2026-07-15</td>
+              <td>2026-08-03</td>
               <td>
-                <div class="payment-cell">
-                  <span class="badge success">Paid</span>
-                  <div style="display:flex; gap:4px;">
-                    <button class="btn-mark" onclick="updatePayment(this, 'pending', 'warning', 'Pending')">Mark Pending</button>
-                  </div>
-                </div>
+                <span class="badge warning">Partial Payment</span>
               </td>
               <td>
                 <div class="action-group">
                   <button class="btn-action">View</button>
-                  <button class="btn-action">Edit</button>
-                  <button class="btn-action decline" onclick="updatePayment(this, 'declined', 'danger', 'Declined')">Decline</button>
+                  <button class="btn-action accept" onclick="openAcceptModal(this)">Accept</button>
+                  <button class="btn-action decline" onclick="declineEnrollment(this)">Decline</button>
                 </div>
               </td>
             </tr>
@@ -703,7 +1088,196 @@
 
   </main>
 
-  <!-- Script for Filtering and Status Updating Functionality -->
+  <!-- ===== ACCEPT ENROLLMENT MODAL (COR Style) ===== -->
+  <div class="modal-overlay" id="acceptModal">
+    <div class="modal-container">
+      <button class="modal-close" onclick="closeAcceptModal()">&times;</button>
+
+      <!-- COR Header -->
+      <div class="cor-header">
+        <div class="cor-header-top">
+          <img src="../../BackGroundimage/ICFLogo.png" alt="School Logo" class="cor-logo">
+          <div>
+            <div class="cor-school-name">Interworld Colleges Foundation Inc.</div>
+          </div>
+        </div>
+        <div class="cor-title">STUDENT SUBJECT AND TUITION ALLOCATION</div>
+        <div class="cor-session">2026-2027 — 1st Semester</div>
+      </div>
+
+      <!-- Student Info (Auto-filled from Table) -->
+      <div class="student-info-grid">
+        <div class="student-info-left">
+          <div class="info-line"><strong>Student ID:</strong> <span class="highlight" id="modalStudentID">-</span></div>
+          <div class="info-line"><strong>Name:</strong> <span id="modalStudentName">-</span></div>
+          <div class="info-line"><strong>Course:</strong> <span id="modalStudentCourse">-</span></div>
+        </div>
+        <div class="student-info-right">
+          <div class="info-line"><strong>Year Level:</strong> <span id="modalStudentYear">-</span></div>
+          <div class="info-line"><strong>Date Enrolled:</strong> <span id="modalStudentDate">-</span></div>
+        </div>
+      </div>
+
+      <!-- Main Form: Subjects then Assessment (Stacked) -->
+      <div class="modal-sections">
+        
+        <!-- ===== STUDENT PORTAL ACCOUNT SECTION ===== -->
+        <div class="student-portal-section">
+          <div class="section-title"><i class="fas fa-user-shield"></i> Student Portal Account</div>
+          <div class="student-portal-grid">
+            <div class="portal-form-group">
+              <label>Student ID</label>
+              <input type="text" id="portalStudentID" readonly />
+            </div>
+            <div class="portal-form-group">
+              <label>Username</label>
+              <input type="text" id="portalUsername" placeholder="Enter username" />
+            </div>
+            <div class="portal-form-group">
+              <label>Password</label>
+              <input type="password" id="portalPassword" placeholder="Enter password" />
+            </div>
+            <div class="portal-form-group">
+              <label>Full Name</label>
+              <input type="text" id="portalFullName" readonly />
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 1: Assign Subjects -->
+        <div class="subject-assignment-section">
+          <div class="section-title">
+            <i class="fas fa-book-open"></i> Assign Subjects
+            <button class="btn-add-subject" onclick="addSubjectRow()" title="Add Subject"><i class="fas fa-plus"></i></button>
+          </div>
+          <table class="subject-table" id="subjectTable">
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Description</th>
+                <th>Units</th>
+                <th>Day/Time</th>
+                <th>Room</th>
+                <th>Block</th>
+              </tr>
+            </thead>
+            <tbody id="subjectBody">
+              <tr>
+                <td><input type="text" required /></td>
+                <td><input type="text" required /></td>
+                <td><input type="number" class="units-input" step="0.5" min="0" value="0" required /></td>
+                <td><input type="text" required /></td>
+                <td><input type="text" /></td>
+                <td><input type="text" required /></td>
+              </tr>
+              <tr>
+                <td><input type="text" required /></td>
+                <td><input type="text" required /></td>
+                <td><input type="number" class="units-input" step="0.5" min="0" value="0" required /></td>
+                <td><input type="text" required /></td>
+                <td><input type="text" /></td>
+                <td><input type="text" required /></td>
+              </tr>
+              <tr style="background: #f1f5f9;">
+                <td colspan="2" style="text-align: right; font-weight: 700; color: #333;">TOTAL UNITS</td>
+                <td id="totalUnitsDisplay" style="font-weight: 800; color: #2563eb;">00.0</td>
+                <td colspan="3"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Section 2: Assessment Details (Below Subjects) -->
+        <div class="assessment-section">
+          <div class="section-title"><i class="fas fa-calculator"></i> Assessment Details</div>
+          <table class="assessment-table">
+            <tbody>
+              <tr>
+                <td><strong>Tuition Fee:</strong></td>
+                <td><input type="number" id="tuitionFee" value="0" placeholder="0.00" min="0" step="0.01"/></td>
+              </tr>
+              <tr>
+                <td><strong>Academic:</strong></td>
+                <td><input type="number" id="academicFee" value="0" placeholder="0.00" min="0" step="0.01"/></td>
+              </tr>
+              <tr>
+                <td><strong>Computer:</strong></td>
+                <td><input type="number" id="computerFee" value="0" placeholder="0.00" min="0" step="0.01"/></td>
+              </tr>
+              <tr>
+                <td><strong>Misc. Fee:</strong></td>
+                <td><input type="number" id="miscFee" value="0" placeholder="0.00" min="0" step="0.01"/></td>
+              </tr>
+              <tr>
+                <td><strong>NSTP:</strong></td>
+                <td><input type="number" id="nstpFee" value="0" placeholder="0.00" min="0" step="0.01"/></td>
+              </tr>
+              <tr>
+                <td><strong>Others:</strong></td>
+                <td><input type="number" id="othersFee" value="0" placeholder="0.00" min="0" step="0.01"/></td>
+              </tr>
+              <tr class="total-row">
+                <td>TOTAL:</td>
+                <td><span id="totalAssessment" style="color: #2563eb; font-size: 18px;">₱ 0.00</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Footer Actions -->
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeAcceptModal()">Cancel</button>
+        <button class="btn-confirm-accept" onclick="confirmAcceptEnrollment()">
+          <i class="fas fa-check-circle"></i> Confirm Acceptance
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SEND MESSAGE TO STUDENT MODAL ===== -->
+  <div class="modal-overlay-sm" id="sendMessageModal">
+    <div class="modal-container-sm">
+      <button class="modal-close" onclick="closeSendMessageModal()">&times;</button>
+
+      <div class="modal-header-sm">
+        <h3><i class="fas fa-envelope-open-text"></i> Send Message to a Student</h3>
+      </div>
+
+      <div class="message-info-grid">
+        <div class="message-info-item">
+          <label>Student ID</label>
+          <input type="text" id="msgStudentID" readonly />
+        </div>
+        <div class="message-info-item">
+          <label>Full Name</label>
+          <input type="text" id="msgFullName" readonly />
+        </div>
+        <div class="message-info-item">
+          <label>Course/Year</label>
+          <input type="text" id="msgCourseYear" readonly />
+        </div>
+        <div class="message-info-item">
+          <label>Email</label>
+          <input type="email" id="msgEmail" readonly />
+        </div>
+      </div>
+
+      <div class="message-form-group">
+        <label>Message</label>
+        <textarea id="msgBody"></textarea>
+      </div>
+
+      <div class="modal-footer-sm">
+        <button class="btn-cancel" onclick="closeSendMessageModal()">Close</button>
+        <button class="btn-send-email" onclick="sendEmailToStudent()">
+          <i class="fas fa-paper-plane"></i> Send Message via Gmail
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Script for Filtering and Status Updating -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const statusFilter = document.getElementById('statusFilter');
@@ -723,26 +1297,246 @@
           }
         });
       });
+
+      // Auto-calculate Assessment Total
+      const feeInputs = ['tuitionFee', 'academicFee', 'computerFee', 'miscFee', 'nstpFee', 'othersFee'];
+      feeInputs.forEach(id => {
+        document.getElementById(id).addEventListener('input', calculateTotal);
+      });
+
+      function calculateTotal() {
+        let total = 0;
+        feeInputs.forEach(id => {
+          total += parseFloat(document.getElementById(id).value) || 0;
+        });
+        document.getElementById('totalAssessment').textContent = '₱ ' + total.toLocaleString('en-US', {minimumFractionDigits: 2});
+      }
+
+      // Initialize units calculation listener
+      attachUnitListeners();
     });
 
-    function updatePayment(button, newStatus, badgeClass, badgeText) {
-      const row = button.closest('tr');
-      row.setAttribute('data-status', newStatus);
-      
-      const badge = row.querySelector('.badge');
-      badge.className = `badge ${badgeClass}`;
-      badge.textContent = badgeText;
+    // Function to Attach Real-time Unit Calculation to all units inputs
+    function attachUnitListeners() {
+      const unitInputs = document.querySelectorAll('.units-input');
+      unitInputs.forEach(input => {
+        input.addEventListener('input', calculateTotalUnits);
+      });
+    }
 
-      const markContainer = badge.nextElementSibling;
-      if (newStatus === 'paid') {
-        markContainer.innerHTML = '<button class="btn-mark" onclick="updatePayment(this, \'pending\', \'warning\', \'Pending\')">Mark Pending</button>';
-      } else if (newStatus === 'pending') {
-        markContainer.innerHTML = '<button class="btn-mark" onclick="updatePayment(this, \'paid\', \'success\', \'Paid\')">Mark Paid</button>';
-      } else if (newStatus === 'declined') {
-        markContainer.innerHTML = '<button class="btn-mark" onclick="updatePayment(this, \'pending\', \'warning\', \'Pending\')">Mark Pending</button> <button class="btn-mark" onclick="updatePayment(this, \'paid\', \'success\', \'Paid\')">Mark Paid</button>';
+    // Function to Calculate Total Units in real-time
+    function calculateTotalUnits() {
+      const unitInputs = document.querySelectorAll('.units-input');
+      let totalUnits = 0;
+      
+      unitInputs.forEach(input => {
+        totalUnits += parseFloat(input.value) || 0;
+      });
+      
+      document.getElementById('totalUnitsDisplay').textContent = totalUnits.toFixed(1);
+    }
+
+    // Function to Add Subject Row
+    function addSubjectRow() {
+      const tbody = document.getElementById('subjectBody');
+      const totalRow = tbody.lastElementChild; // The TOTAL UNITS row
+      
+      const newRow = document.createElement('tr');
+      newRow.innerHTML = `
+        <td><input type="text" required /></td>
+        <td><input type="text" required /></td>
+        <td><input type="number" class="units-input" step="0.5" min="0" value="0" required /></td>
+        <td><input type="text" required /></td>
+        <td><input type="text" /></td>
+        <td><input type="text" required /></td>
+      `;
+      
+      // Insert the new row before the TOTAL UNITS row
+      tbody.insertBefore(newRow, totalRow);
+      
+      // Attach listener to the new row's units input
+      const newUnitsInput = newRow.querySelector('.units-input');
+      newUnitsInput.addEventListener('input', calculateTotalUnits);
+    }
+
+    // Function to Open Accept Modal
+    function openAcceptModal(button) {
+      const row = button.closest('tr');
+      
+      // Auto-fill student info from the table
+      document.getElementById('modalStudentID').textContent = row.cells[0].textContent;
+      document.getElementById('modalStudentName').textContent = row.cells[1].textContent;
+      document.getElementById('modalStudentCourse').textContent = row.cells[2].textContent;
+      document.getElementById('modalStudentYear').textContent = '3rd Year';
+      document.getElementById('modalStudentDate').textContent = row.cells[3].textContent;
+
+      // Auto-fill Student Portal Account fields
+      document.getElementById('portalStudentID').value = row.cells[0].textContent;
+      document.getElementById('portalFullName').value = row.cells[1].textContent;
+
+      // Clear Username and Password fields
+      document.getElementById('portalUsername').value = '';
+      document.getElementById('portalPassword').value = '';
+
+      // Open Modal
+      document.getElementById('acceptModal').classList.add('active');
+    }
+
+    // Function to Close Accept Modal
+    function closeAcceptModal() {
+      document.getElementById('acceptModal').classList.remove('active');
+    }
+
+    // Function to Confirm Acceptance (Triggers Send Message Modal)
+    function confirmAcceptEnrollment() {
+      const username = document.getElementById('portalUsername').value;
+      const password = document.getElementById('portalPassword').value;
+
+      if (!username || !password) {
+        alert('⚠️ Please fill in the Username and Password for the Student Portal Account.');
+        return;
+      }
+
+      // Validate Required Subject Fields
+      const requiredInputs = document.querySelectorAll('#subjectBody input[required]');
+      let allFilled = true;
+      requiredInputs.forEach(input => {
+        if (!input.value.trim()) {
+          allFilled = false;
+        }
+      });
+
+      if (!allFilled) {
+        alert('⚠️ Please fill in all required fields in the Assign Subjects section (except Room).');
+        return;
+      }
+
+      // Move student to Enrolled page
+      moveStudentToEnrolled();
+
+      // Close Accept Modal
+      closeAcceptModal();
+      
+      // Open Send Message Modal
+      openSendMessageModal();
+    }
+
+    // Function to Move Student to Enrolled Page (using localStorage)
+    function moveStudentToEnrolled() {
+      const studentID = document.getElementById('portalStudentID').value;
+      const fullName = document.getElementById('portalFullName').value;
+      const course = document.getElementById('modalStudentCourse').textContent;
+      const username = document.getElementById('portalUsername').value;
+      const password = document.getElementById('portalPassword').value;
+      const totalUnits = document.getElementById('totalUnitsDisplay').textContent;
+      const totalAssessment = document.getElementById('totalAssessment').textContent;
+
+      // Get existing enrolled students from localStorage
+      let enrolledStudents = JSON.parse(localStorage.getItem('enrolledStudents')) || [];
+
+      // Add new student to the list
+      enrolledStudents.push({
+        studentID: studentID,
+        fullName: fullName,
+        course: course,
+        username: username,
+        password: password,
+        totalUnits: totalUnits,
+        totalAssessment: totalAssessment
+      });
+
+      // Save back to localStorage
+      localStorage.setItem('enrolledStudents', JSON.stringify(enrolledStudents));
+
+      // Remove student from the enrollment table
+      const row = document.querySelector(`#enrollmentTable tbody tr[data-id="${studentID}"]`);
+      if (row) {
+        row.remove();
       }
     }
+
+    // Function to Open Send Message Modal
+    function openSendMessageModal() {
+      const studentID = document.getElementById('portalStudentID').value;
+      const fullName = document.getElementById('portalFullName').value;
+      const course = document.getElementById('modalStudentCourse').textContent;
+      const username = document.getElementById('portalUsername').value;
+      const password = document.getElementById('portalPassword').value;
+      
+      // Auto-fill Message Modal info
+      document.getElementById('msgStudentID').value = studentID;
+      document.getElementById('msgFullName').value = fullName;
+      
+      // Convert Course to Acronym (e.g., "Computer Science 101" -> "BSCS")
+      let courseAcronym = course.split(' ').map(word => word[0]).join('').toUpperCase();
+      if (courseAcronym.includes('101')) courseAcronym = courseAcronym.replace('101', '');
+      
+      document.getElementById('msgCourseYear').value = courseAcronym + ' - 3rd Year';
+      
+      // Simulated email based on student ID (Replace with real email logic)
+      document.getElementById('msgEmail').value = fullName.toLowerCase().replace(/ /g, '.') + '@gmail.com';
+
+      // Generate Pre-filled Message
+      const message = `Dear ${fullName},
+
+We are pleased to inform you that you have been officially enrolled at Interworld Colleges Foundation Inc. for the 1st Semester of Academic Year 2026-2027.
+
+Course: ${course}
+Student ID: ${studentID}
+
+Your Student Portal Account has been created with the following credentials:
+Username: ${username}
+Password: ${password}
+Our system uses a Default Password so for security privacy measures we suggest you to replace the current password.
+
+Please make sure to keep this information secure. You will need this to access the Student Portal, where you can view your grades, schedule, and other important updates.
+
+We look forward to your first day of school and wish you a successful academic year ahead!
+
+Best regards,
+Admissions Office
+ICF Interworld Colleges Foundation Inc.`;
+
+      document.getElementById('msgBody').value = message;
+
+      // Show Modal
+      document.getElementById('sendMessageModal').classList.add('active');
+    }
+
+    // Function to Close Send Message Modal
+    function closeSendMessageModal() {
+      document.getElementById('sendMessageModal').classList.remove('active');
+    }
+
+    // Function to Send Email via Gmail
+    function sendEmailToStudent() {
+      const email = document.getElementById('msgEmail').value;
+      const studentName = document.getElementById('msgFullName').value;
+      const messageBody = document.getElementById('msgBody').value;
+      
+      const subject = encodeURIComponent('Welcome to Interworld Colleges Foundation Inc. - Enrollment Confirmation');
+      const body = encodeURIComponent(messageBody);
+      
+      // Open Gmail with pre-filled subject and body
+      window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${subject}&body=${body}`, '_blank');
+      
+      // Show success message and close modal
+      alert('✅ Email draft has been opened in Gmail! You can review and send it to the student.');
+      closeSendMessageModal();
+    }
+
+    // Function to Decline Enrollment
+    function declineEnrollment(button) {
+      const row = button.closest('tr');
+      const actionGroup = row.querySelector('.action-group');
+      
+      actionGroup.innerHTML = `
+        <button class="btn-action">View</button>
+        <span class="badge danger" style="align-self: center;">Declined</span>
+      `;
+      
+      alert('Enrollment has been declined!');
+    }
   </script>
-  <script src="script.js"></script>
 </body>
 </html>

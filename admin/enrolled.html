@@ -237,24 +237,6 @@
         gap: 12px;
       }
 
-      .filter-select {
-        padding: 8px 12px;
-        background-color: #f8fafc;
-        border: 1px solid #cbd5e1;
-        border-radius: 6px;
-        color: var(--bg-deep-abyss);
-        font-size: 0.85rem;
-        font-weight: 500;
-        outline: none;
-        cursor: pointer;
-        transition: all 0.2s ease;
-      }
-
-      .filter-select:focus {
-        border-color: #2563eb;
-        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
-      }
-
       .table-wrapper {
         overflow-x: auto;
       }
@@ -274,9 +256,24 @@
       }
 
       th {
-        background-color: var(--text-muted-teal);
+        background-color: #a5bdd5;
         color: var(--bg-deep-abyss);
         font-weight: 600;
+        cursor: pointer;
+        user-select: none;
+        transition: background-color 0.2s ease;
+      }
+
+      th:hover {
+        background-color: #94a3b8;
+      }
+
+      th.no-sort {
+        cursor: default;
+      }
+
+      th.no-sort:hover {
+        background-color: var(--text-muted-teal);
       }
 
       tr:hover {
@@ -372,6 +369,26 @@
           opacity: 1;
           transform: translateY(0);
         }
+      }
+      /* ===== CUSTOM SCROLLBAR (For Body & Modals) ===== */
+      .modal-container::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+      }
+
+      .modal-container::-webkit-scrollbar-track {
+        background: var(--bg-deep-abyss);
+        border-radius: 10px;
+      }
+
+      .modal-container::-webkit-scrollbar-thumb {
+        background: var(--border-teal);
+        border-radius: 10px;
+        border: 2px solid var(--bg-deep-abyss);
+      }
+
+      .modal-container::-webkit-scrollbar-thumb:hover {
+        background: var(--primary-neon);
       }
 
       .modal-close {
@@ -723,29 +740,33 @@
       <div class="table-card">
         <div class="table-header">
           <h2>List of Enrolled Students</h2>
-          <div class="table-actions">
-            <!-- Filter Dropdown for Year Level -->
-            <select id="yearFilter" class="filter-select">
-              <option value="all">All Year Levels</option>
-              <option value="1st Year">1st Year</option>
-              <option value="2nd Year">2nd Year</option>
-              <option value="3rd Year">3rd Year</option>
-              <option value="4th Year">4th Year</option>
-            </select>
-          </div>
         </div>
         <div class="table-wrapper">
           <table id="enrolledTable">
             <thead>
               <tr>
-                <th>Student ID</th>
-                <th>Full Name</th>
-                <th>Year Level</th>
-                <th>Courses</th>
-                <th>Block</th>
-                <th>Units</th>
-                <th>Balance</th>
-                <th>Action</th>
+                <th class="sortable" onclick="sortTable(0)">
+                  Student ID <i class="fas fa-sort"></i>
+                </th>
+                <th class="sortable" onclick="sortTable(1)">
+                  Full Name <i class="fas fa-sort"></i>
+                </th>
+                <th class="sortable" onclick="sortTable(2)">
+                  Year Level <i class="fas fa-sort"></i>
+                </th>
+                <th class="sortable" onclick="sortTable(3)">
+                  Courses <i class="fas fa-sort"></i>
+                </th>
+                <th class="sortable" onclick="sortTable(4)">
+                  Block <i class="fas fa-sort"></i>
+                </th>
+                <th class="sortable" onclick="sortTable(5)">
+                  Units <i class="fas fa-sort"></i>
+                </th>
+                <th class="sortable" onclick="sortTable(6)">
+                  Balance <i class="fas fa-sort"></i>
+                </th>
+                <th class="no-sort">Action</th>
               </tr>
             </thead>
             <tbody id="enrolledTableBody">
@@ -920,27 +941,14 @@
 
     <!-- Script for Filtering, Viewing, and localStorage -->
     <script>
+      let sortDirection = 1; // 1 = Ascending, -1 = Descending
+
       document.addEventListener("DOMContentLoaded", () => {
-        const yearFilter = document.getElementById("yearFilter");
+        // Search Functionality
+        const searchInput = document.getElementById("userSearchInput");
         const enrollmentTable = document.getElementById("enrolledTable");
         const rows = enrollmentTable.querySelectorAll("tbody tr");
 
-        yearFilter.addEventListener("change", (e) => {
-          const selectedValue = e.target.value.toLowerCase();
-
-          rows.forEach((row) => {
-            const rowYear = row.getAttribute("data-year").toLowerCase();
-
-            if (selectedValue === "all" || rowYear === selectedValue) {
-              row.style.display = "";
-            } else {
-              row.style.display = "none";
-            }
-          });
-        });
-
-        // Search Functionality
-        const searchInput = document.getElementById("userSearchInput");
         searchInput.addEventListener("input", (e) => {
           const searchTerm = e.target.value.toLowerCase();
 
@@ -957,6 +965,43 @@
         // Load Students from localStorage
         loadEnrolledStudents();
       });
+
+      // Function to Sort Table by Column
+      function sortTable(columnIndex) {
+        const table = document.getElementById("enrolledTable");
+        const tbody = table.querySelector("tbody");
+        const rows = Array.from(tbody.rows);
+
+        // Toggle sort direction
+        sortDirection = sortDirection === 1 ? -1 : 1;
+
+        // Sort rows
+        rows.sort((a, b) => {
+          const aText = a.cells[columnIndex].textContent.trim().toLowerCase();
+          const bText = b.cells[columnIndex].textContent.trim().toLowerCase();
+
+          if (aText < bText) return -1 * sortDirection;
+          if (aText > bText) return 1 * sortDirection;
+          return 0;
+        });
+
+        // Re-append rows in sorted order
+        rows.forEach((row) => tbody.appendChild(row));
+
+        // Update sort icons
+        const sortIcons = document.querySelectorAll("th.sortable i");
+        sortIcons.forEach((icon) => {
+          icon.className = "fas fa-sort";
+        });
+
+        const activeTh = table.querySelector(
+          `th.sortable:nth-child(${columnIndex + 1}) i`,
+        );
+        if (activeTh) {
+          activeTh.className =
+            sortDirection === 1 ? "fas fa-sort-up" : "fas fa-sort-down";
+        }
+      }
 
       // Load Enrolled Students from localStorage
       function loadEnrolledStudents() {

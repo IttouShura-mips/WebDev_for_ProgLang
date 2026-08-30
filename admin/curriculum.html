@@ -1,0 +1,1553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Control Panel - Curriculum</title>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <style>
+      * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    :root {
+      --bg-deep-abyss: #020c1b;      
+      --bg-card: #0a192f;            
+      --bg-card-hover: #112240;      
+      --primary-neon: #0df5e3;       
+      --primary-neon-hover: #00cbb9; 
+      --text-high-contrast: #e2e8f0; 
+      --text-muted-teal: #8892b0;    
+      --border-teal: #172a45;        
+      --success-green: #10b981;      
+      --warning-yellow: #f59e0b;
+      --danger-red: #dc2626;
+      --border-radius: 12px;
+      --transition-smooth: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      --neon-glow: 0 0 15px rgba(13, 245, 227, 0.3);
+    }
+
+    body {
+      display: flex;
+      background-color: rgb(19, 27, 50);
+      color: var(--text-high-contrast);
+      min-height: 100vh;
+    }
+
+    /* ===== CUSTOM SCROLLBAR ===== */
+    ::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-deep-abyss);
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-teal);
+      border-radius: 10px;
+      border: 2px solid var(--bg-deep-abyss);
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--primary-neon);
+    }
+
+    /* Sidebar Styles */
+    .sidebar {
+      background: radial-gradient(circle at center, #071f30, var(--bg-deep-abyss));
+      width: 330px;
+      background-color: var(--bg-deep-abyss);
+      color: var(--text-high-contrast);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between; 
+    }
+
+    .brand {
+      border-left: 4px solid var(--primary-neon);
+      padding: 30px 20px;
+      margin-bottom: 30px;
+      background-color: var(--bg-deep-abyss);
+    }
+
+    .brand h2 {
+      color: var(--primary-neon);
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .nav-links {
+      list-style: none;
+      margin-top: 20px;
+    }
+
+    .nav-links li a {
+      display: block;
+      padding: 14px 50px;
+      color: #94a3b8;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .nav-links li.active a,
+    .nav-links li a:hover {
+      background-color: #334155;
+      color: var(--primary-neon);
+      font-weight: 700;
+    }
+
+    .sidebar-footer {
+      padding: 20px 30px;
+      border-top: 1px solid var(--border-teal);
+      margin-top: auto;
+    }
+
+    .btn-homepage {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 12px;
+      background-color: transparent;
+      color: var(--primary-neon);
+      border: 1px solid var(--primary-neon);
+      border-radius: var(--border-radius);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: var(--transition-smooth);
+    }
+
+    .btn-homepage:hover {
+      background-color: var(--primary-neon);
+      color: var(--bg-deep-abyss);
+      box-shadow: var(--neon-glow);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .search-container {
+      position: relative;
+      width: 260px;
+    }
+
+    .search-container input {
+      width: 100%;
+      padding: 8px 14px;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-teal);
+      border-radius: var(--border-radius);
+      color: var(--text-high-contrast);
+      font-size: 0.9rem;
+      outline: none;
+      transition: var(--transition-smooth);
+    }
+
+    .search-container input:focus {
+      border-color: var(--primary-neon);
+      box-shadow: var(--neon-glow);
+    }
+
+    .main-content {
+      flex: 1;
+      padding: 30px;
+      overflow-y: auto;
+    }
+
+    .top-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 30px 20px;  
+    }
+
+    .top-header h1 {
+      font-size: 1.6rem;
+      color: var(--primary-neon);
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      margin-right: 50px;
+      gap: 15px;
+      font-weight: 600;
+    }
+
+    .avatar {
+      width: 38px;
+      height: 38px;
+      background-color: var(--primary-neon);
+      color: rgb(0, 0, 0);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+
+    /* Overview Summary Cards */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    .card {
+      background: var(--text-high-contrast);
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0px 5px var(--primary-neon);
+    }
+
+    .card h3 {
+      font-size: 0.85rem;
+      color: var(--bg-deep-abyss);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .card-value {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: var(--bg-deep-abyss);
+    }
+
+    /* Table Card */
+    .table-card {
+      background: var(--text-high-contrast);
+      border-radius: 8px;
+      box-shadow: 0 0px 5px var(--primary-neon);
+      padding: 20px;
+    }
+
+    .table-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .table-header h2 {
+      font-size: 1.1rem;
+      color: var(--bg-deep-abyss);
+    }
+
+    .table-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th, td {
+      padding: 12px 16px;
+      color: var(--bg-deep-abyss);
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 0.9rem;
+    }
+
+    th {
+      background-color: #a5bdd5;
+      color: var(--bg-deep-abyss);
+      font-weight: 600;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.2s ease;
+    }
+
+    th:hover {
+      background-color: #94a3b8;
+    }
+
+    th.no-sort {
+      cursor: default;
+    }
+
+    th.no-sort:hover {
+      background-color: #a5bdd5;
+    }
+
+    tr:hover {
+      background-color: #e2e8f0;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 8px 14px;
+      border: 1px solid #cbd5e1;
+      background: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn:hover {
+      background: #f1f5f9;
+    }
+
+    .btn.primary {
+      background: #2563eb;
+      color: white;
+      border: none;
+    }
+
+    .btn.primary:hover {
+      background: #1d4ed8;
+    }
+
+    .btn-action {
+      padding: 4px 10px;
+      background: transparent;
+      border: 1px solid #2563eb;
+      color: #2563eb;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      margin-right: 4px;
+    }
+
+    .btn-action:hover {
+      background: #2563eb;
+      color: white;
+    }
+
+    .btn-action.view { border-color: #0ea5e9; color: #0ea5e9; }
+    .btn-action.view:hover { background: #0ea5e9; color: white; }
+
+    /* ===== CUSTOM OPERATION MODAL ===== */
+    .operation-modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(2, 12, 27, 0.95);
+      backdrop-filter: blur(8px);
+      z-index: 5000;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .operation-modal-overlay.active {
+      display: flex;
+    }
+
+    .operation-modal-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-teal);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+      position: relative;
+      animation: modalFadeIn 0.3s ease;
+      padding: 30px;
+      color: var(--text-high-contrast);
+      text-align: center;
+    }
+
+    .operation-icon {
+      font-size: 50px;
+      margin-bottom: 15px;
+    }
+
+    .operation-modal-box.success {
+      border-color: var(--success-green);
+      box-shadow: 0 20px 50px rgba(16, 185, 129, 0.3);
+    }
+
+    .operation-modal-box.warning {
+      border-color: var(--warning-yellow);
+      box-shadow: 0 20px 50px rgba(245, 158, 11, 0.3);
+    }
+
+    .operation-modal-box.success .operation-icon { color: var(--success-green); }
+    .operation-modal-box.warning .operation-icon { color: var(--warning-yellow); }
+
+    .operation-modal-box h3 {
+      font-size: 20px;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .operation-modal-box p {
+      font-size: 14px;
+      color: var(--text-muted-teal);
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    .operation-modal-box .operation-form-group {
+      margin-bottom: 15px;
+      text-align: left;
+    }
+
+    .operation-modal-box .operation-form-group label {
+      display: block;
+      font-size: 12px;
+      color: var(--text-muted-teal);
+      font-weight: 600;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    .operation-modal-box .operation-form-group input {
+      width: 100%;
+      padding: 10px;
+      background: var(--bg-deep-abyss);
+      border: 1px solid var(--border-teal);
+      border-radius: 4px;
+      font-size: 0.9rem;
+      color: var(--text-high-contrast);
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    .operation-modal-box .operation-form-group input:focus {
+      border-color: var(--primary-neon);
+    }
+
+    .operation-modal-actions {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .op-btn {
+      padding: 10px 25px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+    }
+
+    .op-btn.cancel {
+      background: var(--bg-card);
+      color: var(--text-high-contrast);
+      border: 1px solid var(--border-teal);
+    }
+
+    .op-btn.cancel:hover { background: var(--bg-card-hover); }
+
+    .op-btn.confirm-success {
+      background: var(--success-green);
+      color: white;
+    }
+
+    .op-btn.confirm-success:hover { background: #059669; }
+
+    .op-btn.confirm-danger {
+      background: var(--danger-red);
+      color: white;
+    }
+
+    .op-btn.confirm-danger:hover { background: #b91c1c; }
+
+    /* ===== ADD CURRICULUM MODAL ===== */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(2, 12, 27, 0.95);
+      backdrop-filter: blur(8px);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border-teal);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+      position: relative;
+      animation: modalFadeIn 0.3s ease;
+      padding: 30px;
+      color: var(--text-high-contrast);
+    }
+
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted-teal);
+      font-size: 28px;
+      cursor: pointer;
+      z-index: 10;
+      transition: color 0.3s;
+    }
+
+    .modal-close:hover {
+      color: #ef4444;
+    }
+
+    .modal-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--primary-neon);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .modal-title i { font-size: 24px; }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      color: var(--text-muted-teal);
+      font-weight: 600;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px;
+      background: var(--bg-deep-abyss);
+      border: 1px solid var(--border-teal);
+      border-radius: 4px;
+      font-size: 0.9rem;
+      color: var(--text-high-contrast);
+      outline: none;
+      transition: border-color 0.2s ease;
+      font-family: inherit;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: var(--primary-neon);
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      border-top: 1px solid var(--border-teal);
+      padding-top: 20px;
+    }
+
+    .btn-cancel {
+      background: var(--bg-card);
+      color: var(--text-high-contrast);
+      border: 1px solid var(--border-teal);
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .btn-cancel:hover { background: var(--bg-card-hover); }
+
+    .btn-save {
+      background: var(--success-green);
+      color: white;
+      border: none;
+      padding: 10px 25px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .btn-save:hover { background: #059669; }
+
+    /* ===== VIEW CURRICULUM MODAL ===== */
+    .view-modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(2, 12, 27, 0.95);
+      backdrop-filter: blur(8px);
+      z-index: 3000;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .view-modal-overlay.active {
+      display: flex;
+    }
+
+    .view-modal-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border-teal);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 1000px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+      position: relative;
+      animation: modalFadeIn 0.3s ease;
+      padding: 0;
+      color: var(--text-high-contrast);
+    }
+
+    .view-modal-header {
+      background: var(--bg-deep-abyss);
+      padding: 20px;
+      border-bottom: 2px solid var(--primary-neon);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      border-radius: 16px 16px 0 0;
+    }
+
+    .view-modal-header h3 {
+      font-size: 20px;
+      color: var(--primary-neon);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .view-modal-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted-teal);
+      font-size: 24px;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+
+    .view-modal-close:hover { color: #ef4444; }
+
+    .view-modal-body {
+      padding: 20px;
+    }
+
+    .curriculum-info {
+      text-align: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid var(--border-teal);
+    }
+
+    .curriculum-info h2 {
+      font-size: 24px;
+      color: var(--text-high-contrast);
+      font-weight: 800;
+      margin-bottom: 5px;
+    }
+
+    .curriculum-info h3 {
+      font-size: 16px;
+      color: var(--primary-neon);
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .curriculum-info p {
+      font-size: 13px;
+      color: var(--text-muted-teal);
+    }
+
+    .semester-section {
+      margin-bottom: 30px;
+    }
+
+    .semester-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .semester-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--primary-neon);
+      background: var(--bg-deep-abyss);
+      padding: 10px;
+      border-radius: 4px;
+      flex: 1;
+    }
+
+    .semester-actions {
+      display: flex;
+      gap: 6px;
+      margin-left: 10px;
+    }
+
+    .btn-small {
+      padding: 5px 10px;
+      border: 1px solid var(--border-teal);
+      background: transparent;
+      color: var(--text-high-contrast);
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .btn-small:hover { background: var(--bg-card-hover); }
+    .btn-small.add { border-color: var(--primary-neon); color: var(--primary-neon); }
+    .btn-small.add:hover { background: var(--primary-neon); color: var(--bg-deep-abyss); }
+
+    .curriculum-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    .curriculum-table th,
+    .curriculum-table td {
+      padding: 10px 8px;
+      border: 1px solid var(--border-teal);
+      text-align: left;
+      color: var(--text-high-contrast);
+    }
+
+    .curriculum-table th {
+      background-color: var(--bg-deep-abyss);
+      color: var(--primary-neon);
+      font-weight: 600;
+    }
+
+    .curriculum-table tr:nth-child(even) {
+      background-color: var(--bg-deep-abyss);
+    }
+
+    .curriculum-table tr:hover {
+      background-color: var(--bg-card-hover);
+    }
+
+    .curriculum-table .total-row td {
+      background: var(--bg-deep-abyss);
+      font-weight: 700;
+      color: var(--primary-neon);
+      border-top: 2px solid var(--primary-neon);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .top-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+      .header-right {
+        width: 100%;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .search-container {
+        width: 100%;
+      }
+      .cards-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar">
+    <div>
+      <div class="brand">
+        <h2>Admin Panel</h2>
+      </div>
+        <ul class="nav-links">
+          <li><a href="adminpanel.html">Dashboard</a></li>
+          <li><a href="user.html">Users</a></li>
+          <li><a href="enrollments.html">Enrollments</a></li>
+          <li><a href="enrolled.html">Enrolled</a></li>
+          <li><a href="instructors.html">Instructors</a></li>
+          <li class="active"><a href="curriculum.html">Curriculum</a></li>
+          <li><a href="received-mail.html">Received Mail</a></li>
+        </ul>
+    </div>
+
+    <div class="sidebar-footer">
+      <a href="../../index.html" class="btn-homepage">
+        <i class="fa-solid fa-arrow-left"></i> Back to Homepage
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="main-content">
+    
+    <!-- Header -->
+    <header class="top-header">
+      <h1>Curriculum Management</h1>
+
+      <div class="header-right">
+        <div class="search-container">
+          <input 
+            type="text" 
+            id="curriculumSearchInput" 
+            placeholder="Search curriculum..." 
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="user-profile">
+          <span>Admin User</span>
+          <div class="avatar">A</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Overview Summary Cards -->
+    <div class="cards-grid">
+      <div class="card">
+        <h3>Total Curriculums</h3>
+        <div class="card-value" id="totalCurriculumsCard">0</div>
+      </div>
+      <div class="card">
+        <h3>Active Programs</h3>
+        <div class="card-value" id="activeProgramsCard">0</div>
+      </div>
+      <div class="card">
+        <h3>Total Courses Offered</h3>
+        <div class="card-value">24</div>
+      </div>
+      <div class="card">
+        <h3>Total Units Enrolled</h3>
+        <div class="card-value">156</div>
+      </div>
+    </div>
+
+    <!-- Curriculum Table -->
+    <div class="table-card">
+      <div class="table-header">
+        <h2>List of Courses</h2>
+        <div class="table-actions">
+          <button class="btn primary" onclick="openAddCurriculumModal()">
+            <i class="fas fa-plus"></i> Add Course
+          </button>
+        </div>
+      </div>
+      <div class="table-wrapper">
+        <table id="curriculumTable">
+          <thead>
+            <tr>
+              <th class="sortable" onclick="sortTable(0)">Course Code <i class="fas fa-sort"></i></th>
+              <th class="sortable" onclick="sortTable(1)">Course Title <i class="fas fa-sort"></i></th>
+              <th class="sortable" onclick="sortTable(2)">Academic Year <i class="fas fa-sort"></i></th>
+              <th class="sortable" onclick="sortTable(3)">Total Units <i class="fas fa-sort"></i></th>
+              <th class="no-sort">Action</th>
+            </tr>
+          </thead>
+          <tbody id="curriculumTableBody">
+            <!-- Data populated by JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ===== ADD CURRICULUM MODAL ===== -->
+  <div class="modal-overlay" id="addCurriculumModal">
+    <div class="modal-container">
+      <button class="modal-close" onclick="closeAddCurriculumModal()">&times;</button>
+
+      <div class="modal-title"><i class="fas fa-plus-circle"></i> Add Course</div>
+
+      <form id="addCurriculumForm">
+        <div class="form-group">
+          <label>Course Code</label>
+          <input type="text" id="curriculumCode" placeholder="e.g., BSCS-2024" required />
+        </div>
+        <div class="form-group">
+          <label>Course Title</label>
+          <input type="text" id="curriculumTitle" placeholder="e.g., Bachelor of Science in Computer Science" required />
+        </div>
+        <div class="form-group">
+          <label>Year Level Covered</label>
+          <input type="text" id="curriculumYear" placeholder="e.g., 1st - 4th Year" required />
+        </div>
+        <div class="form-group">
+          <label>Academic Year</label>
+          <input type="text" id="curriculumAcademicYear" placeholder="e.g., S.Y. 2023-2024" required />
+        </div>
+      </form>
+
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeAddCurriculumModal()">Cancel</button>
+        <button class="btn-save" onclick="saveCurriculum()"><i class="fas fa-save"></i> Save Course</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== VIEW CURRICULUM DETAILS MODAL ===== -->
+  <div class="view-modal-overlay" id="viewCurriculumModal">
+    <div class="view-modal-container">
+      <div class="view-modal-header">
+        <h3><i class="fas fa-book-open"></i> Full Curriculum Details</h3>
+        <button class="view-modal-close" onclick="closeViewCurriculumModal()">&times;</button>
+      </div>
+      <div class="view-modal-body" id="viewCurriculumBody">
+        <!-- Content generated by JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CUSTOM OPERATION MODAL ===== -->
+  <div class="operation-modal-overlay" id="operationModal">
+    <div class="operation-modal-box" id="operationBox">
+      <div class="operation-icon" id="operationIcon"></div>
+      <h3 id="operationTitle"></h3>
+      <p id="operationMessage"></p>
+      
+      <div id="operationFormContainer" style="display: none;"></div>
+
+      <div class="operation-modal-actions" id="operationActions"></div>
+    </div>
+  </div>
+
+  <!-- Script for Sorting, Searching, and Data Management -->
+  <script>
+    let sortDirection = 1; // 1 = Ascending, -1 = Descending
+
+    // ===== OPERATION MODAL STATE =====
+    let operationCallback = null;
+    let currentCurriculumIndex = null;
+    let currentSemesterIndex = null;
+    let currentSubjectIndex = null;
+
+    // ===== CURRICULUM DATA =====
+    const curriculumData = [
+      {
+        code: "BSCS-2024",
+        title: "Bachelor of Science in Computer Science",
+        year: "1st - 4th Year",
+        academicYear: "S.Y. 2023-2024",
+        totalUnits: 210,
+        details: {
+          school: "INTERWORLD COLLEGES FOUNDATION, INC",
+          address: "Burgos St., Paniqui, Tarlac",
+          courseTitle: "Bachelor of Science in Computer Science",
+          yearLevel: "S.Y. 2023-2024",
+          semesters: [
+            {
+              name: "1st Year - 1st Semester",
+              subjects: [
+                { prereq: "None", code: "GECCOED101YG1", title: "Understanding the Self", lec: 3, lab: 0, units: 3 },
+                { prereq: "None", code: "GECPCOM101YG1", title: "Purposive Communication", lec: 3, lab: 0, units: 3 },
+                { prereq: "None", code: "GECMATH101YG1", title: "Mathematics in the Modern World", lec: 3, lab: 0, units: 3 },
+                { prereq: "None", code: "GECRPHIL101YG1", title: "Readings in Philippine History", lec: 3, lab: 0, units: 3 },
+                { prereq: "None", code: "GECETHIC101YG1", title: "Ethics", lec: 3, lab: 0, units: 3 },
+                { prereq: "None", code: "GECSCTS101YG1", title: "Science, Technology and Society", lec: 3, lab: 0, units: 3 },
+                { prereq: "None", code: "CC1", title: "Introduction to Computing", lec: 2, lab: 3, units: 3 },
+                { prereq: "None", code: "PC1", title: "Computer Programming 1 (Fund. of Programming)", lec: 2, lab: 3, units: 3 },
+                { prereq: "None", code: "NSTP101YG1", title: "CWTS/ROTC 1", lec: 3, lab: 0, units: 3 },
+                { prereq: "None", code: "PE1", title: "Physical Activities Towards Health and Fitness 1", lec: 2, lab: 0, units: 2 }
+              ]
+            },
+            {
+              name: "1st Year - 2nd Semester",
+              subjects: [
+                { prereq: "None", code: "GECRIZAL101YG1", title: "Rizal's Life and Works", lec: 3, lab: 0, units: 3 },
+                { prereq: "None", code: "GECARTAP101YG2", title: "Art Appreciation", lec: 3, lab: 0, units: 3 },
+                { prereq: "None", code: "CC2", title: "Computer Programming 2", lec: 2, lab: 3, units: 3 },
+                { prereq: "None", code: "CC3", title: "Discrete Structures", lec: 3, lab: 0, units: 3 },
+                { prereq: "None", code: "PC2", title: "Data Structures and Algorithms", lec: 2, lab: 3, units: 3 },
+                { prereq: "None", code: "PCOMPEI101", title: "Web Systems and Technologies 1", lec: 2, lab: 3, units: 3 },
+                { prereq: "None", code: "PC3", title: "Information Assurance and Security 1", lec: 2, lab: 3, units: 3 },
+                { prereq: "None", code: "NSTP102YG1", title: "CWTS/ROTC 2", lec: 3, lab: 0, units: 3 },
+                { prereq: "None", code: "PE2", title: "Physical Activities Towards Health and Fitness 2", lec: 2, lab: 0, units: 2 }
+              ]
+            },
+            {
+              name: "2nd Year - 1st Semester",
+              subjects: [
+                { prereq: "None", code: "GECFIL101YG1", title: "Komunikasyon sa Akademikong Filipino", lec: 3, lab: 0, units: 3 },
+                { prereq: "None", code: "CC4", title: "Algorithms and Complexity", lec: 3, lab: 0, units: 3 },
+                { prereq: "None", code: "COMPP101YG2", title: "Information Management", lec: 3, lab: 0, units: 3 },
+                { prereq: "None", code: "PC4", title: "Networks and Communication 1", lec: 2, lab: 3, units: 3 },
+                { prereq: "None", code: "PC5", title: "Object-Oriented Programming", lec: 2, lab: 3, units: 3 },
+                { prereq: "None", code: "PC6", title: "Information Assurance and Security 2", lec: 2, lab: 3, units: 3 },
+                { prereq: "None", code: "PE3", title: "Physical Activities Towards Health and Fitness 3", lec: 2, lab: 0, units: 2 }
+              ]
+            },
+            {
+              name: "2nd Year - 2nd Semester",
+              subjects: [
+                { prereq: "None", code: "GECFIL102YG1", title: "Filipino sa Iba't Ibang Larangan", lec: 3, lab: 0, units: 3 },
+                { prereq: "None", code: "CC5", title: "Applications Development", lec: 3, lab: 0, units: 3 },
+                { prereq: "None", code: "CC6", title: "Social and Professional Issues", lec: 3, lab: 0, units: 3 },
+                { prereq: "None", code: "PC7", title: "Automata Theory and Formal Languages", lec: 3, lab: 0, units: 3 },
+                { prereq: "None", code: "PC8", title: "Architecture and Organization", lec: 3, lab: 0, units: 3 },
+                { prereq: "None", code: "PC9", title: "Software Engineering 1", lec: 3, lab: 0, units: 3 },
+                { prereq: "None", code: "PE4", title: "Physical Activities Towards Health and Fitness 4", lec: 2, lab: 0, units: 2 }
+              ]
+            },
+            {
+              name: "3rd Year - 1st Semester",
+              subjects: [
+                { prereq: "None", code: "GECSCP101YG3", title: "The Contemporary World", lec: 3, lab: 0, units: 3 },
+                { prereq: "None", code: "PCOMINT101YG3", title: "Technopreneurship", lec: 3, lab: 0, units: 3 },
+                { prereq: "None", code: "PC10", title: "Information Assurance and Security", lec: 3, lab: 0, units: 3 },
+                { prereq: "None", code: "PC11", title: "Programming Languages", lec: 3, lab: 0, units: 3 },
+                { prereq: "None", code: "PC12", title: "Software Engineering 2", lec: 3, lab: 0, units: 3 },
+                { prereq: "None", code: "PC13", title: "Intelligent Systems", lec: 3, lab: 0, units: 3 }
+              ]
+            },
+            {
+              name: "3rd Year - 2nd Semester",
+              subjects: [
+                { prereq: "None", code: "CCSC1013YG2", title: "Multimedia", lec: 3, lab: 0, units: 3 }
+              ]
+            },
+            {
+              name: "4th Year - 1st Semester",
+              subjects: [
+                { prereq: "None", code: "CCSC141YG1", title: "Human Computer Interaction", lec: 3, lab: 0, units: 3 },
+                { prereq: "None", code: "CCSC154YG1", title: "Operating Systems", lec: 3, lab: 0, units: 3 },
+                { prereq: "None", code: "CCSC155YG1", title: "Social Issues and Professional Ethics", lec: 3, lab: 0, units: 3 },
+                { prereq: "None", code: "CCSC174YG1", title: "Thesis Writing 1", lec: 3, lab: 0, units: 3 }
+              ]
+            },
+            {
+              name: "4th Year - 2nd Semester",
+              subjects: [
+                { prereq: "None", code: "CCSC158YG2", title: "Networks and Communication", lec: 3, lab: 0, units: 3 },
+                { prereq: "None", code: "CCSC184YG2", title: "Thesis Writing 2", lec: 3, lab: 0, units: 3 }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        code: "BSACT-2023",
+        title: "2-Year Associate in Computer Technology",
+        year: "1st - 2nd Year",
+        academicYear: "S.Y. 2022-2023",
+        totalUnits: 90,
+        details: {
+          school: "INTERWORLD COLLEGES FOUNDATION, INC",
+          address: "Burgos St., Paniqui, Tarlac",
+          courseTitle: "2-Year Associate in Computer Technology",
+          yearLevel: "S.Y. 2022-2023",
+          semesters: [
+            {
+              name: "1st Year - 1st Semester",
+              subjects: [
+                { prereq: "None", code: "BRIDGING101 Math 2", title: "Plane Trigonometry", lec: 0, lab: 0, units: 3 },
+                { prereq: "None", code: "BRIDGING102 Math 3", title: "Probabilities and Statistics", lec: 0, lab: 0, units: 3 },
+                { prereq: "None", code: "ACTGECOD101YG1", title: "Understanding the Self", lec: 3, lab: 0, units: 3 },
+                { prereq: "None", code: "ACTGECOT201YG1", title: "Purposive Communication", lec: 3, lab: 0, units: 3 },
+                { prereq: "None", code: "ACTGECOS101YG1", title: "Readings in Philippine History", lec: 3, lab: 0, units: 3 },
+                { prereq: "None", code: "ACTSCT101YG1", title: "Discrete Structures 1", lec: 2, lab: 3, units: 3 },
+                { prereq: "None", code: "ACTCCO101YG1", title: "Introduction to Computing", lec: 2, lab: 3, units: 3 },
+                { prereq: "None", code: "ACTCCC021YG1", title: "Computer Programming 1", lec: 2, lab: 3, units: 3 },
+                { prereq: "None", code: "ACTCCC021YG1 NSTP1", title: "CWTS/ROTC 1", lec: 3, lab: 0, units: 3 },
+                { prereq: "None", code: "ACTGEC04AY1 PE 1", title: "Physical Activities Towards Health and Fitness 1", lec: 2, lab: 0, units: 2 }
+              ]
+            },
+            {
+              name: "1st Year - 2nd Semester",
+              subjects: [
+                { prereq: "None", code: "BRIDGING103 Nat Sci 1", title: "College Physics 1", lec: 0, lab: 0, units: 3 },
+                { prereq: "None", code: "BRIDGING104 Math 1", title: "College Algebra", lec: 3, lab: 0, units: 3 },
+                { prereq: "None", code: "ACTGECOT102YG1", title: "Mathematics in the Modern World", lec: 3, lab: 0, units: 3 },
+                { prereq: "None", code: "ACTPCOM102YG1", title: "Professional Issues in Computing", lec: 3, lab: 0, units: 3 },
+                { prereq: "None", code: "ACTSCT102YG1", title: "Discrete Structures 2", lec: 2, lab: 3, units: 3 },
+                { prereq: "None", code: "ACTCCC021YG1", title: "Computer Programming 2", lec: 2, lab: 3, units: 3 },
+                { prereq: "None", code: "ACTCCC021YG1", title: "Object-Oriented Programming", lec: 2, lab: 3, units: 3 },
+                { prereq: "None", code: "ACTCCC021YG1 NSTP2", title: "CWTS/ROTC 2", lec: 3, lab: 0, units: 3 },
+                { prereq: "None", code: "ACTGEC04AY1 PE 2", title: "Physical Activities Towards Health and Fitness 2", lec: 2, lab: 0, units: 2 }
+              ]
+            },
+            {
+              name: "2nd Year - 1st Semester",
+              subjects: [
+                { prereq: "None", code: "BRIDGING105 Nat Sci 2", title: "College Physics 2", lec: 0, lab: 0, units: 3 },
+                { prereq: "None", code: "ACTGECOT102YG1", title: "Purposive Communication", lec: 3, lab: 0, units: 3 },
+                { prereq: "None", code: "ACTGECOT102YG1", title: "Ethics", lec: 3, lab: 0, units: 3 },
+                { prereq: "None", code: "ACTSCC102YG1", title: "Algorithms and Complexity", lec: 2, lab: 3, units: 3 },
+                { prereq: "None", code: "ACTSCC102YG1", title: "Networks and Communication", lec: 2, lab: 3, units: 3 },
+                { prereq: "None", code: "ACTSCC102YG1", title: "Data Structures and Algorithms", lec: 2, lab: 3, units: 3 },
+                { prereq: "None", code: "ACTSCC102YG1", title: "Information Management", lec: 2, lab: 3, units: 3 },
+                { prereq: "None", code: "ACTSCC102YG1", title: "Information Assurance and Security", lec: 2, lab: 3, units: 3 },
+                { prereq: "None", code: "ACTGEC04AY1 PE 3", title: "Physical Activities Towards Health and Fitness 3", lec: 2, lab: 0, units: 2 }
+              ]
+            },
+            {
+              name: "2nd Year - 2nd Semester",
+              subjects: [
+                { prereq: "None", code: "ACTSCS202YG1", title: "Applications Development", lec: 2, lab: 3, units: 3 },
+                { prereq: "None", code: "ACTOJOT201YG2", title: "Internship (320 Hrs)", lec: 6, lab: 0, units: 6 },
+                { prereq: "None", code: "ACTGEC04AY1 PE 4", title: "Physical Activities Towards Health and Fitness 4", lec: 2, lab: 0, units: 2 }
+              ]
+            }
+          ]
+        }
+      }
+    ];
+
+    // ===== INITIALIZE =====
+    document.addEventListener('DOMContentLoaded', () => {
+      loadCurriculumData();
+
+      const searchInput = document.getElementById('curriculumSearchInput');
+      const curriculumTable = document.getElementById('curriculumTable');
+
+      searchInput.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        const rows = curriculumTable.querySelectorAll('tbody tr');
+
+        rows.forEach(row => {
+          const rowText = row.textContent.toLowerCase();
+          if (rowText.includes(searchTerm)) {
+            row.style.display = '';
+          } else {
+            row.style.display = 'none';
+          }
+        });
+      });
+
+      updateSummaryCards();
+    });
+
+    // ===== OPERATION MODAL HELPERS =====
+    function showSuccessModal(title, message) {
+      const modal = document.getElementById('operationModal');
+      const box = document.getElementById('operationBox');
+      const icon = document.getElementById('operationIcon');
+      
+      box.className = 'operation-modal-box success';
+      icon.innerHTML = '<i class="fas fa-check-circle"></i>';
+      document.getElementById('operationTitle').textContent = title;
+      document.getElementById('operationMessage').textContent = message;
+      document.getElementById('operationFormContainer').style.display = 'none';
+      
+      document.getElementById('operationActions').innerHTML = `
+        <button class="op-btn confirm-success" onclick="closeOperationModal()">OK</button>
+      `;
+      
+      modal.classList.add('active');
+    }
+
+    function showWarningModal(title, message, confirmText, callback) {
+      const modal = document.getElementById('operationModal');
+      const box = document.getElementById('operationBox');
+      const icon = document.getElementById('operationIcon');
+      
+      box.className = 'operation-modal-box warning';
+      icon.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+      document.getElementById('operationTitle').textContent = title;
+      document.getElementById('operationMessage').textContent = message;
+      document.getElementById('operationFormContainer').style.display = 'none';
+      
+      operationCallback = callback;
+      
+      document.getElementById('operationActions').innerHTML = `
+        <button class="op-btn cancel" onclick="closeOperationModal()">Cancel</button>
+        <button class="op-btn confirm-danger" onclick="executeOperation()">${confirmText}</button>
+      `;
+      
+      modal.classList.add('active');
+    }
+
+    function showInputModal(title, fields, callback) {
+      const modal = document.getElementById('operationModal');
+      const box = document.getElementById('operationBox');
+      const icon = document.getElementById('operationIcon');
+      
+      box.className = 'operation-modal-box';
+      icon.innerHTML = '<i class="fas fa-edit"></i>';
+      document.getElementById('operationTitle').textContent = title;
+      document.getElementById('operationMessage').textContent = '';
+      
+      let formHtml = '';
+      fields.forEach((field, i) => {
+        formHtml += `
+          <div class="operation-form-group">
+            <label>${field.label}</label>
+            <input type="text" id="op_field_${i}" value="${field.value || ''}" />
+          </div>
+        `;
+      });
+      
+      document.getElementById('operationFormContainer').innerHTML = formHtml;
+      document.getElementById('operationFormContainer').style.display = 'block';
+      
+      operationCallback = callback;
+      
+      document.getElementById('operationActions').innerHTML = `
+        <button class="op-btn cancel" onclick="closeOperationModal()">Cancel</button>
+        <button class="op-btn confirm-success" onclick="executeInputOperation()">Save</button>
+      `;
+      
+      modal.classList.add('active');
+    }
+
+    function executeOperation() {
+      if (operationCallback) {
+        operationCallback();
+      }
+      closeOperationModal();
+    }
+
+    function executeInputOperation() {
+      if (operationCallback) {
+        const values = [];
+        const inputs = document.querySelectorAll('#operationFormContainer input');
+        inputs.forEach(input => values.push(input.value));
+        operationCallback(values);
+      }
+      closeOperationModal();
+    }
+
+    function closeOperationModal() {
+      document.getElementById('operationModal').classList.remove('active');
+      operationCallback = null;
+    }
+
+    // ===== LOAD CURRICULUM DATA =====
+    function loadCurriculumData() {
+      const tbody = document.getElementById('curriculumTableBody');
+      tbody.innerHTML = '';
+
+      curriculumData.forEach((curriculum, index) => {
+        const row = document.createElement('tr');
+        row.setAttribute('data-index', index);
+        row.innerHTML = `
+          <td>${curriculum.code}</td>
+          <td>${curriculum.title}</td>
+          <td>${curriculum.academicYear}</td>
+          <td>${curriculum.totalUnits}</td>
+          <td>
+            <div class="action-group">
+              <button class="btn-action view" onclick="viewCurriculum(${index})"><i class="fas fa-eye"></i> View</button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    // ===== UPDATE SUMMARY CARDS =====
+    function updateSummaryCards() {
+      const rows = document.querySelectorAll('#curriculumTableBody tr');
+      document.getElementById('totalCurriculumsCard').textContent = rows.length;
+      document.getElementById('activeProgramsCard').textContent = curriculumData.length;
+    }
+
+    // ===== SORT TABLE =====
+    function sortTable(columnIndex) {
+      const table = document.getElementById('curriculumTable');
+      const tbody = table.querySelector('tbody');
+      const rows = Array.from(tbody.rows);
+
+      sortDirection = sortDirection === 1 ? -1 : 1;
+
+      rows.sort((a, b) => {
+        const aText = a.cells[columnIndex].textContent.trim().toLowerCase();
+        const bText = b.cells[columnIndex].textContent.trim().toLowerCase();
+        
+        if (aText < bText) return -1 * sortDirection;
+        if (aText > bText) return 1 * sortDirection;
+        return 0;
+      });
+
+      rows.forEach(row => tbody.appendChild(row));
+
+      const sortIcons = document.querySelectorAll('th.sortable i');
+      sortIcons.forEach(icon => {
+        icon.className = 'fas fa-sort';
+      });
+      
+      const activeTh = table.querySelector(`th.sortable:nth-child(${columnIndex + 1}) i`);
+      if (activeTh) {
+        activeTh.className = sortDirection === 1 ? 'fas fa-sort-up' : 'fas fa-sort-down';
+      }
+    }
+
+    // ===== VIEW CURRICULUM DETAILS (WITH EDITING CAPABILITIES) =====
+    function viewCurriculum(index) {
+      currentCurriculumIndex = index;
+      const curriculum = curriculumData[index];
+      const body = document.getElementById('viewCurriculumBody');
+
+      let html = `
+        <div class="curriculum-info">
+          <h2>${curriculum.details.school}</h2>
+          <h3>${curriculum.details.address}</h3>
+          <p><strong>${curriculum.details.courseTitle}</strong></p>
+          <p>${curriculum.details.yearLevel}</p>
+        </div>
+      `;
+
+      curriculum.details.semesters.forEach((semester, sIdx) => {
+        html += `
+          <div class="semester-section">
+            <div class="semester-header">
+              <div class="semester-title">${semester.name}</div>
+              <div class="semester-actions">
+                <button class="btn-small add" onclick="addSubject(${index}, ${sIdx})">+ Add Subject</button>
+                <button class="btn-small" onclick="editSemesterName(${index}, ${sIdx})">Rename</button>
+                <button class="btn-small" onclick="deleteSemester(${index}, ${sIdx})">Delete</button>
+              </div>
+            </div>
+            <table class="curriculum-table">
+              <thead>
+                <tr>
+                  <th>Pre-req</th>
+                  <th>Code</th>
+                  <th>Title</th>
+                  <th>Lec</th>
+                  <th>Lab</th>
+                  <th>Units</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+        `;
+
+        semester.subjects.forEach((subject, subIdx) => {
+          html += `
+            <tr>
+              <td>${subject.prereq}</td>
+              <td>${subject.code}</td>
+              <td>${subject.title}</td>
+              <td>${subject.lec}</td>
+              <td>${subject.lab}</td>
+              <td>${subject.units}</td>
+              <td>
+                <button class="btn-small" onclick="editSubject(${index}, ${sIdx}, ${subIdx})">Edit</button>
+                <button class="btn-small" onclick="deleteSubject(${index}, ${sIdx}, ${subIdx})">Delete</button>
+              </td>
+            </tr>
+          `;
+        });
+
+        const totalSemesterUnits = semester.subjects.reduce((sum, subj) => sum + parseFloat(subj.units), 0);
+        const totalSemesterLec = semester.subjects.reduce((sum, subj) => sum + parseFloat(subj.lec), 0);
+        const totalSemesterLab = semester.subjects.reduce((sum, subj) => sum + parseFloat(subj.lab), 0);
+
+        html += `
+              </tbody>
+              <tr class="total-row">
+                <td colspan="2" style="text-align: right;">TOTAL</td>
+                <td></td>
+                <td>${totalSemesterLec}</td>
+                <td>${totalSemesterLab}</td>
+                <td>${totalSemesterUnits}</td>
+                <td></td>
+              </tr>
+            </table>
+          </div>
+        `;
+      });
+
+      html += `
+        <div style="text-align: center; margin-top: 20px;">
+          <button class="btn-save" onclick="addSemester(${index})"><i class="fas fa-plus"></i> Add Semester</button>
+        </div>
+      `;
+
+      body.innerHTML = html;
+      document.getElementById('viewCurriculumModal').classList.add('active');
+    }
+
+    // ===== ADD SEMESTER =====
+    function addSemester(index) {
+      currentCurriculumIndex = index;
+      showInputModal("Add New Semester", [{ label: "Semester Name", value: "" }], (values) => {
+        if (values[0]) {
+          curriculumData[index].details.semesters.push({ name: values[0], subjects: [] });
+          viewCurriculum(index);
+          showSuccessModal("Success!", "Semester added successfully.");
+        }
+      });
+    }
+
+    // ===== DELETE SEMESTER =====
+    function deleteSemester(index, sIdx) {
+      showWarningModal("Delete Semester", "Are you sure you want to delete this semester?", "Delete", () => {
+        curriculumData[index].details.semesters.splice(sIdx, 1);
+        viewCurriculum(index);
+        showSuccessModal("Deleted!", "Semester deleted successfully.");
+      });
+    }
+
+    // ===== EDIT SEMESTER NAME =====
+    function editSemesterName(index, sIdx) {
+      const currentName = curriculumData[index].details.semesters[sIdx].name;
+      showInputModal("Edit Semester Name", [{ label: "Semester Name", value: currentName }], (values) => {
+        if (values[0]) {
+          curriculumData[index].details.semesters[sIdx].name = values[0];
+          viewCurriculum(index);
+          showSuccessModal("Updated!", "Semester name updated successfully.");
+        }
+      });
+    }
+
+    // ===== ADD SUBJECT =====
+    function addSubject(index, sIdx) {
+      showInputModal("Add New Subject", [
+        { label: "Pre-requisite", value: "None" },
+        { label: "Subject Code", value: "" },
+        { label: "Subject Title", value: "" },
+        { label: "Lecture Units", value: "3" },
+        { label: "Lab Units", value: "0" },
+        { label: "Total Units", value: "3" }
+      ], (values) => {
+        curriculumData[index].details.semesters[sIdx].subjects.push({
+          prereq: values[0] || "None",
+          code: values[1] || "",
+          title: values[2] || "",
+          lec: values[3] || 0,
+          lab: values[4] || 0,
+          units: values[5] || 0
+        });
+        viewCurriculum(index);
+        showSuccessModal("Success!", "Subject added successfully.");
+      });
+    }
+
+    // ===== EDIT SUBJECT =====
+    function editSubject(index, sIdx, subIdx) {
+      const subject = curriculumData[index].details.semesters[sIdx].subjects[subIdx];
+      showInputModal("Edit Subject", [
+        { label: "Pre-requisite", value: subject.prereq },
+        { label: "Subject Code", value: subject.code },
+        { label: "Subject Title", value: subject.title },
+        { label: "Lecture Units", value: subject.lec },
+        { label: "Lab Units", value: subject.lab },
+        { label: "Total Units", value: subject.units }
+      ], (values) => {
+        curriculumData[index].details.semesters[sIdx].subjects[subIdx] = {
+          prereq: values[0] || subject.prereq,
+          code: values[1] || subject.code,
+          title: values[2] || subject.title,
+          lec: values[3] || subject.lec,
+          lab: values[4] || subject.lab,
+          units: values[5] || subject.units
+        };
+        viewCurriculum(index);
+        showSuccessModal("Updated!", "Subject updated successfully.");
+      });
+    }
+
+    // ===== DELETE SUBJECT =====
+    function deleteSubject(index, sIdx, subIdx) {
+      showWarningModal("Delete Subject", "Are you sure you want to delete this subject?", "Delete", () => {
+        curriculumData[index].details.semesters[sIdx].subjects.splice(subIdx, 1);
+        viewCurriculum(index);
+        showSuccessModal("Deleted!", "Subject deleted successfully.");
+      });
+    }
+
+    function closeViewCurriculumModal() {
+      document.getElementById('viewCurriculumModal').classList.remove('active');
+    }
+
+    // ===== ADD CURRICULUM =====
+    function openAddCurriculumModal() {
+      document.getElementById('addCurriculumForm').reset();
+      document.getElementById('addCurriculumModal').classList.add('active');
+    }
+
+    function closeAddCurriculumModal() {
+      document.getElementById('addCurriculumModal').classList.remove('active');
+    }
+
+    function saveCurriculum() {
+      const code = document.getElementById('curriculumCode').value;
+      const title = document.getElementById('curriculumTitle').value;
+      const year = document.getElementById('curriculumYear').value;
+      const academicYear = document.getElementById('curriculumAcademicYear').value;
+      const units = document.getElementById('curriculumUnits').value;
+
+      if (!code || !title || !year || !academicYear || !units) {
+        showWarningModal("Missing Information", "Please fill in all fields before saving.", "OK", null);
+        return;
+      }
+
+      const newCurriculum = {
+        code: code,
+        title: title,
+        year: year,
+        academicYear: academicYear,
+        totalUnits: parseInt(units),
+        details: {
+          school: "INTERWORLD COLLEGES FOUNDATION, INC",
+          address: "Burgos St., Paniqui, Tarlac",
+          courseTitle: title,
+          yearLevel: academicYear,
+          semesters: [
+            { name: "1st Year - 1st Semester", subjects: [] }
+          ]
+        }
+      };
+
+      curriculumData.push(newCurriculum);
+      loadCurriculumData();
+      updateSummaryCards();
+
+      closeAddCurriculumModal();
+      showSuccessModal("Course Added!", "Course has been added successfully! Click 'View' to add detailed subjects.");
+    }
+  </script>
+</body>
+</html>

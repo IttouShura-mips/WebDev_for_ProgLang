@@ -38,6 +38,7 @@
         color: var(--text-high-contrast);
         min-height: 100vh;
       }
+      
 
       /* Sidebar Styles */
       .sidebar {
@@ -370,26 +371,27 @@
           transform: translateY(0);
         }
       }
-      /* ===== CUSTOM SCROLLBAR (For Body & Modals) ===== */
-      .modal-container::-webkit-scrollbar {
-        width: 10px;
-        height: 10px;
-      }
+          /* ===== CUSTOM SCROLLBAR (For Body & Modals) ===== */
+    .modal-container::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
 
-      .modal-container::-webkit-scrollbar-track {
-        background: var(--bg-deep-abyss);
-        border-radius: 10px;
-      }
+    .modal-container::-webkit-scrollbar-track {
+      background: var(--bg-deep-abyss);
+      border-radius: 10px;
+    }
 
-      .modal-container::-webkit-scrollbar-thumb {
-        background: var(--border-teal);
-        border-radius: 10px;
-        border: 2px solid var(--bg-deep-abyss);
-      }
+    .modal-container::-webkit-scrollbar-thumb {
+      background: var(--border-teal);
+      border-radius: 10px;
+      border: 2px solid var(--bg-deep-abyss);
+    }
 
-      .modal-container::-webkit-scrollbar-thumb:hover {
-        background: var(--primary-neon);
-      }
+    .modal-container::-webkit-scrollbar-thumb:hover {
+      background: var(--primary-neon);
+    }
+
 
       .modal-close {
         position: absolute;
@@ -676,14 +678,15 @@
         <div class="brand">
           <h2>Admin Panel</h2>
         </div>
-        <ul class="nav-links">
-          <li><a href="adminpanel.html">Dashboard</a></li>
-          <li><a href="user.html">Users</a></li>
-          <li><a href="enrollments.html">Enrollments</a></li>
-          <li class="active"><a href="enrolled.html">Enrolled</a></li>
-          <li><a href="instructors.html">Instructors</a></li>
-          <li><a href="received-mail.html">Received Mail</a></li>
-        </ul>
+      <ul class="nav-links">
+        <li class="active"><a href="adminpanel.html">Dashboard</a></li>
+        <li><a href="user.html">Users</a></li>
+        <li><a href="enrollments.html">Enrollments</a></li>
+        <li><a href="enrolled.html">Enrolled</a></li>
+        <li><a href="instructor.html">Instructors</a></li>
+        <li><a href="curriculum.html">Curriculum</a></li>
+        <li><a href="received-mail.html">Received Mail</a></li>
+      </ul>
       </div>
 
       <div class="sidebar-footer">
@@ -745,27 +748,13 @@
           <table id="enrolledTable">
             <thead>
               <tr>
-                <th class="sortable" onclick="sortTable(0)">
-                  Student ID <i class="fas fa-sort"></i>
-                </th>
-                <th class="sortable" onclick="sortTable(1)">
-                  Full Name <i class="fas fa-sort"></i>
-                </th>
-                <th class="sortable" onclick="sortTable(2)">
-                  Year Level <i class="fas fa-sort"></i>
-                </th>
-                <th class="sortable" onclick="sortTable(3)">
-                  Courses <i class="fas fa-sort"></i>
-                </th>
-                <th class="sortable" onclick="sortTable(4)">
-                  Block <i class="fas fa-sort"></i>
-                </th>
-                <th class="sortable" onclick="sortTable(5)">
-                  Units <i class="fas fa-sort"></i>
-                </th>
-                <th class="sortable" onclick="sortTable(6)">
-                  Balance <i class="fas fa-sort"></i>
-                </th>
+                <th class="sortable" onclick="sortTable(0)">Student ID <i class="fas fa-sort"></i></th>
+                <th class="sortable" onclick="sortTable(1)">Full Name <i class="fas fa-sort"></i></th>
+                <th class="sortable" onclick="sortTable(2)">Year Level <i class="fas fa-sort"></i></th>
+                <th class="sortable" onclick="sortTable(3)">Courses <i class="fas fa-sort"></i></th>
+                <th class="sortable" onclick="sortTable(4)">Block <i class="fas fa-sort"></i></th>
+                <th class="sortable" onclick="sortTable(5)">Units <i class="fas fa-sort"></i></th>
+                <th class="sortable" onclick="sortTable(6)">Balance <i class="fas fa-sort"></i></th>
                 <th class="no-sort">Action</th>
               </tr>
             </thead>
@@ -979,27 +968,24 @@
         rows.sort((a, b) => {
           const aText = a.cells[columnIndex].textContent.trim().toLowerCase();
           const bText = b.cells[columnIndex].textContent.trim().toLowerCase();
-
+          
           if (aText < bText) return -1 * sortDirection;
           if (aText > bText) return 1 * sortDirection;
           return 0;
         });
 
         // Re-append rows in sorted order
-        rows.forEach((row) => tbody.appendChild(row));
+        rows.forEach(row => tbody.appendChild(row));
 
         // Update sort icons
-        const sortIcons = document.querySelectorAll("th.sortable i");
-        sortIcons.forEach((icon) => {
-          icon.className = "fas fa-sort";
+        const sortIcons = document.querySelectorAll('th.sortable i');
+        sortIcons.forEach(icon => {
+          icon.className = 'fas fa-sort';
         });
-
-        const activeTh = table.querySelector(
-          `th.sortable:nth-child(${columnIndex + 1}) i`,
-        );
+        
+        const activeTh = table.querySelector(`th.sortable:nth-child(${columnIndex + 1}) i`);
         if (activeTh) {
-          activeTh.className =
-            sortDirection === 1 ? "fas fa-sort-up" : "fas fa-sort-down";
+          activeTh.className = sortDirection === 1 ? 'fas fa-sort-up' : 'fas fa-sort-down';
         }
       }
 

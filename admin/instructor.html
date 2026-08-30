@@ -1,0 +1,1561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Control Panel - Instructors</title>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <style>
+      * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    :root {
+      --bg-deep-abyss: #020c1b;      
+      --bg-card: #0a192f;            
+      --bg-card-hover: #112240;      
+      --primary-neon: #0df5e3;       
+      --primary-neon-hover: #00cbb9; 
+      --text-high-contrast: #e2e8f0; 
+      --text-muted-teal: #8892b0;    
+      --border-teal: #172a45;        
+      --success-green: #10b981;      
+      --warning-yellow: #f59e0b;
+      --danger-red: #dc2626;
+      --border-radius: 12px;
+      --transition-smooth: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      --neon-glow: 0 0 15px rgba(13, 245, 227, 0.3);
+    }
+
+    body {
+      display: flex;
+      background-color: rgb(19, 27, 50);
+      color: var(--text-high-contrast);
+      min-height: 100vh;
+    }
+
+    /* ===== CUSTOM SCROLLBAR ===== */
+    ::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-deep-abyss);
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-teal);
+      border-radius: 10px;
+      border: 2px solid var(--bg-deep-abyss);
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--primary-neon);
+    }
+
+    /* Sidebar Styles */
+    .sidebar {
+      background: radial-gradient(circle at center, #071f30, var(--bg-deep-abyss));
+      width: 330px;
+      background-color: var(--bg-deep-abyss);
+      color: var(--text-high-contrast);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between; 
+    }
+
+    .brand {
+      border-left: 4px solid var(--primary-neon);
+      padding: 30px 20px;
+      margin-bottom: 30px;
+      background-color: var(--bg-deep-abyss);
+    }
+
+    .brand h2 {
+      color: var(--primary-neon);
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .nav-links {
+      list-style: none;
+      margin-top: 20px;
+    }
+
+    .nav-links li a {
+      display: block;
+      padding: 14px 50px;
+      color: #94a3b8;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .nav-links li.active a,
+    .nav-links li a:hover {
+      background-color: #334155;
+      color: var(--primary-neon);
+      font-weight: 700;
+    }
+
+    .sidebar-footer {
+      padding: 20px 30px;
+      border-top: 1px solid var(--border-teal);
+      margin-top: auto;
+    }
+
+    .btn-homepage {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 12px;
+      background-color: transparent;
+      color: var(--primary-neon);
+      border: 1px solid var(--primary-neon);
+      border-radius: var(--border-radius);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: var(--transition-smooth);
+    }
+
+    .btn-homepage:hover {
+      background-color: var(--primary-neon);
+      color: var(--bg-deep-abyss);
+      box-shadow: var(--neon-glow);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .search-container {
+      position: relative;
+      width: 260px;
+    }
+
+    .search-container input {
+      width: 100%;
+      padding: 8px 14px;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-teal);
+      border-radius: var(--border-radius);
+      color: var(--text-high-contrast);
+      font-size: 0.9rem;
+      outline: none;
+      transition: var(--transition-smooth);
+    }
+
+    .search-container input:focus {
+      border-color: var(--primary-neon);
+      box-shadow: var(--neon-glow);
+    }
+
+    .main-content {
+      flex: 1;
+      padding: 30px;
+      overflow-y: auto;
+    }
+
+    .top-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 30px 20px;  
+    }
+
+    .top-header h1 {
+      font-size: 1.6rem;
+      color: var(--primary-neon);
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      margin-right: 50px;
+      gap: 15px;
+      font-weight: 600;
+    }
+
+    .avatar {
+      width: 38px;
+      height: 38px;
+      background-color: var(--primary-neon);
+      color: rgb(0, 0, 0);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+
+    /* Overview Summary Cards */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    .card {
+      background: var(--text-high-contrast);
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0px 5px var(--primary-neon);
+    }
+
+    .card h3 {
+      font-size: 0.85rem;
+      color: var(--bg-deep-abyss);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .card-value {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: var(--bg-deep-abyss);
+    }
+
+    /* Department Section */
+    .department-section {
+      margin-bottom: 40px;
+    }
+
+    .department-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      background: var(--bg-deep-abyss);
+      padding: 15px;
+      border-radius: 8px;
+      border-left: 4px solid var(--primary-neon);
+    }
+
+    .department-header h2 {
+      color: var(--primary-neon);
+      font-size: 1.3rem;
+    }
+
+    .department-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    /* Table Card */
+    .table-card {
+      background: var(--text-high-contrast);
+      border-radius: 8px;
+      box-shadow: 0 0px 5px var(--primary-neon);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .table-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .table-header h2 {
+      font-size: 1.1rem;
+      color: var(--bg-deep-abyss);
+    }
+
+    .table-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th, td {
+      padding: 12px 16px;
+      color: var(--bg-deep-abyss);
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 0.9rem;
+    }
+
+    th {
+      background-color: #a5bdd5;
+      color: var(--bg-deep-abyss);
+      font-weight: 600;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.2s ease;
+    }
+
+    th:hover {
+      background-color: #94a3b8;
+    }
+
+    th.no-sort {
+      cursor: default;
+    }
+
+    th.no-sort:hover {
+      background-color: #a5bdd5;
+    }
+
+    tr:hover {
+      background-color: #e2e8f0;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 8px 14px;
+      border: 1px solid #cbd5e1;
+      background: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn:hover {
+      background: #f1f5f9;
+    }
+
+    .btn.primary {
+      background: #2563eb;
+      color: white;
+      border: none;
+    }
+
+    .btn.primary:hover {
+      background: #1d4ed8;
+    }
+
+    .btn-action {
+      padding: 4px 10px;
+      background: transparent;
+      border: 1px solid #2563eb;
+      color: #2563eb;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      margin-right: 4px;
+    }
+
+    .btn-action:hover {
+      background: #2563eb;
+      color: white;
+    }
+
+    .btn-action.view { border-color: #0ea5e9; color: #0ea5e9; }
+    .btn-action.view:hover { background: #0ea5e9; color: white; }
+
+    .btn-action.archive { border-color: #f59e0b; color: #f59e0b; }
+    .btn-action.archive:hover { background: #f59e0b; color: white; }
+
+    .btn-action.delete { border-color: #dc2626; color: #dc2626; }
+    .btn-action.delete:hover { background: #dc2626; color: white; }
+
+    .btn-action.restore { border-color: #10b981; color: #10b981; }
+    .btn-action.restore:hover { background: #10b981; color: white; }
+
+    .btn-small {
+      padding: 4px 8px;
+      border: 1px solid var(--border-teal);
+      background: transparent;
+      color: var(--text-high-contrast);
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .btn-small:hover { background: var(--bg-card-hover); }
+    .btn-small.add { border-color: var(--primary-neon); color: var(--primary-neon); }
+    .btn-small.add:hover { background: var(--primary-neon); color: var(--bg-deep-abyss); }
+
+    /* ===== CUSTOM OPERATION MODAL ===== */
+    .operation-modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(2, 12, 27, 0.95);
+      backdrop-filter: blur(8px);
+      z-index: 5000;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .operation-modal-overlay.active {
+      display: flex;
+    }
+
+    .operation-modal-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-teal);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+      position: relative;
+      animation: modalFadeIn 0.3s ease;
+      padding: 30px;
+      color: var(--text-high-contrast);
+      text-align: center;
+    }
+
+    .operation-icon {
+      font-size: 50px;
+      margin-bottom: 15px;
+    }
+
+    .operation-modal-box.success {
+      border-color: var(--success-green);
+      box-shadow: 0 20px 50px rgba(16, 185, 129, 0.3);
+    }
+
+    .operation-modal-box.warning {
+      border-color: var(--warning-yellow);
+      box-shadow: 0 20px 50px rgba(245, 158, 11, 0.3);
+    }
+
+    .operation-modal-box.success .operation-icon { color: var(--success-green); }
+    .operation-modal-box.warning .operation-icon { color: var(--warning-yellow); }
+
+    .operation-modal-box h3 {
+      font-size: 20px;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .operation-modal-box p {
+      font-size: 14px;
+      color: var(--text-muted-teal);
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    .operation-modal-box .operation-form-group {
+      margin-bottom: 15px;
+      text-align: left;
+    }
+
+    .operation-modal-box .operation-form-group label {
+      display: block;
+      font-size: 12px;
+      color: var(--text-muted-teal);
+      font-weight: 600;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    .operation-modal-box .operation-form-group input,
+    .operation-modal-box .operation-form-group select,
+    .operation-modal-box .operation-form-group textarea {
+      width: 100%;
+      padding: 10px;
+      background: var(--bg-deep-abyss);
+      border: 1px solid var(--border-teal);
+      border-radius: 4px;
+      font-size: 0.9rem;
+      color: var(--text-high-contrast);
+      outline: none;
+      transition: border-color 0.2s ease;
+      font-family: inherit;
+    }
+
+    .operation-modal-box .operation-form-group input:focus,
+    .operation-modal-box .operation-form-group select:focus,
+    .operation-modal-box .operation-form-group textarea:focus {
+      border-color: var(--primary-neon);
+    }
+
+    .operation-modal-box .operation-form-group input[type="radio"] {
+      width: auto;
+      margin-right: 5px;
+    }
+
+    .operation-modal-box .operation-form-group .radio-label {
+      display: inline-block;
+      margin-right: 15px;
+    }
+
+    .operation-modal-actions {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .op-btn {
+      padding: 10px 25px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+    }
+
+    .op-btn.cancel {
+      background: var(--bg-card);
+      color: var(--text-high-contrast);
+      border: 1px solid var(--border-teal);
+    }
+
+    .op-btn.cancel:hover { background: var(--bg-card-hover); }
+
+    .op-btn.confirm-success {
+      background: var(--success-green);
+      color: white;
+    }
+
+    .op-btn.confirm-success:hover { background: #059669; }
+
+    .op-btn.confirm-danger {
+      background: var(--danger-red);
+      color: white;
+    }
+
+    .op-btn.confirm-danger:hover { background: #b91c1c; }
+
+    /* ===== VIEW INSTRUCTOR MODAL ===== */
+    .view-modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(2, 12, 27, 0.95);
+      backdrop-filter: blur(8px);
+      z-index: 3000;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .view-modal-overlay.active {
+      display: flex;
+    }
+
+    .view-modal-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border-teal);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 900px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+      position: relative;
+      animation: modalFadeIn 0.3s ease;
+      padding: 0;
+      color: var(--text-high-contrast);
+    }
+
+    .view-modal-header {
+      background: var(--bg-deep-abyss);
+      padding: 20px;
+      border-bottom: 2px solid var(--primary-neon);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      border-radius: 16px 16px 0 0;
+    }
+
+    .view-modal-header h3 {
+      font-size: 20px;
+      color: var(--primary-neon);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .view-modal-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted-teal);
+      font-size: 24px;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+
+    .view-modal-close:hover { color: #ef4444; }
+
+    .view-modal-body {
+      padding: 20px;
+    }
+
+    /* Profile Picture Section */
+    .profile-pic-container {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .profile-pic {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--primary-neon);
+      box-shadow: var(--neon-glow);
+      background: var(--bg-deep-abyss);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      color: var(--primary-neon);
+      margin: 0 auto;
+    }
+
+    .profile-pic-container h2 {
+      margin-top: 10px;
+      color: var(--primary-neon);
+    }
+
+    .profile-pic-container p {
+      color: var(--text-muted-teal);
+    }
+
+    .info-section {
+      margin-bottom: 30px;
+    }
+
+    .info-section-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--primary-neon);
+      border-bottom: 1px solid var(--border-teal);
+      padding-bottom: 10px;
+      margin-bottom: 15px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .info-item {
+      display: flex;
+      gap: 10px;
+    }
+
+    .info-label {
+      width: 140px;
+      color: var(--text-muted-teal);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .info-value {
+      color: var(--text-high-contrast);
+      font-size: 14px;
+      flex: 1;
+    }
+
+    .subject-table, .schedule-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    .subject-table th, .subject-table td,
+    .schedule-table th, .schedule-table td {
+      padding: 10px 8px;
+      border: 1px solid var(--border-teal);
+      text-align: left;
+      color: var(--text-high-contrast);
+    }
+
+    .subject-table th, .schedule-table th {
+      background-color: var(--bg-deep-abyss);
+      color: var(--primary-neon);
+      font-weight: 600;
+    }
+
+    .subject-table tr:nth-child(even), .schedule-table tr:nth-child(even) {
+      background-color: var(--bg-deep-abyss);
+    }
+
+    .subject-table tr:hover, .schedule-table tr:hover {
+      background-color: var(--bg-card-hover);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .top-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+      .header-right {
+        width: 100%;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .search-container {
+        width: 100%;
+      }
+      .cards-grid {
+        grid-template-columns: 1fr;
+      }
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar">
+    <div>
+      <div class="brand">
+        <h2>Admin Panel</h2>
+      </div>
+        <ul class="nav-links">
+          <li><a href="adminpanel.html">Dashboard</a></li>
+          <li><a href="user.html">Users</a></li>
+          <li><a href="enrollments.html">Enrollments</a></li>
+          <li><a href="enrolled.html">Enrolled</a></li>
+          <li class="active"><a href="instructor.html">Instructors</a></li>
+          <li><a href="curriculum.html">Curriculum</a></li>
+          <li><a href="received-mail.html">Received Mail</a></li>
+        </ul>
+    </div>
+
+    <div class="sidebar-footer">
+      <a href="../../index.html" class="btn-homepage">
+        <i class="fa-solid fa-arrow-left"></i> Back to Homepage
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="main-content">
+    
+    <!-- Header -->
+    <header class="top-header">
+      <h1>Instructor Management</h1>
+
+      <div class="header-right">
+        <div class="search-container">
+          <input 
+            type="text" 
+            id="instructorSearchInput" 
+            placeholder="Search instructors..." 
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="user-profile">
+          <span>Admin User</span>
+          <div class="avatar">A</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Overview Summary Cards -->
+    <div class="cards-grid">
+      <div class="card">
+        <h3>Total Instructors</h3>
+        <div class="card-value" id="totalInstructorsCard">0</div>
+      </div>
+      <div class="card">
+        <h3>Active Instructors</h3>
+        <div class="card-value" id="activeInstructorsCard">0</div>
+      </div>
+      <div class="card">
+        <h3>Former Instructors</h3>
+        <div class="card-value" id="formerInstructorsCard">0</div>
+      </div>
+      <div class="card">
+        <h3>Total Departments</h3>
+        <div class="card-value">2</div>
+      </div>
+    </div>
+
+    <!-- ===== ACTIVE INSTRUCTORS SECTION ===== -->
+    <div class="department-section">
+      <div class="department-header">
+        <h2>Active Instructors by Department</h2>
+        <div class="department-actions">
+          <button class="btn primary" onclick="openAddInstructorModal()">
+            <i class="fas fa-plus"></i> Add Instructor
+          </button>
+        </div>
+      </div>
+
+      <!-- CICS Department -->
+      <div class="table-card">
+        <div class="table-header">
+          <h2>CICS - College of Information and Computing Sciences</h2>
+        </div>
+        <div class="table-wrapper">
+          <table class="instructor-table" data-department="CICS" data-status="active">
+            <thead>
+              <tr>
+                <th class="sortable">Full Name <i class="fas fa-sort"></i></th>
+                <th class="sortable">Department <i class="fas fa-sort"></i></th>
+                <th class="sortable">Units Handling <i class="fas fa-sort"></i></th>
+                <th class="no-sort">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Data populated by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- EDUC Department -->
+      <div class="table-card">
+        <div class="table-header">
+          <h2>EDUC - College of Education</h2>
+        </div>
+        <div class="table-wrapper">
+          <table class="instructor-table" data-department="EDUC" data-status="active">
+            <thead>
+              <tr>
+                <th class="sortable">Full Name <i class="fas fa-sort"></i></th>
+                <th class="sortable">Department <i class="fas fa-sort"></i></th>
+                <th class="sortable">Units Handling <i class="fas fa-sort"></i></th>
+                <th class="no-sort">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Data populated by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== FORMER INSTRUCTORS SECTION ===== -->
+    <div class="department-section">
+      <div class="department-header">
+        <h2>Former Instructors by Department</h2>
+      </div>
+
+      <!-- Former CICS -->
+      <div class="table-card">
+        <div class="table-header">
+          <h2>CICS - Former Instructors</h2>
+        </div>
+        <div class="table-wrapper">
+          <table class="instructor-table" data-department="CICS" data-status="former">
+            <thead>
+              <tr>
+                <th class="sortable">Full Name <i class="fas fa-sort"></i></th>
+                <th class="sortable">Department <i class="fas fa-sort"></i></th>
+                <th class="sortable">Units Handling <i class="fas fa-sort"></i></th>
+                <th class="no-sort">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Data populated by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Former EDUC -->
+      <div class="table-card">
+        <div class="table-header">
+          <h2>EDUC - Former Instructors</h2>
+        </div>
+        <div class="table-wrapper">
+          <table class="instructor-table" data-department="EDUC" data-status="former">
+            <thead>
+              <tr>
+                <th class="sortable">Full Name <i class="fas fa-sort"></i></th>
+                <th class="sortable">Department <i class="fas fa-sort"></i></th>
+                <th class="sortable">Units Handling <i class="fas fa-sort"></i></th>
+                <th class="no-sort">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Data populated by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ===== VIEW INSTRUCTOR MODAL ===== -->
+  <div class="view-modal-overlay" id="viewInstructorModal">
+    <div class="view-modal-container">
+      <div class="view-modal-header">
+        <h3><i class="fas fa-user-tie"></i> Instructor Full Details</h3>
+        <button class="view-modal-close" onclick="closeViewInstructorModal()">&times;</button>
+      </div>
+      <div class="view-modal-body" id="viewInstructorBody">
+        <!-- Content generated by JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CUSTOM OPERATION MODAL ===== -->
+  <div class="operation-modal-overlay" id="operationModal">
+    <div class="operation-modal-box" id="operationBox">
+      <div class="operation-icon" id="operationIcon"></div>
+      <h3 id="operationTitle"></h3>
+      <p id="operationMessage"></p>
+      
+      <div id="operationFormContainer" style="display: none;"></div>
+
+      <div class="operation-modal-actions" id="operationActions"></div>
+    </div>
+  </div>
+
+  <!-- Script for Data Management -->
+  <script>
+    let operationCallback = null;
+    let currentViewIndex = null;
+
+    // ===== PHONE NUMBER FORMATTING =====
+    function formatPhoneInput(input) {
+      // Remove all non-numeric characters
+      let value = input.value.replace(/\D/g, '');
+
+      // Limit to 11 digits
+      if (value.length > 11) {
+        value = value.substring(0, 11);
+      }
+
+      // Format as 4-3-4
+      let formattedValue = '';
+      if (value.length > 0) {
+        formattedValue += value.substring(0, 4);
+      }
+      if (value.length >= 5) {
+        formattedValue += '-' + value.substring(4, 7);
+      }
+      if (value.length >= 8) {
+        formattedValue += '-' + value.substring(7, 11);
+      }
+
+      input.value = formattedValue;
+    }
+
+    // ===== INSTRUCTOR DATA =====
+    const instructors = [
+      {
+        id: 1,
+        fullName: "Engr. Cesar C. Gaspar",
+        profilePic: "",
+        department: "CICS",
+        status: "active",
+        bioData: {
+          gender: "Male", birthday: "1980-01-15",
+          citizenship: "Filipino", civilStatus: "Married", employment: "Full-Time"
+        },
+        contactInfo: {
+          email: "cesar.gaspar@icf.edu.ph", phone: "0917-123-4567", address: "Burgos St., Paniqui, Tarlac"
+        },
+        subjectHandling: [
+          { code: "PC7", title: "Automata Theory & Formal Languages", units: 3 },
+          { code: "PC8", title: "Architecture and Organization", units: 3 },
+          { code: "PC11", title: "Programming Languages", units: 3 },
+          { code: "PC10", title: "Information Assurance and Security", units: 3 },
+          { code: "PC12", title: "Software Engineering 2", units: 3 },
+          { code: "PC13", title: "Intelligent Systems", units: 3 }
+        ],
+        schedule: [
+          { day: "MON/WED", time: "07:30 AM - 09:00 AM", room: "208 / CL1", subject: "PC7" },
+          { day: "MON/WED", time: "09:00 AM - 10:30 AM", room: "208 / CL1", subject: "PC8" },
+          { day: "MON/WED", time: "01:00 PM - 02:30 PM", room: "208 / CL1", subject: "PC11" },
+          { day: "MON/WED", time: "02:30 PM - 04:00 PM", room: "208 / CL1", subject: "PC10" },
+          { day: "S", time: "01:00 PM - 04:00 PM", room: "ILAB", subject: "PC12" }
+        ]
+      },
+      {
+        id: 2,
+        fullName: "Prof. Alma Reyes",
+        profilePic: "",
+        department: "CICS",
+        status: "active",
+        bioData: {
+          gender: "Female", birthday: "1988-03-10",
+          citizenship: "Filipino", civilStatus: "Single", employment: "Full-Time"
+        },
+        contactInfo: {
+          email: "alma.reyes@icf.edu.ph", phone: "0918-456-7890", address: "Tarlac City"
+        },
+        subjectHandling: [
+          { code: "PC1", title: "Computer Programming 1", units: 3 },
+          { code: "PC2", title: "Data Structures & Algorithms", units: 3 },
+          { code: "PC4", title: "Networks and Communication", units: 3 },
+          { code: "PC5", title: "Object-Oriented Programming", units: 3 }
+        ],
+        schedule: [
+          { day: "TUE/THU", time: "07:30 AM - 09:00 AM", room: "202 / CL2", subject: "PC1" },
+          { day: "TUE/THU", time: "09:00 AM - 10:30 AM", room: "202 / CL2", subject: "PC2" },
+          { day: "S", time: "09:00 AM - 12:00 PM", room: "202 / CL2", subject: "PC4" }
+        ]
+      },
+      {
+        id: 3,
+        fullName: "Dr. Maria Santos",
+        profilePic: "",
+        department: "EDUC",
+        status: "active",
+        bioData: {
+          gender: "Female", birthday: "1985-05-22",
+          citizenship: "Filipino", civilStatus: "Single", employment: "Full-Time"
+        },
+        contactInfo: {
+          email: "maria.santos@icf.edu.ph", phone: "0928-987-6543", address: "Tarlac City"
+        },
+        subjectHandling: [
+          { code: "EDUC101", title: "Child and Adolescent Development", units: 3 },
+          { code: "EDUC102", title: "The Teaching Profession", units: 3 },
+          { code: "EDUC103", title: "Facilitating Learner-Centered Teaching", units: 3 }
+        ],
+        schedule: [
+          { day: "TUE/THU", time: "08:00 AM - 09:30 AM", room: "101 / EDUC", subject: "EDUC101" },
+          { day: "TUE/THU", time: "10:00 AM - 11:30 AM", room: "101 / EDUC", subject: "EDUC102" },
+          { day: "S", time: "09:00 AM - 12:00 PM", room: "102 / EDUC", subject: "EDUC103" }
+        ]
+      },
+      {
+        id: 4,
+        fullName: "Prof. Dante Cruz",
+        profilePic: "",
+        department: "CICS",
+        status: "former",
+        bioData: {
+          gender: "Male", birthday: "1975-11-30",
+          citizenship: "Filipino", civilStatus: "Married", employment: "Part-Time"
+        },
+        contactInfo: {
+          email: "dante.cruz@icf.edu.ph", phone: "0917-222-3344", address: "Paniqui, Tarlac"
+        },
+        subjectHandling: [
+          { code: "PC6", title: "Information Assurance 2", units: 3 },
+          { code: "PC9", title: "Software Engineering 1", units: 3 }
+        ],
+        schedule: [
+          { day: "MON/WED", time: "04:00 PM - 05:30 PM", room: "208 / CL1", subject: "PC6" },
+          { day: "S", time: "09:00 AM - 12:00 PM", room: "209 / CL2", subject: "PC9" }
+        ]
+      }
+    ];
+
+    // ===== OPERATION MODAL HELPERS =====
+    function showSuccessModal(title, message) {
+      const modal = document.getElementById('operationModal');
+      const box = document.getElementById('operationBox');
+      const icon = document.getElementById('operationIcon');
+      
+      box.className = 'operation-modal-box success';
+      icon.innerHTML = '<i class="fas fa-check-circle"></i>';
+      document.getElementById('operationTitle').textContent = title;
+      document.getElementById('operationMessage').textContent = message;
+      document.getElementById('operationFormContainer').style.display = 'none';
+      
+      document.getElementById('operationActions').innerHTML = `
+        <button class="op-btn confirm-success" onclick="closeOperationModal()">OK</button>
+      `;
+      
+      modal.classList.add('active');
+    }
+
+    function showWarningModal(title, message, confirmText, callback) {
+      const modal = document.getElementById('operationModal');
+      const box = document.getElementById('operationBox');
+      const icon = document.getElementById('operationIcon');
+      
+      box.className = 'operation-modal-box warning';
+      icon.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+      document.getElementById('operationTitle').textContent = title;
+      document.getElementById('operationMessage').textContent = message;
+      document.getElementById('operationFormContainer').style.display = 'none';
+      
+      operationCallback = callback;
+      
+      document.getElementById('operationActions').innerHTML = `
+        <button class="op-btn cancel" onclick="closeOperationModal()">Cancel</button>
+        <button class="op-btn confirm-danger" onclick="executeOperation()">${confirmText}</button>
+      `;
+      
+      modal.classList.add('active');
+    }
+
+    function showInputModal(title, fields, callback) {
+      const modal = document.getElementById('operationModal');
+      const box = document.getElementById('operationBox');
+      const icon = document.getElementById('operationIcon');
+      
+      box.className = 'operation-modal-box';
+      icon.innerHTML = '<i class="fas fa-edit"></i>';
+      document.getElementById('operationTitle').textContent = title;
+      document.getElementById('operationMessage').textContent = '';
+      
+      let formHtml = '';
+      fields.forEach((field, i) => {
+        if (field.type === 'radio') {
+          formHtml += `
+            <div class="operation-form-group">
+              <label>${field.label}</label>
+              ${field.options.map(opt => `
+                <label class="radio-label">
+                  <input type="radio" name="op_radio_${i}" value="${opt}" ${field.value === opt ? 'checked' : ''}> ${opt}
+                </label>
+              `).join('')}
+            </div>
+          `;
+        } else if (field.type === 'date') {
+          formHtml += `
+            <div class="operation-form-group">
+              <label>${field.label}</label>
+              <input type="date" id="op_field_${i}" value="${field.value || ''}" />
+            </div>
+          `;
+        } else if (field.type === 'phone') {
+          formHtml += `
+            <div class="operation-form-group">
+              <label>${field.label}</label>
+              <input type="text" inputmode="numeric" id="op_field_${i}" value="${field.value || ''}" oninput="formatPhoneInput(this)" placeholder="0912-345-6789" />
+            </div>
+          `;
+        } else {
+          formHtml += `
+            <div class="operation-form-group">
+              <label>${field.label}</label>
+              <input type="text" id="op_field_${i}" value="${field.value || ''}" />
+            </div>
+          `;
+        }
+      });
+      
+      document.getElementById('operationFormContainer').innerHTML = formHtml;
+      document.getElementById('operationFormContainer').style.display = 'block';
+      
+      operationCallback = callback;
+      
+      document.getElementById('operationActions').innerHTML = `
+        <button class="op-btn cancel" onclick="closeOperationModal()">Cancel</button>
+        <button class="op-btn confirm-success" onclick="executeInputOperation()">Save</button>
+      `;
+      
+      modal.classList.add('active');
+    }
+
+    function executeOperation() {
+      if (operationCallback) operationCallback();
+      closeOperationModal();
+    }
+
+    function executeInputOperation() {
+      if (operationCallback) {
+        const values = [];
+        const inputs = document.querySelectorAll('#operationFormContainer input');
+        inputs.forEach(input => {
+          if (input.type === 'radio') {
+            if (input.checked) values.push(input.value);
+          } else {
+            values.push(input.value);
+          }
+        });
+        operationCallback(values);
+      }
+      closeOperationModal();
+    }
+
+    function closeOperationModal() {
+      document.getElementById('operationModal').classList.remove('active');
+      operationCallback = null;
+    }
+
+    // ===== LOAD INSTRUCTORS =====
+    function loadInstructors() {
+      const tables = document.querySelectorAll('.instructor-table');
+      tables.forEach(table => {
+        const department = table.getAttribute('data-department');
+        const status = table.getAttribute('data-status');
+        const tbody = table.querySelector('tbody');
+        tbody.innerHTML = '';
+
+        instructors.forEach((instructor, index) => {
+          if (instructor.department === department && instructor.status === status) {
+            const row = document.createElement('tr');
+            
+            const totalUnits = instructor.subjectHandling.reduce((sum, subj) => sum + parseFloat(subj.units), 0);
+            instructor.units = totalUnits;
+
+            let actions = '';
+            if (status === 'active') {
+              actions = `
+                <button class="btn-action view" onclick="viewInstructor(${index})"><i class="fas fa-eye"></i> View</button>
+                <button class="btn-action archive" onclick="archiveInstructor(${index})"><i class="fas fa-archive"></i> Archive</button>
+              `;
+            } else {
+              actions = `
+                <button class="btn-action view" onclick="viewInstructor(${index})"><i class="fas fa-eye"></i> View</button>
+                <button class="btn-action restore" onclick="restoreInstructor(${index})"><i class="fas fa-undo"></i> Restore</button>
+                <button class="btn-action delete" onclick="deleteInstructor(${index})"><i class="fas fa-trash"></i> Delete</button>
+              `;
+            }
+
+            row.innerHTML = `
+              <td>${instructor.fullName}</td>
+              <td>${instructor.department}</td>
+              <td>${instructor.units}</td>
+              <td><div class="action-group">${actions}</div></td>
+            `;
+            tbody.appendChild(row);
+          }
+        });
+      });
+      updateSummaryCards();
+    }
+
+    // ===== UPDATE SUMMARY CARDS =====
+    function updateSummaryCards() {
+      const totalInstructors = instructors.length;
+      const activeInstructors = instructors.filter(i => i.status === 'active').length;
+      const formerInstructors = instructors.filter(i => i.status === 'former').length;
+
+      document.getElementById('totalInstructorsCard').textContent = totalInstructors;
+      document.getElementById('activeInstructorsCard').textContent = activeInstructors;
+      document.getElementById('formerInstructorsCard').textContent = formerInstructors;
+    }
+
+    // ===== VIEW INSTRUCTOR =====
+    function viewInstructor(index) {
+      currentViewIndex = index;
+      const instructor = instructors[index];
+      const body = document.getElementById('viewInstructorBody');
+      const canEdit = instructor.status === 'active';
+
+      const initials = instructor.fullName.split(' ').filter(w => w[0] && w[0] === w[0].toUpperCase()).map(w => w[0]).slice(0, 2).join('');
+
+      let subjectHtml = '';
+      instructor.subjectHandling.forEach((subject, subIdx) => {
+        subjectHtml += `
+          <tr>
+            <td>${subject.code}</td>
+            <td>${subject.title}</td>
+            <td>${subject.units}</td>
+            ${canEdit ? `<td><button class="btn-small" onclick="editSubject(${index}, ${subIdx})">Edit</button> <button class="btn-small" onclick="deleteSubject(${index}, ${subIdx})">Delete</button></td>` : ''}
+          </tr>
+        `;
+      });
+
+      let scheduleHtml = '';
+      instructor.schedule.forEach((sched, schIdx) => {
+        scheduleHtml += `
+          <tr>
+            <td>${sched.day}</td>
+            <td>${sched.time}</td>
+            <td>${sched.room}</td>
+            <td>${sched.subject}</td>
+            ${canEdit ? `<td><button class="btn-small" onclick="editSchedule(${index}, ${schIdx})">Edit</button> <button class="btn-small" onclick="deleteSchedule(${index}, ${schIdx})">Delete</button></td>` : ''}
+          </tr>
+        `;
+      });
+
+      const totalUnits = instructor.subjectHandling.reduce((sum, subj) => sum + parseFloat(subj.units), 0);
+
+      body.innerHTML = `
+        <div class="profile-pic-container">
+          <div class="profile-pic">
+            ${instructor.profilePic ? `<img src="${instructor.profilePic}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` : initials}
+          </div>
+          <h2>${instructor.fullName}</h2>
+          <p>${instructor.department} Department</p>
+          <p style="color:var(--text-muted-teal); margin-top:5px;">Total Units Handling: <strong style="color:var(--primary-neon);">${totalUnits}</strong></p>
+        </div>
+
+        <div class="info-section">
+          <div class="info-section-title">Bio Data</div>
+          <div class="info-grid">
+            <div class="info-item"><span class="info-label">Gender:</span><span class="info-value">${instructor.bioData.gender}</span></div>
+            <div class="info-item"><span class="info-label">Birthday:</span><span class="info-value">${instructor.bioData.birthday}</span></div>
+            <div class="info-item"><span class="info-label">Citizenship:</span><span class="info-value">${instructor.bioData.citizenship}</span></div>
+            <div class="info-item"><span class="info-label">Civil Status:</span><span class="info-value">${instructor.bioData.civilStatus}</span></div>
+            <div class="info-item"><span class="info-label">Employment:</span><span class="info-value">${instructor.bioData.employment}</span></div>
+          </div>
+        </div>
+
+        <div class="info-section">
+          <div class="info-section-title">Contact Info</div>
+          <div class="info-grid">
+            <div class="info-item"><span class="info-label">Email:</span><span class="info-value">${instructor.contactInfo.email}</span></div>
+            <div class="info-item"><span class="info-label">Phone:</span><span class="info-value">${instructor.contactInfo.phone}</span></div>
+            <div class="info-item"><span class="info-label">Address:</span><span class="info-value">${instructor.contactInfo.address}</span></div>
+          </div>
+        </div>
+
+        <div class="info-section">
+          <div class="info-section-title">Subject Handling</div>
+          ${canEdit ? `<div style="margin-bottom:10px;"><button class="btn-small add" onclick="addSubject(${index})">+ Add Subject</button></div>` : ''}
+          <table class="subject-table">
+            <thead><tr><th>Code</th><th>Title</th><th>Units</th>${canEdit ? '<th>Actions</th>' : ''}</tr></thead>
+            <tbody>${subjectHtml}</tbody>
+          </table>
+        </div>
+
+        <div class="info-section">
+          <div class="info-section-title">Schedule List</div>
+          ${canEdit ? `<div style="margin-bottom:10px;"><button class="btn-small add" onclick="addSchedule(${index})">+ Add Schedule</button></div>` : ''}
+          <table class="schedule-table">
+            <thead><tr><th>Day</th><th>Time</th><th>Room</th><th>Subject</th>${canEdit ? '<th>Actions</th>' : ''}</tr></thead>
+            <tbody>${scheduleHtml}</tbody>
+          </table>
+        </div>
+
+        ${canEdit ? `
+        <div style="text-align: center; margin-top: 20px;">
+          <button class="btn primary" onclick="openEditInstructorModal(${index})"><i class="fas fa-edit"></i> Edit Instructor</button>
+        </div>` : ''}
+      `;
+
+      document.getElementById('viewInstructorModal').classList.add('active');
+    }
+
+    // ===== CLOSE VIEW MODAL =====
+    function closeViewInstructorModal() {
+      document.getElementById('viewInstructorModal').classList.remove('active');
+    }
+
+    // ===== OPEN EDIT INSTRUCTOR MODAL =====
+    function openEditInstructorModal(index) {
+      const instructor = instructors[index];
+      showInputModal("Edit Instructor Information", [
+        { label: "Full Name", value: instructor.fullName },
+        { label: "Department", value: instructor.department },
+        { label: "Gender", type: "radio", options: ["Male", "Female"], value: instructor.bioData.gender },
+        { label: "Birthday", type: "date", value: instructor.bioData.birthday },
+        { label: "Citizenship", value: instructor.bioData.citizenship },
+        { label: "Civil Status", type: "radio", options: ["Single", "Married"], value: instructor.bioData.civilStatus },
+        { label: "Employment", type: "radio", options: ["Full-Time", "Part-Time"], value: instructor.bioData.employment },
+        { label: "Email", value: instructor.contactInfo.email },
+        { label: "Phone Number", type: "phone", value: instructor.contactInfo.phone },
+        { label: "Address", value: instructor.contactInfo.address }
+      ], (values) => {
+        instructors[index].fullName = values[0] || instructor.fullName;
+        instructors[index].department = values[1] || instructor.department;
+        instructors[index].bioData.gender = values[2] || instructor.bioData.gender;
+        instructors[index].bioData.birthday = values[3] || instructor.bioData.birthday;
+        instructors[index].bioData.citizenship = values[4] || instructor.bioData.citizenship;
+        instructors[index].bioData.civilStatus = values[5] || instructor.bioData.civilStatus;
+        instructors[index].bioData.employment = values[6] || instructor.bioData.employment;
+        instructors[index].contactInfo.email = values[7] || instructor.contactInfo.email;
+        instructors[index].contactInfo.phone = values[8] || instructor.contactInfo.phone;
+        instructors[index].contactInfo.address = values[9] || instructor.contactInfo.address;
+
+        loadInstructors();
+        closeViewInstructorModal();
+        showSuccessModal("Updated!", "Instructor information updated successfully.");
+      });
+    }
+
+    // ===== ADD SUBJECT =====
+    function addSubject(index) {
+      showInputModal("Add Subject", [
+        { label: "Code", value: "" },
+        { label: "Title", value: "" },
+        { label: "Units", value: "3" }
+      ], (values) => {
+        instructors[index].subjectHandling.push({
+          code: values[0] || "",
+          title: values[1] || "",
+          units: values[2] || 0
+        });
+        loadInstructors();
+        viewInstructor(index);
+        showSuccessModal("Added!", "Subject added successfully.");
+      });
+    }
+
+    // ===== EDIT SUBJECT =====
+    function editSubject(index, subIdx) {
+      const subject = instructors[index].subjectHandling[subIdx];
+      showInputModal("Edit Subject", [
+        { label: "Code", value: subject.code },
+        { label: "Title", value: subject.title },
+        { label: "Units", value: subject.units }
+      ], (values) => {
+        instructors[index].subjectHandling[subIdx] = {
+          code: values[0] || subject.code,
+          title: values[1] || subject.title,
+          units: values[2] || subject.units
+        };
+        loadInstructors();
+        viewInstructor(index);
+        showSuccessModal("Updated!", "Subject updated successfully.");
+      });
+    }
+
+    // ===== DELETE SUBJECT =====
+    function deleteSubject(index, subIdx) {
+      showWarningModal("Delete Subject", "Are you sure you want to delete this subject?", "Delete", () => {
+        instructors[index].subjectHandling.splice(subIdx, 1);
+        loadInstructors();
+        viewInstructor(index);
+        showSuccessModal("Deleted!", "Subject deleted successfully.");
+      });
+    }
+
+    // ===== ADD SCHEDULE =====
+    function addSchedule(index) {
+      showInputModal("Add Schedule", [
+        { label: "Day (e.g. MON/WED)", value: "" },
+        { label: "Time (e.g. 07:30 AM - 09:00 AM)", value: "" },
+        { label: "Room", value: "" },
+        { label: "Subject Code", value: "" }
+      ], (values) => {
+        instructors[index].schedule.push({
+          day: values[0] || "",
+          time: values[1] || "",
+          room: values[2] || "",
+          subject: values[3] || ""
+        });
+        loadInstructors();
+        viewInstructor(index);
+        showSuccessModal("Added!", "Schedule added successfully.");
+      });
+    }
+
+    // ===== EDIT SCHEDULE =====
+    function editSchedule(index, schIdx) {
+      const schedule = instructors[index].schedule[schIdx];
+      showInputModal("Edit Schedule", [
+        { label: "Day (e.g. MON/WED)", value: schedule.day },
+        { label: "Time (e.g. 07:30 AM - 09:00 AM)", value: schedule.time },
+        { label: "Room", value: schedule.room },
+        { label: "Subject Code", value: schedule.subject }
+      ], (values) => {
+        instructors[index].schedule[schIdx] = {
+          day: values[0] || schedule.day,
+          time: values[1] || schedule.time,
+          room: values[2] || schedule.room,
+          subject: values[3] || schedule.subject
+        };
+        loadInstructors();
+        viewInstructor(index);
+        showSuccessModal("Updated!", "Schedule updated successfully.");
+      });
+    }
+
+    // ===== DELETE SCHEDULE =====
+    function deleteSchedule(index, schIdx) {
+      showWarningModal("Delete Schedule", "Are you sure you want to delete this schedule?", "Delete", () => {
+        instructors[index].schedule.splice(schIdx, 1);
+        loadInstructors();
+        viewInstructor(index);
+        showSuccessModal("Deleted!", "Schedule deleted successfully.");
+      });
+    }
+
+    // ===== OPEN ADD INSTRUCTOR MODAL =====
+    function openAddInstructorModal() {
+      showInputModal("Add New Instructor", [
+        { label: "Full Name", value: "" },
+        { label: "Department", value: "CICS" },
+        { label: "Gender", type: "radio", options: ["Male", "Female"], value: "Male" },
+        { label: "Birthday", type: "date", value: "" },
+        { label: "Citizenship", value: "Filipino" },
+        { label: "Civil Status", type: "radio", options: ["Single", "Married"], value: "Single" },
+        { label: "Employment", type: "radio", options: ["Full-Time", "Part-Time"], value: "Full-Time" },
+        { label: "Email", value: "" },
+        { label: "Phone Number", type: "phone", value: "" },
+        { label: "Address", value: "" }
+      ], (values) => {
+        if (!values[0]) {
+          showWarningModal("Missing Information", "Please enter the Instructor's Full Name.", "OK", null);
+          return;
+        }
+
+        const newInstructor = {
+          id: instructors.length + 1,
+          fullName: values[0],
+          department: values[1] || "CICS",
+          status: "active",
+          profilePic: "",
+          bioData: {
+            gender: values[2] || "Male",
+            birthday: values[3] || "",
+            citizenship: values[4] || "Filipino",
+            civilStatus: values[5] || "Single",
+            employment: values[6] || "Full-Time"
+          },
+          contactInfo: {
+            email: values[7] || "",
+            phone: values[8] || "",
+            address: values[9] || ""
+          },
+          subjectHandling: [],
+          schedule: []
+        };
+
+        instructors.push(newInstructor);
+        loadInstructors();
+        showSuccessModal("Added!", "New instructor added successfully.");
+      });
+    }
+
+    // ===== ARCHIVE INSTRUCTOR =====
+    function archiveInstructor(index) {
+      showWarningModal("Archive Instructor", "Are you sure you want to archive this instructor? They will move to the Former Instructors section.", "Archive", () => {
+        instructors[index].status = 'former';
+        loadInstructors();
+        showSuccessModal("Archived!", "Instructor has been moved to Former Instructors.");
+      });
+    }
+
+    // ===== RESTORE INSTRUCTOR =====
+    function restoreInstructor(index) {
+      showWarningModal("Restore Instructor", "Are you sure you want to restore this instructor? They will move back to the Active Instructors section.", "Restore", () => {
+        instructors[index].status = 'active';
+        loadInstructors();
+        showSuccessModal("Restored!", "Instructor has been restored to Active Instructors.");
+      });
+    }
+
+    // ===== DELETE INSTRUCTOR =====
+    function deleteInstructor(index) {
+      showWarningModal("Delete Instructor", "Are you sure you want to permanently delete this instructor? This action cannot be undone.", "Delete", () => {
+        instructors.splice(index, 1);
+        loadInstructors();
+        showSuccessModal("Deleted!", "Instructor deleted permanently.");
+      });
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      loadInstructors();
+    });
+  </script>
+</body>
+</html>

@@ -827,7 +827,8 @@ $initial       = strtoupper(substr($student['first_name'], 0, 1));
         }
 
         .form-group select,
-        .form-group input {
+        .form-group input,
+        .form-group textarea {
             width: 100%;
             padding: 12px;
             background: var(--bg-deep-abyss);
@@ -840,23 +841,128 @@ $initial       = strtoupper(substr($student['first_name'], 0, 1));
             transition: var(--transition-smooth);
         }
 
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
         .form-group select:focus,
-        .form-group input:focus {
+        .form-group input:focus,
+        .form-group textarea:focus {
             border-color: var(--primary-neon);
             box-shadow: 0 0 10px rgba(13, 245, 227, 0.2);
         }
 
-        /* ===== GCash Input Specific Styles ===== */
-        .form-group input[type="tel"] {
-            letter-spacing: 1px;
+        /* ===== SEND MESSAGE MODAL (CONTACT US) ===== */
+        .inquiry-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(2, 12, 27, 0.95);
+            backdrop-filter: blur(8px);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
         }
 
-        .form-group input::placeholder {
+        .inquiry-modal-overlay.active {
+            display: flex;
+        }
+
+        .inquiry-modal-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-teal);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+            position: relative;
+            animation: modalFadeIn 0.3s ease;
+            padding: 30px;
+            color: var(--text-high-contrast);
+        }
+
+        .inquiry-modal-header {
+            margin-bottom: 20px;
+        }
+
+        .inquiry-modal-header h2 {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--text-high-contrast);
+            margin-bottom: 8px;
+        }
+
+        .inquiry-modal-header p {
+            font-size: 14px;
             color: var(--text-muted-teal);
-            opacity: 0.7;
         }
 
-        .btn-pay-confirm {
+        .inquiry-close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted-teal);
+            font-size: 24px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .inquiry-close-btn:hover {
+            color: #ff6b6b;
+            transform: rotate(90deg);
+        }
+
+        .inquiry-form-group {
+            margin-bottom: 15px;
+        }
+
+        .inquiry-form-group label {
+            display: block;
+            font-size: 13px;
+            color: var(--text-muted-teal);
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        .inquiry-form-group input,
+        .inquiry-form-group textarea {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg-deep-abyss);
+            border: 1px solid var(--border-teal);
+            border-radius: 8px;
+            color: var(--text-high-contrast);
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            transition: var(--transition-smooth);
+        }
+
+        .inquiry-form-group input:focus,
+        .inquiry-form-group textarea:focus {
+            border-color: var(--primary-neon);
+            box-shadow: 0 0 10px rgba(13, 245, 227, 0.2);
+        }
+
+        .inquiry-form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .btn-send-inquiry {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
             width: 100%;
             padding: 14px;
             background: linear-gradient(135deg, var(--primary-neon), #00cbb9);
@@ -868,9 +974,10 @@ $initial       = strtoupper(substr($student['first_name'], 0, 1));
             cursor: pointer;
             transition: var(--transition-smooth);
             margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(13, 245, 227, 0.3);
         }
 
-        .btn-pay-confirm:hover {
+        .btn-send-inquiry:hover {
             transform: translateY(-2px);
             box-shadow: var(--neon-glow);
         }
@@ -1302,7 +1409,7 @@ $initial       = strtoupper(substr($student['first_name'], 0, 1));
     </style> -->
 </head>
 <body>
-
+    
     <!-- <nav class="navbar">
         <div class="navbar-brand">
             <i class="fas fa-graduation-cap"></i>
@@ -1437,7 +1544,7 @@ $initial       = strtoupper(substr($student['first_name'], 0, 1));
                     <tr class="total-row">
                         <td colspan="2" style="text-align: right; padding-right: 20px;">TOTAL UNITS</td>
                         <td>21.0</td>
-                        <td colspan="4" style="text-align: left;">No. of Classcards: 7 | Bridging Subjects: 0 | NSTP: 0</td>
+                        <td colspan="4" style="text-align: left;">Bridging Subjects: 0 | NSTP: 0</td>
                     </tr>
                 </tbody>
             </table>
@@ -1534,7 +1641,7 @@ $initial       = strtoupper(substr($student['first_name'], 0, 1));
                         <div class="contact-info">
                             <h4>Email & Landline</h4>
                             <p>Reach us anytime for inquiries regarding enrollment, payments, and student records.</p>
-                            <a href="mailto:info@icf.edu.ph" class="btn-contact"><i class="fas fa-envelope"></i> Send Email</a>
+                            <a href="javascript:void(0);" class="btn-contact" onclick="openInquiryModal()"><i class="fas fa-envelope"></i> Send Message</a>
                         </div>
                     </div>
                     <div class="contact-card">
@@ -1547,25 +1654,42 @@ $initial       = strtoupper(substr($student['first_name'], 0, 1));
                     </div>
                 </div>
             </div>
-
-            <!-- ===== CUSTOMER SERVICE HANDLER ===== -->
-            <div class="support-handler">
-                <div class="handler-profile">
-                    <div class="handler-avatar"><i class="fas fa-user-tie"></i></div>
-                    <div class="handler-details">
-                        <h5>Customer Service Handler</h5>
-                        <p><i class="fas fa-circle"></i> Available now · Ms. Maria Santos</p>
-                        <p style="margin-top: 4px; font-size: 11px; color: var(--text-muted-teal);">Mon-Fri 8:00 AM - 5:00 PM · Sat 8:00 AM - 12:00 PM</p>
-                    </div>
-                </div>
-                <div class="handler-actions">
-                    <button class="btn-call" onclick="showAlert('warning', 'Calling Customer Service', 'You are about to call: (045) 470-8645');"><i class="fas fa-phone-alt"></i> Call</button>
-                    <button class="btn-chat" onclick="showAlert('success', 'Live Chat', 'Opening Live Chat with Ms. Maria Santos...');"><i class="fas fa-comment-dots"></i> Chat with Us</button>
-                </div>
-            </div>
-
         </div>
     </main>
+
+    <!-- ===== INQUIRE US / SEND MESSAGE MODAL ===== -->
+    <div class="inquiry-modal-overlay" id="inquiryModal">
+        <div class="inquiry-modal-box">
+            <button class="inquiry-close-btn" onclick="closeInquiryModal()">&times;</button>
+            <div class="inquiry-modal-header">
+                <h2>Inquire Us</h2>
+                <p>Send an official message directly to our administrative team.</p>
+            </div>
+
+            <form id="inquiryForm" onsubmit="submitInquiry(event)">
+                <div class="inquiry-form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="inqFullName" placeholder="e.g. Juan Dela Cruz" required />
+                </div>
+                <div class="inquiry-form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="inqEmail" placeholder="name@example.com" required />
+                </div>
+                <div class="inquiry-form-group">
+                    <label>Subject</label>
+                    <input type="text" id="inqSubject" placeholder="e.g. Admission Inquiry / Prospectus Request" required />
+                </div>
+                <div class="inquiry-form-group">
+                    <label>Concern</label>
+                    <textarea id="inqMessage" placeholder="Please describe your message or concern here..." required></textarea>
+                </div>
+
+                <button type="submit" class="btn-send-inquiry">
+                    <i class="fas fa-paper-plane"></i> Send Message
+                </button>
+            </form>
+        </div>
+    </div>
 
     <!-- ===== PAYMENT MODAL ===== -->
     <div class="modal-overlay" id="paymentModal">

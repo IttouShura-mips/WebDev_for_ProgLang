@@ -141,8 +141,8 @@ function sendEnrollmentApprovalEmail($toEmail, $studentName, $studentId, $passwo
         $mail->isSMTP();
         $mail->Host       = 'smtp.gmail.com';
         $mail->SMTPAuth   = true;
-        $mail->Username   = 'YOUR_SMTP_EMAIL@gmail.com'; // <-- CHANGE THIS
-        $mail->Password   = 'YOUR_SMTP_APP_PASSWORD';    // <-- CHANGE THIS
+        $mail->Username   = 'Shanrayeguzman0@gmail.com'; 
+        $mail->Password   = 'beto pzbx zgqk kjcv';    
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port       = 587;
 

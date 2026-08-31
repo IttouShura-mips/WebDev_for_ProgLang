@@ -141,8 +141,8 @@ function sendEnrollmentApprovalEmail($toEmail, $studentName, $studentId, $passwo
         $mail->isSMTP();
         $mail->Host       = 'smtp.gmail.com';
         $mail->SMTPAuth   = true;
-        $mail->Username   = 'Shanrayeguzman0@gmail.com'; 
-        $mail->Password   = 'beto pzbx zgqk kjcv';    
+     $mail->Username   = 'Shanrayeguzman0@gmail.com'; 
+        $mail->Password   = 'beto pzbx zgqk kjcv';  
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port       = 587;
 
@@ -193,6 +193,10 @@ function sendEnrollmentApprovalEmail($toEmail, $studentName, $studentId, $passwo
 // Approve enrollment
 if (isset($_GET['approve_enrollment'])) {
     $id = intval($_GET['approve_enrollment']);
+
+    // Auto-create student_code column if it doesn't exist
+    $conn->query("ALTER TABLE enrolled ADD COLUMN IF NOT EXISTS student_code VARCHAR(20) DEFAULT NULL AFTER student_id");
+
     $stmt = $conn->prepare("SELECT * FROM enrolled WHERE student_id = ? AND enrollment_status = 'pending'");
     $stmt->bind_param("i", $id);
     $stmt->execute();
@@ -209,8 +213,8 @@ if (isset($_GET['approve_enrollment'])) {
         $stmt2->bind_param("sssss", $enr['firstname'], $enr['middlename'], $enr['lastname'], $studentCode, $hashedPassword);
 
         if ($stmt2->execute()) {
-            $stmt3 = $conn->prepare("UPDATE enrolled SET enrollment_status = 'approved' WHERE student_id = ?");
-            $stmt3->bind_param("i", $id);
+            $stmt3 = $conn->prepare("UPDATE enrolled SET enrollment_status = 'approved', student_code = ? WHERE student_id = ?");
+            $stmt3->bind_param("si", $studentCode, $id);
             $stmt3->execute();
 
             $emailSent = sendEnrollmentApprovalEmail($enr['email'], $enr['firstname'] . ' ' . $enr['lastname'], $studentCode, $plainPassword);

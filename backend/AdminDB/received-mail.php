@@ -98,10 +98,21 @@ if (isset($_GET['mark_read'])) {
 // ENROLLMENT APPROVAL / DECLINE SYSTEM
 // ============================================
 
-// NOTE: Run `composer require phpmailer/phpmailer` in your project root first.
-// Then update the SMTP credentials inside sendEnrollmentApprovalEmail() below.
-
-require_once __DIR__ . '/../vendor/autoload.php';
+// PHPMailer auto-detect (tries common paths)
+$phpmailerLoaded = false;
+$possiblePaths = [
+    __DIR__ . '/../vendor/autoload.php',      // backend/vendor
+    __DIR__ . '/../../vendor/autoload.php',   // project root vendor
+    __DIR__ . '/vendor/autoload.php',         // same folder vendor
+    __DIR__ . '/../PHPMailer/src/PHPMailer.php', // manual download fallback
+];
+foreach ($possiblePaths as $path) {
+    if (file_exists($path)) {
+        require_once $path;
+        $phpmailerLoaded = true;
+        break;
+    }
+}
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -135,59 +146,91 @@ function generatePassword($length = 8) {
 }
 
 function sendEnrollmentApprovalEmail($toEmail, $studentName, $studentId, $password) {
-    $mail = new PHPMailer(true);
-    try {
-        // TODO: Replace with your actual SMTP credentials
-        $mail->isSMTP();
-        $mail->Host       = 'smtp.gmail.com';
-        $mail->SMTPAuth   = true;
-     $mail->Username   = 'Shanrayeguzman0@gmail.com'; 
-        $mail->Password   = 'beto pzbx zgqk kjcv';  
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port       = 587;
-
-        $mail->setFrom('admin@icfpaniqui.edu.ph', 'ICF Enrollment System');
-        $mail->addAddress($toEmail, $studentName);
-
-        $mail->isHTML(true);
-        $mail->Subject = 'ICF Enrollment Approved - Student Portal Credentials';
-        $mail->Body    = "
-            <div style='font-family: Arial, sans-serif; color: #0a192f; max-width: 600px; margin: 0 auto; border: 1px solid #172a45; border-radius: 12px; overflow: hidden;'>
-                <div style='background: #020c1b; padding: 20px; text-align: center;'>
-                    <h2 style='color: #0df5e3; margin: 0;'>Welcome to ICF!</h2>
-                </div>
-                <div style='padding: 25px; background: #fff;'>
-                    <p style='font-size: 16px;'>Dear <strong>{$studentName}</strong>,</p>
-                    <p>Your enrollment application has been <strong style='color: #10b981;'>APPROVED</strong>.</p>
-                    <p>You may now access the <strong>Student Portal</strong> using the credentials below:</p>
-                    <table style='width: 100%; border-collapse: collapse; margin: 20px 0; background: #f8fafc; border-radius: 8px;'>
-                        <tr>
-                            <td style='padding: 12px 15px; border-bottom: 1px solid #e2e8f0; font-weight: bold; color: #0a192f; width: 40%;'>Student ID:</td>
-                            <td style='padding: 12px 15px; border-bottom: 1px solid #e2e8f0; color: #0a192f; font-family: monospace; font-size: 15px;'>{$studentId}</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 12px 15px; font-weight: bold; color: #0a192f;'>Password:</td>
-                            <td style='padding: 12px 15px; color: #0a192f; font-family: monospace; font-size: 15px;'>{$password}</td>
-                        </tr>
-                    </table>
-                    <p style='text-align: center; margin: 25px 0;'>
-                        <a href='../../student/login.html' style='display: inline-block; padding: 12px 24px; background: #0df5e3; color: #020c1b; text-decoration: none; border-radius: 8px; font-weight: bold;'>Go to Student Portal</a>
-                    </p>
-                    <p style='font-size: 13px; color: #666; margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 15px;'>
-                        Please change your password immediately after your first login for security purposes.<br>
-                        If you have any questions, contact the Registrar's Office.
-                    </p>
-                </div>
+    $subject = 'ICF Enrollment Approved - Student Portal Credentials';
+    $htmlBody = "
+        <div style='font-family: Arial, sans-serif; color: #0a192f; max-width: 600px; margin: 0 auto; border: 1px solid #172a45; border-radius: 12px; overflow: hidden;'>
+            <div style='background: #020c1b; padding: 20px; text-align: center;'>
+                <h2 style='color: #0df5e3; margin: 0;'>Welcome to ICF!</h2>
             </div>
-        ";
-        $mail->AltBody = "Welcome to ICF, {$studentName}!\n\nYour enrollment has been APPROVED.\n\nStudent ID: {$studentId}\nPassword: {$password}\n\nLogin at: ../../student/login.html\n\nPlease change your password after first login.";
+            <div style='padding: 25px; background: #fff;'>
+                <p style='font-size: 16px;'>Dear <strong>{$studentName}</strong>,</p>
+                <p>Your enrollment application has been <strong style='color: #10b981;'>APPROVED</strong>.</p>
+                <p>You may now access the <strong>Student Portal</strong> using the credentials below:</p>
+                <table style='width: 100%; border-collapse: collapse; margin: 20px 0; background: #f8fafc; border-radius: 8px;'>
+                    <tr>
+                        <td style='padding: 12px 15px; border-bottom: 1px solid #e2e8f0; font-weight: bold; color: #0a192f; width: 40%;'>Student ID:</td>
+                        <td style='padding: 12px 15px; border-bottom: 1px solid #e2e8f0; color: #0a192f; font-family: monospace; font-size: 15px;'>{$studentId}</td>
+                    </tr>
+                    <tr>
+                        <td style='padding: 12px 15px; font-weight: bold; color: #0a192f;'>Password:</td>
+                        <td style='padding: 12px 15px; color: #0a192f; font-family: monospace; font-size: 15px;'>{$password}</td>
+                    </tr>
+                </table>
+                <p style='text-align: center; margin: 25px 0;'>
+                    <a href='../../student/login.html' style='display: inline-block; padding: 12px 24px; background: #0df5e3; color: #020c1b; text-decoration: none; border-radius: 8px; font-weight: bold;'>Go to Student Portal</a>
+                </p>
+                <p style='font-size: 13px; color: #666; margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 15px;'>
+                    Please change your password immediately after your first login for security purposes.<br>
+                    If you have any questions, contact the Registrar's Office.
+                </p>
+            </div>
+        </div>
+    ";
+    $altBody = "Welcome to ICF, {$studentName}!
 
-        $mail->send();
-        return true;
-    } catch (Exception $e) {
-        error_log("PHPMailer Error: " . $mail->ErrorInfo);
-        return false;
+Your enrollment has been APPROVED.
+
+Student ID: {$studentId}
+Password: {$password}
+
+Login at: ../../student/login.html
+
+Please change your password after first login.";
+
+    // Try PHPMailer first (if Composer installed)
+    if (class_exists('PHPMailer\PHPMailer\PHPMailer')) {
+        try {
+            $mail = new PHPMailer(true);
+            // TODO: Replace with your actual SMTP credentials
+            $mail->isSMTP();
+            $mail->Host       = 'smtp.gmail.com';
+            $mail->SMTPAuth   = true;
+            $mail->Username   = 'Shanrayeguzman0@gmail.com'; 
+            $mail->Password   = 'beto pzbx zgqk kjcv';  
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port       = 587;
+
+            $mail->setFrom('admin@icfpaniqui.edu.ph', 'ICF Enrollment System');
+            $mail->addAddress($toEmail, $studentName);
+
+            $mail->isHTML(true);
+            $mail->Subject = $subject;
+            $mail->Body    = $htmlBody;
+            $mail->AltBody = $altBody;
+
+            $mail->send();
+            return true;
+        } catch (Exception $e) {
+            error_log("PHPMailer Error: " . $e->getMessage());
+            // Fall through to native mail() below
+        }
     }
+
+    // Fallback: PHP native mail()
+    $headers  = "MIME-Version: 1.0
+";
+    $headers .= "Content-type: text/html; charset=UTF-8
+";
+    $headers .= "From: ICF Enrollment System <admin@icfpaniqui.edu.ph>
+";
+    $headers .= "Reply-To: admin@icfpaniqui.edu.ph
+";
+
+    $sent = mail($toEmail, $subject, $htmlBody, $headers);
+    if (!$sent) {
+        error_log("Native mail() failed for: " . $toEmail);
+    }
+    return $sent;
 }
 
 // Approve enrollment

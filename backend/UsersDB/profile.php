@@ -1485,7 +1485,7 @@ $initial       = strtoupper(substr($student['first_name'], 0, 1));
                 <i class="fas fa-user"></i>
                 <span>2024-0061</span>
             </div>
-            <a href="logout.php" class="btn-logout" onclick="showAlert('warning', 'Logout Confirmation', 'Are you sure you want to logout?'); return false;">
+            <a href="logout.php" class="btn-logout">
                 <i class="fas fa-sign-out-alt"></i> Logout
             </a>
         </div>
@@ -1641,7 +1641,7 @@ $initial       = strtoupper(substr($student['first_name'], 0, 1));
                         <div class="contact-info">
                             <h4>Email & Landline</h4>
                             <p>Reach us anytime for inquiries regarding enrollment, payments, and student records.</p>
-                            <a href="javascript:void(0);" class="btn-contact" onclick="openInquiryModal()"><i class="fas fa-envelope"></i> Send Message</a>
+                            <a href="../../Extension/contact.html" class="btn-contact" onclick="openInquiryModal()"><i class="fas fa-envelope"></i> Send Message</a>
                         </div>
                     </div>
                     <div class="contact-card">

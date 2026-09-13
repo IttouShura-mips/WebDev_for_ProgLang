@@ -14,6 +14,20 @@ $total_enrollments = $count_result->fetch_assoc()['total'] ?? 0;
 $course_result = $conn->query("SELECT COUNT(DISTINCT course) as total FROM enrolled");
 $total_courses = $course_result->fetch_assoc()['total'] ?? 0;
 
+$pendingCount = 0;
+$colCheck = $conn->query("SHOW COLUMNS FROM enrolled LIKE 'enrollment_status'");
+if ($colCheck && $colCheck->num_rows > 0) {
+    $r = $conn->query("SELECT COUNT(*) as t FROM enrolled WHERE enrollment_status='pending'");
+    if ($r) $pendingCount = $r->fetch_assoc()['t'];
+}
+
+$instructorCount = 0;
+$insCheck = $conn->query("SHOW TABLES LIKE 'instructors'");
+if ($insCheck && $insCheck->num_rows > 0) {
+    $r = $conn->query("SELECT COUNT(*) as t FROM instructors");
+    if ($r) $instructorCount = $r->fetch_assoc()['t'];
+}
+
 $logins = [];
 $login_check = $conn->query("SHOW COLUMNS FROM enrolled LIKE 'last_login'");
 if ($login_check && $login_check->num_rows > 0) {
@@ -25,7 +39,6 @@ $enrollments = [];
 $enr_result = $conn->query("SELECT student_id, firstname, lastname, course, academic_year, mobile_number FROM enrolled ORDER BY student_id DESC LIMIT 5");
 while ($row = $enr_result->fetch_assoc()) { $enrollments[] = $row; }
 
-// Fetch full records for view modal
 $full_records = [];
 $all_res = $conn->query("SELECT * FROM enrolled ORDER BY student_id DESC LIMIT 5");
 while ($row = $all_res->fetch_assoc()) { $full_records[$row['student_id']] = $row; }
@@ -40,7 +53,6 @@ while ($row = $all_res->fetch_assoc()) { $full_records[$row['student_id']] = $ro
   <link rel="stylesheet" href="adminpanelstyle.css">
   <style>
     .view-modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .view-modal-grid.full { grid-template-columns: 1fr; }
     .view-modal-section { margin-bottom: 18px; }
     .view-modal-section h4 { color: var(--primary-neon); font-size: 0.95rem; margin-bottom: 10px; border-bottom: 1px solid var(--border-teal); padding-bottom: 6px; }
     .view-modal-row { display: flex; margin-bottom: 8px; font-size: 0.88rem; }
@@ -86,11 +98,15 @@ while ($row = $all_res->fetch_assoc()) { $full_records[$row['student_id']] = $ro
 
     <section class="cards-grid">
       <div class="card">
-        <h3>Total Students</h3>
-        <p class="card-value"><?php echo $total_enrollments; ?></p>
+        <h3>Total Instructor</h3>
+        <p class="card-value"><?php echo $instructorCount; ?></p>
       </div>
       <div class="card">
-        <h3>Active Enrollments</h3>
+        <h3>Pending Enrollment</h3>
+        <p class="card-value"><?php echo $pendingCount; ?></p>
+      </div>
+      <div class="card">
+        <h3>Enrolled</h3>
         <p class="card-value"><?php echo $total_enrollments; ?></p>
       </div>
       <div class="card">
@@ -142,7 +158,7 @@ while ($row = $all_res->fetch_assoc()) { $full_records[$row['student_id']] = $ro
             </thead>
             <tbody>
               <?php if (count($enrollments) > 0): ?>
-                <?php foreach ($enrollments as $row): 
+                <?php foreach ($enrollments as $row):
                   $full = $full_records[$row['student_id']] ?? [];
                 ?>
                 <tr data-record='<?php echo htmlspecialchars(json_encode($full), ENT_QUOTES, "UTF-8"); ?>'>
@@ -155,7 +171,7 @@ while ($row = $all_res->fetch_assoc()) { $full_records[$row['student_id']] = $ro
                     <div class="action-group">
                       <button class="btn-action" onclick="openViewModal(this)" style="border-color:#10b981; color:#10b981;"><i class="fa-solid fa-eye"></i> View</button>
                       <a href="edit.php?id=<?php echo $row['student_id']; ?>"><button class="btn-action">Edit</button></a>
-                      <a href="delete.php?id=<?php echo $row['student_id']; ?>" onclick="return confirm('Delete this record?')"><button class="btn-action" style="color:red; border-color:red;">Delete</button></a>
+                      <a href="delete.php?id=<?php echo $row['student_id']; ?>" onclick="return confirm('Delete this record?')"><button class="btn-action decline">Delete</button></a>
                     </div>
                   </td>
                 </tr>
@@ -170,16 +186,13 @@ while ($row = $all_res->fetch_assoc()) { $full_records[$row['student_id']] = $ro
     </section>
   </main>
 
-  <!-- View Enrollment Modal -->
   <div class="modal-overlay" id="viewEnrollmentModal">
     <div class="modal-container" style="max-width: 700px; max-height: 85vh; overflow-y: auto;">
       <div class="modal-header">
         <h3><i class="fa-solid fa-id-card"></i> Enrollment Details</h3>
         <button class="modal-close-btn" onclick="closeViewModal()"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <div class="modal-body" id="viewModalBody">
-        <!-- Populated by JS -->
-      </div>
+      <div class="modal-body" id="viewModalBody"></div>
       <div class="modal-footer">
         <button class="btn primary" onclick="closeViewModal()">Close</button>
       </div>
@@ -192,54 +205,25 @@ while ($row = $all_res->fetch_assoc()) { $full_records[$row['student_id']] = $ro
       const row = btn.closest('tr');
       const data = JSON.parse(row.getAttribute('data-record'));
       if (!data) return;
-
       const sections = [
-        {
-          title: 'Personal Information',
-          fields: [
-            ['First Name', data.firstname],
-            ['Middle Name', data.middlename],
-            ['Last Name', data.lastname],
-            ['Suffix', data.suffix || 'N/A'],
-            ['Gender', data.gender],
-            ['Birthday', data.birthday],
-            ['Birthplace', data.birthplace],
-            ['Citizenship', data.citizenship],
-            ['Civil Status', data.civilstatus],
-            ['Employment', data.employment]
-          ]
-        },
-        {
-          title: 'Family / Guardian',
-          fields: [
-            ["Mother's Name", data.mother],
-            ["Mother's Phone", data.mphone_number],
-            ["Father's Name", data.father],
-            ["Father's Phone", data.fphone_number],
-            ["Guardian's Name", data.guardian],
-            ["Guardian's Phone", data.gphone_number]
-          ]
-        },
-        {
-          title: 'Academic Information',
-          fields: [
-            ['Course', data.course],
-            ['Major', data.major],
-            ['School Address', data.school_address],
-            ['Academic Year', data.academic_year],
-            ['Scholarship', data.scholarship]
-          ]
-        },
-        {
-          title: 'Contact & Address',
-          fields: [
-            ['Full Address', data.full_address],
-            ['Mobile Number', data.mobile_number],
-            ['Email', data.email]
-          ]
-        }
+        { title: 'Personal Information', fields: [
+            ['First Name', data.firstname], ['Middle Name', data.middlename], ['Last Name', data.lastname],
+            ['Suffix', data.suffix || 'N/A'], ['Gender', data.gender], ['Birthday', data.birthday],
+            ['Birthplace', data.birthplace], ['Citizenship', data.citizenship], ['Civil Status', data.civilstatus], ['Employment', data.employment]
+        ]},
+        { title: 'Family / Guardian', fields: [
+            ["Mother's Name", data.mother], ["Mother's Phone", data.mphone_number],
+            ["Father's Name", data.father], ["Father's Phone", data.fphone_number],
+            ["Guardian's Name", data.guardian], ["Guardian's Phone", data.gphone_number]
+        ]},
+        { title: 'Academic Information', fields: [
+            ['Course', data.course], ['Major', data.major], ['School Address', data.school_address],
+            ['Academic Year', data.academic_year], ['Scholarship', data.scholarship]
+        ]},
+        { title: 'Contact & Address', fields: [
+            ['Full Address', data.full_address], ['Mobile Number', data.mobile_number], ['Email', data.email]
+        ]}
       ];
-
       let html = '';
       sections.forEach(sec => {
         html += `<div class="view-modal-section"><h4>${sec.title}</h4><div class="view-modal-grid">`;
@@ -248,16 +232,12 @@ while ($row = $all_res->fetch_assoc()) { $full_records[$row['student_id']] = $ro
         });
         html += '</div></div>';
       });
-
       document.getElementById('viewModalBody').innerHTML = html;
       document.getElementById('viewEnrollmentModal').classList.add('active');
     }
-
     function closeViewModal() {
       document.getElementById('viewEnrollmentModal').classList.remove('active');
     }
-
-    // Close on overlay click
     document.getElementById('viewEnrollmentModal').addEventListener('click', function(e) {
       if (e.target === this) closeViewModal();
     });

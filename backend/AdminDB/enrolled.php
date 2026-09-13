@@ -4,687 +4,73 @@ if (!isset($_SESSION['admin_user'])) {
     header("Location: login.html");
     exit();
 }
+require 'db.php';
+
+$admin_name = htmlspecialchars($_SESSION['admin_name'] ?? $_SESSION['admin_user']);
+
+$res = $conn->query("SELECT * FROM enrolled ORDER BY student_id DESC");
+$students = [];
+while ($row = $res->fetch_assoc()) { $students[] = $row; }
 ?>
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin Control Panel - Enrolled Students</title>
-    <!-- Font Awesome Icons -->
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-    />
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Control Panel - Enrolled Students</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="adminpanelstyle.css">
+  <style>
+    .cards-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px; margin-bottom:40px; }
+    .card { background: var(--text-high-contrast); padding:20px; border-radius:8px; box-shadow: 0 0px 5px var(--primary-neon); }
+    .card h3 { font-size:0.85rem; color: var(--bg-deep-abyss); text-transform:uppercase; margin-bottom:8px; }
+    .card-value { font-size:1.8rem; font-weight:bold; color: var(--bg-deep-abyss); }
+    .badge.warning { background-color:#f59e0b; color:#623e0b; }
 
-      :root {
-        --bg-deep-abyss: #020c1b;
-        --bg-card: #0a192f;
-        --bg-card-hover: #112240;
-        --primary-neon: #0df5e3;
-        --primary-neon-hover: #00cbb9;
-        --text-high-contrast: #e2e8f0;
-        --text-muted-teal: #8892b0;
-        --border-teal: #172a45;
-        --success-green: #10b981;
-        --border-radius: 12px;
-        --transition-smooth: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-        --neon-glow: 0 0 15px rgba(13, 245, 227, 0.3);
-      }
+    .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(2,12,27,0.95); backdrop-filter:blur(8px); z-index:3000; justify-content:center; align-items:center; padding:20px; }
+    .modal-overlay.active { display:flex; }
+    .modal-container { background:var(--bg-card); border:1px solid var(--border-teal); border-radius:16px; width:100%; max-width:1100px; max-height:90vh; overflow-y:auto; box-shadow:0 20px 50px rgba(0,0,0,0.8); position:relative; animation:modalFadeIn 0.3s ease; padding:30px; color:var(--text-high-contrast); }
+    @keyframes modalFadeIn { from{opacity:0; transform:translateY(-20px);} to{opacity:1; transform:translateY(0);} }
+    .modal-close { position:absolute; top:15px; right:20px; background:transparent; border:none; color:var(--text-muted-teal); font-size:28px; cursor:pointer; z-index:10; }
+    .modal-close:hover { color:#ef4444; }
 
-      body {
-        display: flex;
-        background-color: rgb(19, 27, 50);
-        color: var(--text-high-contrast);
-        min-height: 100vh;
-      }
-      
+    .student-info-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:25px; background:var(--bg-deep-abyss); border:1px solid var(--border-teal); border-radius:8px; padding:20px; }
+    .student-info-left, .student-info-right { display:flex; flex-direction:column; gap:12px; }
+    .student-info-right { align-items:flex-end; text-align:right; }
+    .info-line { font-size:14px; color:var(--text-muted-teal); }
+    .info-line strong { color:var(--text-high-contrast); font-weight:600; }
+    .info-line strong i { color:var(--primary-neon); margin-right:8px; }
+    .info-line .highlight { color:var(--primary-neon); font-weight:700; }
 
-      /* Sidebar Styles */
-      .sidebar {
-        background: radial-gradient(
-          circle at center,
-          #071f30,
-          var(--bg-deep-abyss)
-        );
-        width: 330px;
-        background-color: var(--bg-deep-abyss);
-        color: var(--text-high-contrast);
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-      }
+    .course-table { width:100%; border-collapse:collapse; font-size:13px; background:var(--bg-deep-abyss); border-radius:8px; overflow:hidden; margin-bottom:20px; border:1px solid var(--border-teal); }
+    .course-table th { background:#0e1f36; color:var(--primary-neon); font-weight:600; padding:12px 10px; text-align:left; border-bottom:2px solid var(--border-teal); }
+    .course-table td { padding:12px 10px; border-bottom:1px solid var(--border-teal); color:var(--text-high-contrast); }
+    .course-table .total-row td { background:#0e1f36; font-weight:700; color:var(--primary-neon); border-top:2px solid var(--border-teal); }
 
-      .brand {
-        border-left: 4px solid var(--primary-neon);
-        padding: 30px 20px;
-        margin-bottom: 30px;
-        background-color: var(--bg-deep-abyss);
-      }
-
-      .brand h2 {
-        color: var(--primary-neon);
-        font-size: 2rem;
-        font-weight: 700;
-        letter-spacing: 0.5px;
-      }
-
-      .nav-links {
-        list-style: none;
-        margin-top: 20px;
-      }
-
-      .nav-links li a {
-        display: block;
-        padding: 14px 50px;
-        color: #94a3b8;
-        text-decoration: none;
-        transition: all 0.2s ease;
-      }
-
-      .nav-links li.active a,
-      .nav-links li a:hover {
-        background-color: #334155;
-        color: var(--primary-neon);
-        font-weight: 700;
-      }
-
-      .sidebar-footer {
-        padding: 20px 30px;
-        border-top: 1px solid var(--border-teal);
-        margin-top: auto;
-      }
-
-      .btn-homepage {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        width: 100%;
-        padding: 12px;
-        background-color: transparent;
-        color: var(--primary-neon);
-        border: 1px solid var(--primary-neon);
-        border-radius: var(--border-radius);
-        text-decoration: none;
-        font-weight: 600;
-        font-size: 0.95rem;
-        transition: var(--transition-smooth);
-      }
-
-      .btn-homepage:hover {
-        background-color: var(--primary-neon);
-        color: var(--bg-deep-abyss);
-        box-shadow: var(--neon-glow);
-      }
-
-      .header-right {
-        display: flex;
-        align-items: center;
-        gap: 20px;
-      }
-
-      .search-container {
-        position: relative;
-        width: 260px;
-      }
-
-      .search-container input {
-        width: 100%;
-        padding: 8px 14px;
-        background-color: var(--bg-card);
-        border: 1px solid var(--border-teal);
-        border-radius: var(--border-radius);
-        color: var(--text-high-contrast);
-        font-size: 0.9rem;
-        outline: none;
-        transition: var(--transition-smooth);
-      }
-
-      .search-container input:focus {
-        border-color: var(--primary-neon);
-        box-shadow: var(--neon-glow);
-      }
-
-      .main-content {
-        flex: 1;
-        padding: 30px;
-        overflow-y: auto;
-      }
-
-      .top-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin: 30px 20px;
-      }
-
-      .top-header h1 {
-        font-size: 1.6rem;
-        color: var(--primary-neon);
-      }
-
-      .user-profile {
-        display: flex;
-        align-items: center;
-        margin-right: 50px;
-        gap: 15px;
-        font-weight: 600;
-      }
-
-      .avatar {
-        width: 38px;
-        height: 38px;
-        background-color: var(--primary-neon);
-        color: rgb(0, 0, 0);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-      }
-
-      /* Overview Summary Cards */
-      .cards-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 20px;
-        margin-bottom: 40px;
-      }
-
-      .card {
-        background: var(--text-high-contrast);
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 0px 5px var(--primary-neon);
-      }
-
-      .card h3 {
-        font-size: 0.85rem;
-        color: var(--bg-deep-abyss);
-        text-transform: uppercase;
-        margin-bottom: 8px;
-      }
-
-      .card-value {
-        font-size: 1.8rem;
-        font-weight: bold;
-        color: var(--bg-deep-abyss);
-      }
-
-      /* Table Card */
-      .table-card {
-        background: var(--text-high-contrast);
-        border-radius: 8px;
-        box-shadow: 0 0px 5px var(--primary-neon);
-        padding: 20px;
-      }
-
-      .table-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 16px;
-      }
-
-      .table-header h2 {
-        font-size: 1.1rem;
-        color: var(--bg-deep-abyss);
-      }
-
-      .table-actions {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-      }
-
-      .table-wrapper {
-        overflow-x: auto;
-      }
-
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        text-align: left;
-      }
-
-      th,
-      td {
-        padding: 12px 16px;
-        color: var(--bg-deep-abyss);
-        border-bottom: 1px solid #e2e8f0;
-        font-size: 0.9rem;
-      }
-
-      th {
-        background-color: #a5bdd5;
-        color: var(--bg-deep-abyss);
-        font-weight: 600;
-        cursor: pointer;
-        user-select: none;
-        transition: background-color 0.2s ease;
-      }
-
-      th:hover {
-        background-color: #94a3b8;
-      }
-
-      th.no-sort {
-        cursor: default;
-      }
-
-      th.no-sort:hover {
-        background-color: var(--text-muted-teal);
-      }
-
-      tr:hover {
-        background-color: #e2e8f0;
-      }
-
-      /* Badges */
-      .badge {
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        display: inline-block;
-      }
-
-      .badge.success {
-        background-color: #2fd56a;
-        color: #053015;
-      }
-
-      .badge.warning {
-        background-color: #f59e0b;
-        color: #623e0b;
-      }
-
-      .badge.danger {
-        background-color: #dd9f9f;
-        color: #a31010;
-      }
-
-      .badge.info {
-        background-color: #93c5fd;
-        color: #1e3a8a;
-      }
-
-      /* Action Buttons */
-      .btn-action {
-        padding: 4px 10px;
-        background: transparent;
-        border: 1px solid #2563eb;
-        color: #2563eb;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 0.8rem;
-      }
-
-      .btn-action:hover {
-        background: #2563eb;
-        color: white;
-      }
-
-      /* ===== VIEW STUDENT MODAL (COR Style) ===== */
-      .modal-overlay {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(2, 12, 27, 0.95);
-        backdrop-filter: blur(8px);
-        z-index: 3000;
-        justify-content: center;
-        align-items: center;
-        padding: 20px;
-      }
-
-      .modal-overlay.active {
-        display: flex;
-      }
-
-      .modal-container {
-        background: var(--bg-card);
-        border: 1px solid var(--border-teal);
-        border-radius: 16px;
-        width: 100%;
-        max-width: 1100px;
-        max-height: 90vh;
-        overflow-y: auto;
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
-        position: relative;
-        animation: modalFadeIn 0.3s ease;
-        padding: 30px;
-        color: var(--text-high-contrast);
-      }
-
-      @keyframes modalFadeIn {
-        from {
-          opacity: 0;
-          transform: translateY(-20px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-          /* ===== CUSTOM SCROLLBAR (For Body & Modals) ===== */
-    .modal-container::-webkit-scrollbar {
-      width: 10px;
-      height: 10px;
+    .payment-assessment-wrap { display:grid; grid-template-columns:1.2fr 0.8fr; gap:20px; }
+    .payment-assess-card { background:var(--bg-deep-abyss); border:1px solid var(--border-teal); border-radius:8px; overflow:hidden; }
+    .card-header { background:#0e1f36; padding:10px 15px; font-size:14px; font-weight:700; color:var(--primary-neon); text-transform:uppercase; letter-spacing:1px; border-bottom:2px solid var(--primary-neon); display:flex; align-items:center; gap:8px; }
+    .data-table { width:100%; border-collapse:collapse; font-size:13px; }
+    .data-table th, .data-table td { padding:10px 15px; text-align:left; border-bottom:1px solid var(--border-teal); }
+    .data-table td { color:var(--text-high-contrast); }
+    .data-table .assessment-item td:last-child { text-align:right; font-weight:600; }
+    .data-table .assessment-total td { background:#0e1f36; font-weight:800; color:var(--primary-neon); font-size:15px; border-top:2px solid var(--primary-neon); }
+    .data-table .assessment-total td:last-child { text-align:right; font-size:18px; }
+    .data-table .assessment-remaining td { background:var(--bg-card-hover); color:var(--text-high-contrast); font-weight:800; font-size:15px; border-top:2px solid var(--primary-neon); }
+    .data-table .assessment-remaining td:last-child { text-align:right; font-size:18px; }
+    .data-table .total-paid-row td { background:#0e1f36; font-weight:800; color:var(--primary-neon); font-size:15px; border-top:2px solid var(--primary-neon); }
+    .data-table .total-paid-row td:last-child { text-align:right; font-size:18px; }
+    @media (max-width: 768px) {
+      .student-info-grid { grid-template-columns: 1fr; }
+      .student-info-right { align-items:flex-start; text-align:left; }
+      .payment-assessment-wrap { grid-template-columns: 1fr; }
     }
-
-    .modal-container::-webkit-scrollbar-track {
-      background: var(--bg-deep-abyss);
-      border-radius: 10px;
-    }
-
-    .modal-container::-webkit-scrollbar-thumb {
-      background: var(--border-teal);
-      border-radius: 10px;
-      border: 2px solid var(--bg-deep-abyss);
-    }
-
-    .modal-container::-webkit-scrollbar-thumb:hover {
-      background: var(--primary-neon);
-    }
-
-
-      .modal-close {
-        position: absolute;
-        top: 15px;
-        right: 20px;
-        background: transparent;
-        border: none;
-        color: var(--text-muted-teal);
-        font-size: 28px;
-        cursor: pointer;
-        z-index: 10;
-        transition: color 0.3s;
-      }
-
-      .modal-close:hover {
-        color: #ef4444;
-      }
-
-      /* COR Header */
-      .cor-header {
-        text-align: center;
-        margin-bottom: 25px;
-        padding-bottom: 20px;
-        border-bottom: 2px solid var(--border-teal);
-      }
-
-      .cor-header-top {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 15px;
-        margin-bottom: 10px;
-      }
-
-      .cor-logo {
-        width: 70px;
-        height: 70px;
-        object-fit: contain;
-      }
-
-      .cor-school-name {
-        font-size: 24px;
-        font-weight: 800;
-        color: var(--text-high-contrast);
-        text-transform: uppercase;
-        letter-spacing: 1px;
-      }
-
-      .cor-address {
-        font-size: 13px;
-        color: var(--text-muted-teal);
-        margin-top: 4px;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-      }
-
-      .cor-address i {
-        color: var(--primary-neon);
-      }
-
-      .cor-title {
-        font-size: 22px;
-        font-weight: 700;
-        color: var(--primary-neon);
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        margin-top: 15px;
-      }
-
-      .cor-session {
-        font-size: 14px;
-        color: var(--text-muted-teal);
-        margin-top: 5px;
-        font-style: italic;
-      }
-
-      /* Student Info */
-      .student-info-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 20px;
-        margin-bottom: 25px;
-        background: var(--bg-deep-abyss);
-        border: 1px solid var(--border-teal);
-        border-radius: 8px;
-        padding: 20px;
-      }
-
-      .student-info-left,
-      .student-info-right {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-      }
-
-      .student-info-right {
-        align-items: flex-end;
-        text-align: right;
-      }
-
-      .info-line {
-        font-size: 14px;
-        color: var(--text-muted-teal);
-      }
-
-      .info-line strong {
-        color: var(--text-high-contrast);
-        font-weight: 600;
-      }
-
-      .info-line strong i {
-        color: var(--primary-neon);
-        margin-right: 8px;
-      }
-
-      .info-line .highlight {
-        color: var(--primary-neon);
-        font-weight: 700;
-      }
-
-      /* Course Table */
-      .course-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 13px;
-        background: var(--bg-deep-abyss);
-        border-radius: 8px;
-        overflow: hidden;
-        margin-bottom: 20px;
-        border: 1px solid var(--border-teal);
-      }
-
-      .course-table th {
-        background: #0e1f36;
-        color: var(--primary-neon);
-        font-weight: 600;
-        padding: 12px 10px;
-        text-align: left;
-        border-bottom: 2px solid var(--border-teal);
-      }
-
-      .course-table td {
-        padding: 12px 10px;
-        border-bottom: 1px solid var(--border-teal);
-        color: var(--text-high-contrast);
-      }
-
-      .course-table tr:last-child td {
-        border-bottom: none;
-      }
-
-      .course-table .total-row td {
-        background: #0e1f36;
-        font-weight: 700;
-        color: var(--primary-neon);
-        border-top: 2px solid var(--border-teal);
-      }
-
-      .course-table .summary-row td {
-        font-size: 12px;
-        color: var(--text-muted-teal);
-        border-bottom: none;
-        padding-top: 10px;
-      }
-
-      /* Payment & Assessment Section */
-      .payment-assessment-wrap {
-        display: grid;
-        grid-template-columns: 1.2fr 0.8fr;
-        gap: 20px;
-      }
-
-      .payment-assess-card {
-        background: var(--bg-deep-abyss);
-        border: 1px solid var(--border-teal);
-        border-radius: 8px;
-        overflow: hidden;
-      }
-
-      .card-header {
-        background: #0e1f36;
-        padding: 10px 15px;
-        font-size: 14px;
-        font-weight: 700;
-        color: var(--primary-neon);
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        border-bottom: 2px solid var(--primary-neon);
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-
-      .data-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 13px;
-      }
-
-      .data-table th,
-      .data-table td {
-        padding: 10px 15px;
-        text-align: left;
-        border-bottom: 1px solid var(--border-teal);
-      }
-
-      .data-table th {
-        color: var(--bg-deep-abyss);
-        font-weight: 600;
-        font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-      }
-
-      .data-table td {
-        color: var(--text-high-contrast);
-        font-size: 13px;
-      }
-
-      .data-table .assessment-item td:last-child {
-        text-align: right;
-        font-weight: 600;
-      }
-
-      .data-table .assessment-total td {
-        background: #0e1f36;
-        font-weight: 800;
-        color: var(--primary-neon);
-        font-size: 15px;
-        border-top: 2px solid var(--primary-neon);
-      }
-
-      .data-table .assessment-total td:last-child {
-        text-align: right;
-        font-size: 18px;
-      }
-
-      .data-table .assessment-remaining td {
-        background: var(--bg-card-hover);
-        color: var(--text-high-contrast);
-        font-weight: 800;
-        font-size: 15px;
-        border-top: 2px solid var(--primary-neon);
-      }
-
-      .data-table .assessment-remaining td:last-child {
-        text-align: right;
-        font-size: 18px;
-      }
-
-      .data-table .total-paid-row td {
-        background: #0e1f36;
-        font-weight: 800;
-        color: var(--primary-neon);
-        font-size: 15px;
-        border-top: 2px solid var(--primary-neon);
-      }
-
-      .data-table .total-paid-row td:last-child {
-        text-align: right;
-        font-size: 18px;
-      }
-
-      /* Responsive */
-      @media (max-width: 768px) {
-        .student-info-grid {
-          grid-template-columns: 1fr;
-        }
-        .student-info-right {
-          align-items: flex-start;
-          text-align: left;
-        }
-        .payment-assessment-wrap {
-          grid-template-columns: 1fr;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <!-- Sidebar Navigation -->
-    <aside class="sidebar">
-      <div>
-        <div class="brand">
-          <h2>Admin Panel</h2>
-        </div>
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div>
+      <div class="brand"><h2>Admin Panel</h2></div>
       <ul class="nav-links">
         <li><a href="adminpanel.php">Dashboard</a></li>
         <li><a href="users.php">Users</a></li>
@@ -694,363 +80,180 @@ if (!isset($_SESSION['admin_user'])) {
         <li><a href="curriculum.php">Curriculum</a></li>
         <li><a href="received-mail.php">Received Mail</a></li>
       </ul>
-      </div>
+    </div>
+    <div class="sidebar-footer">
+      <a href="../../index.html" class="btn-homepage"><i class="fa-solid fa-arrow-left"></i> Back to Homepage</a>
+      <a href="logout.php" class="btn-homepage" style="margin-top:10px; border-color:#ef4444; color:#ef4444;"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </div>
+  </aside>
 
-      <div class="sidebar-footer">
-        <a href="../../index.html" class="btn-homepage">
-          <i class="fa-solid fa-arrow-left"></i> Back to Homepage
-        </a>
-      </div>
-    </aside>
-
-    <!-- Main Content Area -->
-    <main class="main-content">
-      <!-- Header -->
-      <header class="top-header">
-        <h1>Enrolled Students</h1>
-
-        <div class="header-right">
-          <div class="search-container">
-            <input
-              type="text"
-              id="userSearchInput"
-              placeholder="Search students..."
-              autocomplete="off"
-            />
-          </div>
-
-          <div class="user-profile">
-          <span><?php echo htmlspecialchars($_SESSION['admin_name'] ?? $_SESSION['admin_user']); ?></span>
-          <div class="avatar"><?php echo strtoupper(substr($_SESSION['admin_name'] ?? $_SESSION['admin_user'], 0, 1)); ?></div>
+  <main class="main-content">
+    <header class="top-header">
+      <h1>Enrolled Students</h1>
+      <div class="header-right">
+        <div class="search-container">
+          <input type="text" id="userSearchInput" placeholder="Search students..." autocomplete="off"/>
         </div>
-        </div>
-      </header>
-
-      <!-- Overview Summary Cards -->
-      <div class="cards-grid">
-        <div class="card">
-          <h3>Total Students</h3>
-          <div class="card-value" id="totalStudentsCard">0</div>
-        </div>
-        <div class="card">
-          <h3>Fully PAID</h3>
-          <div class="card-value">92</div>
-        </div>
-        <div class="card">
-          <h3>Partial Payments</h3>
-          <div class="card-value">36</div>
-        </div>
-        <div class="card">
-          <h3>Total Units Enrolled</h3>
-          <div class="card-value" id="totalUnitsCard">0</div>
+        <div class="user-profile">
+          <span><?php echo $admin_name; ?></span>
+          <div class="avatar"><?php echo strtoupper(substr($admin_name,0,1)); ?></div>
         </div>
       </div>
+    </header>
 
-      <!-- Enrolled Students Table -->
-      <div class="table-card">
-        <div class="table-header">
-          <h2>List of Enrolled Students</h2>
+    <div class="cards-grid">
+      <div class="card"><h3>Total Students</h3><div class="card-value" id="totalStudentsCard"><?php echo count($students); ?></div></div>
+      <div class="card"><h3>Fully PAID</h3><div class="card-value">92</div></div>
+      <div class="card"><h3>Partial Payments</h3><div class="card-value">36</div></div>
+      <div class="card"><h3>Total Units Enrolled</h3><div class="card-value" id="totalUnitsCard">0</div></div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-header"><h2>List of Enrolled Students</h2></div>
+      <div class="table-wrapper">
+        <table id="enrolledTable">
+          <thead>
+            <tr>
+              <th class="sortable" onclick="sortTable(0)">Student ID <i class="fas fa-sort"></i></th>
+              <th class="sortable" onclick="sortTable(1)">Full Name <i class="fas fa-sort"></i></th>
+              <th class="sortable" onclick="sortTable(2)">Year Level <i class="fas fa-sort"></i></th>
+              <th class="sortable" onclick="sortTable(3)">Courses <i class="fas fa-sort"></i></th>
+              <th class="sortable" onclick="sortTable(4)">Block <i class="fas fa-sort"></i></th>
+              <th class="sortable" onclick="sortTable(5)">Units <i class="fas fa-sort"></i></th>
+              <th class="sortable" onclick="sortTable(6)">Balance <i class="fas fa-sort"></i></th>
+              <th class="no-sort">Action</th>
+            </tr>
+          </thead>
+          <tbody id="enrolledTableBody">
+            <?php foreach ($students as $s):
+              $fullName = trim(($s['lastname'] ?? '') . ', ' . ($s['firstname'] ?? ''));
+            ?>
+            <tr data-record='<?php echo htmlspecialchars(json_encode($s), ENT_QUOTES, "UTF-8"); ?>'>
+              <td><?php echo htmlspecialchars($s['student_code'] ?? $s['student_id']); ?></td>
+              <td><?php echo htmlspecialchars($fullName); ?></td>
+              <td>3rd Year</td>
+              <td><?php echo htmlspecialchars($s['course']); ?></td>
+              <td>Block A</td>
+              <td>21.0</td>
+              <td><span class="badge warning">₱ 7,640.00</span></td>
+              <td><button class="btn-action" onclick="viewStudent(this)">View</button></td>
+            </tr>
+            <?php endforeach; ?>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <div class="modal-overlay" id="viewStudentModal">
+    <div class="modal-container">
+      <button class="modal-close" onclick="closeViewStudentModal()">&times;</button>
+      <div class="student-info-grid">
+        <div class="student-info-left">
+          <div class="info-line"><strong><i class="fas fa-id-card"></i> Student ID:</strong> <span class="highlight" id="modalStudentID">-</span></div>
+          <div class="info-line"><strong><i class="fas fa-user"></i> Name:</strong> <span id="modalStudentName">-</span></div>
+          <div class="info-line"><strong><i class="fas fa-book-open"></i> Course:</strong> <span id="modalStudentCourse">-</span></div>
         </div>
-        <div class="table-wrapper">
-          <table id="enrolledTable">
-            <thead>
-              <tr>
-                <th class="sortable" onclick="sortTable(0)">Student ID <i class="fas fa-sort"></i></th>
-                <th class="sortable" onclick="sortTable(1)">Full Name <i class="fas fa-sort"></i></th>
-                <th class="sortable" onclick="sortTable(2)">Year Level <i class="fas fa-sort"></i></th>
-                <th class="sortable" onclick="sortTable(3)">Courses <i class="fas fa-sort"></i></th>
-                <th class="sortable" onclick="sortTable(4)">Block <i class="fas fa-sort"></i></th>
-                <th class="sortable" onclick="sortTable(5)">Units <i class="fas fa-sort"></i></th>
-                <th class="sortable" onclick="sortTable(6)">Balance <i class="fas fa-sort"></i></th>
-                <th class="no-sort">Action</th>
-              </tr>
-            </thead>
-            <tbody id="enrolledTableBody">
-              <!-- Static Sample Data -->
-              <tr data-year="3rd Year">
-                <td>2024-0061</td>
-                <td>Mipanga, Almadin Nor</td>
-                <td>3rd Year</td>
-                <td>BS Computer Science</td>
-                <td>Block A</td>
-                <td>21.0</td>
-                <td><span class="badge warning">₱ 7,640.00</span></td>
-                <td>
-                  <button class="btn-action" onclick="viewStudent(this)">
-                    View
-                  </button>
-                </td>
-              </tr>
+        <div class="student-info-right">
+          <div class="info-line"><strong><i class="fas fa-graduation-cap"></i> Year Level:</strong> <span id="modalStudentYear">-</span></div>
+          <div class="info-line"><strong><i class="fas fa-print"></i> Date Printed:</strong> <span id="modalStudentDate">-</span></div>
+        </div>
+      </div>
+
+      <table class="course-table">
+        <thead>
+          <tr><th>Code</th><th>Description</th><th>Units</th><th>Day</th><th>Time</th><th>Room</th><th>Block</th></tr>
+        </thead>
+        <tbody id="modalCourseBody"></tbody>
+      </table>
+
+      <div class="payment-assessment-wrap">
+        <div class="payment-assess-card">
+          <div class="card-header"><i class="fas fa-receipt"></i> Payment Details</div>
+          <table class="data-table">
+            <thead><tr><th>#</th><th>Date</th><th>O.R. No.</th><th>Amount</th></tr></thead>
+            <tbody id="modalPaymentBody">
+              <tr><td>1</td><td>Jun 02, 2026</td><td>OR-001</td><td>₱ 5,000.00</td></tr>
+              <tr><td>2</td><td>Jun 15, 2026</td><td>OR-002</td><td>₱ 3,000.00</td></tr>
+              <tr><td>3</td><td>Jul 05, 2026</td><td>OR-003</td><td>₱ 2,000.00</td></tr>
+              <tr><td>4</td><td>Aug 10, 2026</td><td>OR-004</td><td>₱ 2,000.00</td></tr>
+              <tr class="total-paid-row"><td colspan="3" style="text-align:right">TOTAL PAID:</td><td>₱ 12,000.00</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="payment-assess-card">
+          <div class="card-header"><i class="fas fa-calculator"></i> Assessment</div>
+          <table class="data-table">
+            <tbody id="modalAssessmentBody">
+              <tr class="assessment-item"><td>Tuition Fee:</td><td>₱ 14,070.00</td></tr>
+              <tr class="assessment-item"><td>Academic:</td><td>₱ 1,200.00</td></tr>
+              <tr class="assessment-item"><td>Computer:</td><td>₱ 1,850.00</td></tr>
+              <tr class="assessment-item"><td>Misc. Fee:</td><td>₱ 2,100.00</td></tr>
+              <tr class="assessment-item"><td>NSTP:</td><td>₱ 0.00</td></tr>
+              <tr class="assessment-item"><td>Others:</td><td>₱ 420.00</td></tr>
+              <tr class="assessment-total"><td>TOTAL:</td><td>₱ 19,640.00</td></tr>
+              <tr class="assessment-remaining"><td>Balance:</td><td>₱ 7,640.00</td></tr>
             </tbody>
           </table>
         </div>
       </div>
-    </main>
-
-    <!-- ===== VIEW STUDENT MODAL ===== -->
-    <div class="modal-overlay" id="viewStudentModal">
-      <div class="modal-container">
-        <button class="modal-close" onclick="closeViewStudentModal()">
-          &times;
-        </button>
-
-        <!-- Student Info -->
-        <div class="student-info-grid">
-          <div class="student-info-left">
-            <div class="info-line">
-              <strong><i class="fas fa-id-card"></i> Student ID:</strong>
-              <span class="highlight" id="modalStudentID">-</span>
-            </div>
-            <div class="info-line">
-              <strong><i class="fas fa-user"></i> Name:</strong>
-              <span id="modalStudentName">-</span>
-            </div>
-            <div class="info-line">
-              <strong><i class="fas fa-book-open"></i> Course:</strong>
-              <span id="modalStudentCourse">-</span>
-            </div>
-          </div>
-          <div class="student-info-right">
-            <div class="info-line">
-              <strong><i class="fas fa-graduation-cap"></i> Year Level:</strong>
-              <span id="modalStudentYear">-</span>
-            </div>
-            <div class="info-line">
-              <strong><i class="fas fa-print"></i> Date Printed:</strong>
-              <span id="modalStudentDate">-</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Enrolled Courses Table -->
-        <table class="course-table">
-          <thead>
-            <tr>
-              <th>Code</th>
-              <th>Description</th>
-              <th>Units</th>
-              <th>Day</th>
-              <th>Time</th>
-              <th>Room</th>
-              <th>Block</th>
-            </tr>
-          </thead>
-          <tbody id="modalCourseBody">
-            <!-- Populated via JS -->
-          </tbody>
-        </table>
-
-        <!-- Payment & Assessment -->
-        <div class="payment-assessment-wrap">
-          <!-- Payment Details -->
-          <div class="payment-assess-card">
-            <div class="card-header">
-              <i class="fas fa-receipt"></i> Payment Details
-            </div>
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Date</th>
-                  <th>O.R. No.</th>
-                  <th>Amount</th>
-                </tr>
-              </thead>
-              <tbody id="modalPaymentBody">
-                <tr>
-                  <td>1</td>
-                  <td>Jun 02, 2026</td>
-                  <td>OR-001</td>
-                  <td>₱ 5,000.00</td>
-                </tr>
-                <tr>
-                  <td>2</td>
-                  <td>Jun 15, 2026</td>
-                  <td>OR-002</td>
-                  <td>₱ 3,000.00</td>
-                </tr>
-                <tr>
-                  <td>3</td>
-                  <td>Jul 05, 2026</td>
-                  <td>OR-003</td>
-                  <td>₱ 2,000.00</td>
-                </tr>
-                <tr>
-                  <td>4</td>
-                  <td>Aug 10, 2026</td>
-                  <td>OR-004</td>
-                  <td>₱ 2,000.00</td>
-                </tr>
-                <tr class="total-paid-row">
-                  <td colspan="3" style="text-align: right">TOTAL PAID:</td>
-                  <td>₱ 12,000.00</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <!-- Assessment (NO PAY BUTTON) -->
-          <div class="payment-assess-card">
-            <div class="card-header">
-              <i class="fas fa-calculator"></i> Assessment
-            </div>
-            <table class="data-table">
-              <tbody id="modalAssessmentBody">
-                <tr class="assessment-item">
-                  <td>Tuition Fee:</td>
-                  <td>₱ 14,070.00</td>
-                </tr>
-                <tr class="assessment-item">
-                  <td>Academic:</td>
-                  <td>₱ 1,200.00</td>
-                </tr>
-                <tr class="assessment-item">
-                  <td>Computer:</td>
-                  <td>₱ 1,850.00</td>
-                </tr>
-                <tr class="assessment-item">
-                  <td>Misc. Fee:</td>
-                  <td>₱ 2,100.00</td>
-                </tr>
-                <tr class="assessment-item">
-                  <td>NSTP:</td>
-                  <td>₱ 0.00</td>
-                </tr>
-                <tr class="assessment-item">
-                  <td>Others:</td>
-                  <td>₱ 420.00</td>
-                </tr>
-                <tr class="assessment-total">
-                  <td>TOTAL:</td>
-                  <td>₱ 19,640.00</td>
-                </tr>
-                <tr class="assessment-remaining">
-                  <td>Balance:</td>
-                  <td>₱ 7,640.00</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
     </div>
+  </div>
 
-    <!-- Script for Filtering, Viewing, and localStorage -->
-    <script>
-      let sortDirection = 1; // 1 = Ascending, -1 = Descending
+  <script src="script.js"></script>
+  <script>
+    let sortDirection = 1;
 
-      document.addEventListener("DOMContentLoaded", () => {
-        // Search Functionality
-        const searchInput = document.getElementById("userSearchInput");
-        const enrollmentTable = document.getElementById("enrolledTable");
-        const rows = enrollmentTable.querySelectorAll("tbody tr");
-
+    document.addEventListener("DOMContentLoaded", () => {
+      const searchInput = document.getElementById("userSearchInput");
+      const enrollmentTable = document.getElementById("enrolledTable");
+      if (searchInput && enrollmentTable) {
         searchInput.addEventListener("input", (e) => {
           const searchTerm = e.target.value.toLowerCase();
-
-          rows.forEach((row) => {
-            const rowText = row.textContent.toLowerCase();
-            if (rowText.includes(searchTerm)) {
-              row.style.display = "";
-            } else {
-              row.style.display = "none";
-            }
+          enrollmentTable.querySelectorAll("tbody tr").forEach((row) => {
+            row.style.display = row.textContent.toLowerCase().includes(searchTerm) ? "" : "none";
           });
         });
+      }
+      updateUnitsCard();
+    });
 
-        // Load Students from localStorage
-        loadEnrolledStudents();
+    function updateUnitsCard() {
+      let totalUnits = 0;
+      document.querySelectorAll("#enrolledTableBody tr").forEach((row) => {
+        totalUnits += parseFloat(row.cells[5].textContent) || 0;
       });
+      document.getElementById("totalUnitsCard").textContent = totalUnits.toFixed(1);
+    }
 
-      // Function to Sort Table by Column
-      function sortTable(columnIndex) {
-        const table = document.getElementById("enrolledTable");
-        const tbody = table.querySelector("tbody");
-        const rows = Array.from(tbody.rows);
+    function sortTable(columnIndex) {
+      const table = document.getElementById("enrolledTable");
+      const tbody = table.querySelector("tbody");
+      const rows = Array.from(tbody.rows);
+      sortDirection = sortDirection === 1 ? -1 : 1;
+      rows.sort((a, b) => {
+        const aText = a.cells[columnIndex].textContent.trim().toLowerCase();
+        const bText = b.cells[columnIndex].textContent.trim().toLowerCase();
+        if (aText < bText) return -1 * sortDirection;
+        if (aText > bText) return 1 * sortDirection;
+        return 0;
+      });
+      rows.forEach(row => tbody.appendChild(row));
+      document.querySelectorAll('th.sortable i').forEach(i => i.className = 'fas fa-sort');
+      const activeTh = table.querySelector(`th.sortable:nth-child(${columnIndex + 1}) i`);
+      if (activeTh) activeTh.className = sortDirection === 1 ? 'fas fa-sort-up' : 'fas fa-sort-down';
+    }
 
-        // Toggle sort direction
-        sortDirection = sortDirection === 1 ? -1 : 1;
+    function viewStudent(button) {
+      const row = button.closest("tr");
+      document.getElementById("modalStudentID").textContent = row.cells[0].textContent;
+      document.getElementById("modalStudentName").textContent = row.cells[1].textContent;
+      document.getElementById("modalStudentYear").textContent = row.cells[2].textContent;
+      document.getElementById("modalStudentCourse").textContent = row.cells[3].textContent;
+      document.getElementById("modalStudentDate").textContent = new Date().toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'});
 
-        // Sort rows
-        rows.sort((a, b) => {
-          const aText = a.cells[columnIndex].textContent.trim().toLowerCase();
-          const bText = b.cells[columnIndex].textContent.trim().toLowerCase();
-          
-          if (aText < bText) return -1 * sortDirection;
-          if (aText > bText) return 1 * sortDirection;
-          return 0;
-        });
-
-        // Re-append rows in sorted order
-        rows.forEach(row => tbody.appendChild(row));
-
-        // Update sort icons
-        const sortIcons = document.querySelectorAll('th.sortable i');
-        sortIcons.forEach(icon => {
-          icon.className = 'fas fa-sort';
-        });
-        
-        const activeTh = table.querySelector(`th.sortable:nth-child(${columnIndex + 1}) i`);
-        if (activeTh) {
-          activeTh.className = sortDirection === 1 ? 'fas fa-sort-up' : 'fas fa-sort-down';
-        }
-      }
-
-      // Load Enrolled Students from localStorage
-      function loadEnrolledStudents() {
-        const tbody = document.getElementById("enrolledTableBody");
-        const enrolledStudents =
-          JSON.parse(localStorage.getItem("enrolledStudents")) || [];
-
-        // Add students from localStorage
-        enrolledStudents.forEach((student) => {
-          const row = document.createElement("tr");
-          row.setAttribute("data-year", "3rd Year");
-          row.innerHTML = `
-          <td>${student.studentID}</td>
-          <td>${student.fullName}</td>
-          <td>3rd Year</td>
-          <td>${student.course}</td>
-          <td>Block A</td>
-          <td>${student.totalUnits}</td>
-          <td><span class="badge warning">${student.totalAssessment}</span></td>
-          <td><button class="btn-action" onclick="viewStudent(this)">View</button></td>
-        `;
-          tbody.appendChild(row);
-        });
-
-        // Update Summary Cards
-        const allRows = document.querySelectorAll("#enrolledTableBody tr");
-        document.getElementById("totalStudentsCard").textContent =
-          allRows.length;
-
-        let totalUnits = 0;
-        allRows.forEach((row) => {
-          totalUnits += parseFloat(row.cells[5].textContent) || 0;
-        });
-        document.getElementById("totalUnitsCard").textContent =
-          totalUnits.toFixed(1);
-      }
-
-      // View Student Function (Opens COR Modal)
-      function viewStudent(button) {
-        const row = button.closest("tr");
-
-        // Fill Student Info
-        document.getElementById("modalStudentID").textContent =
-          row.cells[0].textContent;
-        document.getElementById("modalStudentName").textContent =
-          row.cells[1].textContent;
-        document.getElementById("modalStudentYear").textContent =
-          row.cells[2].textContent;
-        document.getElementById("modalStudentCourse").textContent =
-          row.cells[3].textContent;
-        document.getElementById("modalStudentDate").textContent =
-          "June 9, 2026";
-
-        // Populate Courses (Sample Data for Demonstration)
-        const modalCourseBody = document.getElementById("modalCourseBody");
-        modalCourseBody.innerHTML = `
+      document.getElementById("modalCourseBody").innerHTML = `
         <tr><td>PC7</td><td>Automata Theory & Formal Languages</td><td>3.0</td><td>MON / WED</td><td>07:30 AM - 09:00 AM</td><td>208 / CL1</td><td>Block A</td></tr>
         <tr><td>PC8</td><td>Architecture and Organization</td><td>3.0</td><td>MON / WED</td><td>09:00 AM - 10:30 AM</td><td>208 / CL1</td><td>Block A</td></tr>
         <tr><td>PC11</td><td>Programming Languages</td><td>3.0</td><td>MON / WED</td><td>01:00 PM - 02:30 PM</td><td>208 / CL1</td><td>Block A</td></tr>
@@ -1059,20 +262,16 @@ if (!isset($_SESSION['admin_user'])) {
         <tr><td>PElective2</td><td>Graphics and Visual Computing</td><td>3.0</td><td>S</td><td>09:00 AM - 12:00 PM</td><td>209 / CL2</td><td>Block A</td></tr>
         <tr><td>PC12</td><td>Software Engineering 2</td><td>3.0</td><td>S</td><td>01:00 PM - 04:00 PM</td><td>ILAB</td><td>Block A</td></tr>
         <tr class="total-row">
-          <td colspan="2" style="text-align: right; padding-right: 20px;">TOTAL UNITS</td>
+          <td colspan="2" style="text-align:right; padding-right:20px;">TOTAL UNITS</td>
           <td>21.0</td>
-          <td colspan="4" style="text-align: left;">Bridging Subjects: 0 | NSTP: 0</td>
-        </tr>
-      `;
+          <td colspan="4" style="text-align:left;">Bridging Subjects: 0 | NSTP: 0</td>
+        </tr>`;
+      document.getElementById("viewStudentModal").classList.add("active");
+    }
 
-        // Show Modal
-        document.getElementById("viewStudentModal").classList.add("active");
-      }
-
-      // Close View Student Modal
-      function closeViewStudentModal() {
-        document.getElementById("viewStudentModal").classList.remove("active");
-      }
-    </script>
-  </body>
+    function closeViewStudentModal() {
+      document.getElementById("viewStudentModal").classList.remove("active");
+    }
+  </script>
+</body>
 </html>

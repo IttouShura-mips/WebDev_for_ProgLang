@@ -8,7 +8,6 @@ require 'db.php';
 
 $admin_name = htmlspecialchars($_SESSION['admin_name'] ?? $_SESSION['admin_user']);
 
-// Fetch users from the users table
 $users_list = [];
 $res = $conn->query("SELECT * FROM users ORDER BY user_id DESC");
 while ($row = $res->fetch_assoc()) { $users_list[] = $row; }
@@ -31,7 +30,6 @@ if (isset($_GET['delete'])) {
   <link rel="stylesheet" href="adminpanelstyle.css">
   <style>
     .view-modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .view-modal-grid.full { grid-template-columns: 1fr; }
     .view-modal-section { margin-bottom: 18px; }
     .view-modal-section h4 { color: var(--primary-neon); font-size: 0.95rem; margin-bottom: 10px; border-bottom: 1px solid var(--border-teal); padding-bottom: 6px; }
     .view-modal-row { display: flex; margin-bottom: 8px; font-size: 0.88rem; }
@@ -62,7 +60,7 @@ if (isset($_GET['delete'])) {
 
   <main class="main-content">
     <header class="top-header">
-      <h1>Registered Users</h1>
+      <h1>User Table List</h1>
       <div class="header-right">
         <div class="search-container">
           <input type="text" id="userSearchInput" placeholder="Search users..." autocomplete="off"/>
@@ -78,7 +76,7 @@ if (isset($_GET['delete'])) {
     <section class="tables-container">
       <div class="table-card">
         <div class="table-header">
-          <h2>User Accounts</h2>
+          <h2>Registered Users</h2>
           <div class="table-controls">
             <input type="text" class="section-search" placeholder="Search username or name..." data-table="userTable">
           </div>
@@ -95,8 +93,8 @@ if (isset($_GET['delete'])) {
             </thead>
             <tbody>
               <?php if (count($users_list) > 0): ?>
-                <?php foreach ($users_list as $u): 
-                  $full_name = trim($u['first_name'] . ' ' . $u['middle_name'] . ' ' . $u['last_name']);
+                <?php foreach ($users_list as $u):
+                  $full_name = trim(($u['first_name'] ?? '') . ' ' . ($u['middle_name'] ?? '') . ' ' . ($u['last_name'] ?? ''));
                 ?>
                 <tr data-record='<?php echo htmlspecialchars(json_encode($u), ENT_QUOTES, "UTF-8"); ?>'>
                   <td>#USR-<?php echo str_pad($u['user_id'], 3, '0', STR_PAD_LEFT); ?></td>
@@ -105,7 +103,7 @@ if (isset($_GET['delete'])) {
                   <td>
                     <div class="action-group">
                       <button class="btn-action" onclick="openViewModal(this)" style="border-color:#10b981; color:#10b981;"><i class="fa-solid fa-eye"></i> View</button>
-                      <button class="btn-action delete" onclick="openDeleteModal(<?php echo $u['user_id']; ?>, '<?php echo htmlspecialchars($u['username'], ENT_QUOTES); ?>')">Delete</button>
+                      <button class="btn-action delete" onclick="openDeleteModal(<?php echo $u['user_id']; ?>, '<?php echo htmlspecialchars($u['username'], ENT_QUOTES); ?>')">Terminate</button>
                     </div>
                   </td>
                 </tr>
@@ -127,36 +125,33 @@ if (isset($_GET['delete'])) {
         <h3><i class="fa-solid fa-user"></i> User Details</h3>
         <button class="modal-close-btn" onclick="closeViewModal()"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <div class="modal-body" id="viewModalBody">
-        <!-- Populated by JS -->
-      </div>
+      <div class="modal-body" id="viewModalBody"></div>
       <div class="modal-footer">
         <button class="btn primary" onclick="closeViewModal()">Close</button>
       </div>
     </div>
   </div>
 
+  <!-- Terminate Modal -->
   <div id="deleteModal" class="modal-overlay">
     <div class="modal-box">
       <div class="modal-header">
-        <h3>Confirm Delete</h3>
+        <h3>Confirm Termination</h3>
         <button class="modal-close" onclick="closeDeleteModal()">&times;</button>
       </div>
       <p style="color: var(--text-muted-teal); font-size: 0.9rem; margin-bottom: 20px;">
-        Are you sure you want to delete user <strong id="deleteUserName" style="color:var(--primary-neon);"></strong>? This action cannot be undone.
+        Are you sure you want to terminate account <strong id="deleteUserName" style="color:var(--primary-neon);"></strong>? This action cannot be undone.
       </p>
       <div class="modal-actions">
         <button type="button" class="btn-secondary" onclick="closeDeleteModal()">Cancel</button>
-        <a id="deleteLink" href="#"><button type="button" class="btn-danger">Delete</button></a>
+        <a id="deleteLink" href="#"><button type="button" class="btn-danger">Terminate</button></a>
       </div>
     </div>
   </div>
 
   <script src="script.js"></script>
   <script>
-    document.querySelectorAll('.section-search').forEach(el => {
-      el.addEventListener('input', filterTables);
-    });
+    document.querySelectorAll('.section-search').forEach(el => el.addEventListener('input', filterTables));
     function filterTables() {
       document.querySelectorAll('.section-search').forEach(search => {
         const tableId = search.getAttribute('data-table');
@@ -169,9 +164,7 @@ if (isset($_GET['delete'])) {
       });
     }
 
-    let deleteId = 0;
     function openDeleteModal(id, name) {
-      deleteId = id;
       document.getElementById('deleteUserName').textContent = name;
       document.getElementById('deleteLink').href = 'users.php?delete=' + id;
       document.getElementById('deleteModal').classList.add('active');
@@ -184,20 +177,16 @@ if (isset($_GET['delete'])) {
       const row = btn.closest('tr');
       const data = JSON.parse(row.getAttribute('data-record'));
       if (!data) return;
-
-      const sections = [
-        {
-          title: 'Account Information',
-          fields: [
-            ['User ID', '#USR-' + String(data.user_id).padStart(3, '0')],
-            ['Username', data.username],
-            ['First Name', data.first_name],
-            ['Middle Name', data.middle_name],
-            ['Last Name', data.last_name]
-          ]
-        }
-      ];
-
+      const sections = [{
+        title: 'Account Information',
+        fields: [
+          ['User ID', '#USR-' + String(data.user_id).padStart(3, '0')],
+          ['Username', data.username],
+          ['First Name', data.first_name],
+          ['Middle Name', data.middle_name],
+          ['Last Name', data.last_name]
+        ]
+      }];
       let html = '';
       sections.forEach(sec => {
         html += `<div class="view-modal-section"><h4>${sec.title}</h4><div class="view-modal-grid">`;
@@ -207,15 +196,12 @@ if (isset($_GET['delete'])) {
         });
         html += '</div></div>';
       });
-
       document.getElementById('viewModalBody').innerHTML = html;
       document.getElementById('viewUserModal').classList.add('active');
     }
-
     function closeViewModal() {
       document.getElementById('viewUserModal').classList.remove('active');
     }
-
     document.getElementById('viewUserModal').addEventListener('click', function(e) {
       if (e.target === this) closeViewModal();
     });

@@ -4,7 +4,156 @@ if (!isset($_SESSION['admin_user'])) {
     header("Location: login.html");
     exit();
 }
+require 'db.php';
+
 $admin_name = htmlspecialchars($_SESSION['admin_name'] ?? $_SESSION['admin_user']);
+
+/* ============================================
+   ENSURE TABLES EXIST
+   ============================================ */
+$conn->query("CREATE TABLE IF NOT EXISTS curriculums (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    code VARCHAR(50) NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    year_level VARCHAR(100) DEFAULT '',
+    academic_year VARCHAR(50) DEFAULT '',
+    total_units INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+$conn->query("CREATE TABLE IF NOT EXISTS curriculum_semesters (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    curriculum_id INT NOT NULL,
+    name VARCHAR(150) NOT NULL,
+    FOREIGN KEY (curriculum_id) REFERENCES curriculums(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+$conn->query("CREATE TABLE IF NOT EXISTS curriculum_subjects (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    semester_id INT NOT NULL,
+    prereq VARCHAR(100) DEFAULT 'None',
+    code VARCHAR(50) NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    lec DECIMAL(4,1) DEFAULT 0,
+    lab DECIMAL(4,1) DEFAULT 0,
+    units DECIMAL(4,1) DEFAULT 0,
+    FOREIGN KEY (semester_id) REFERENCES curriculum_semesters(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+/* ============================================
+   AJAX HANDLER
+   ============================================ */
+if (isset($_REQUEST['action'])) {
+    header('Content-Type: application/json; charset=utf-8');
+    $action = $_REQUEST['action'];
+
+    if ($action === 'list') {
+        $rows = [];
+        $res = $conn->query("SELECT * FROM curriculums ORDER BY id DESC");
+        while ($r = $res->fetch_assoc()) $rows[] = $r;
+        echo json_encode(['success'=>true, 'data'=>$rows]); exit;
+    }
+
+    if ($action === 'add_curriculum') {
+        $code = trim($_POST['code'] ?? '');
+        $title = trim($_POST['title'] ?? '');
+        $year = trim($_POST['year'] ?? '');
+        $ay = trim($_POST['academic_year'] ?? '');
+        $units = intval($_POST['units'] ?? 0);
+        if ($code === '' || $title === '') { echo json_encode(['success'=>false,'message'=>'Code and Title are required.']); exit; }
+        $stmt = $conn->prepare("INSERT INTO curriculums (code,title,year_level,academic_year,total_units) VALUES (?,?,?,?,?)");
+        $stmt->bind_param("ssssi", $code, $title, $year, $ay, $units);
+        if (!$stmt->execute()) { echo json_encode(['success'=>false,'message'=>$stmt->error]); exit; }
+        $cid = $stmt->insert_id;
+        $conn->query("INSERT INTO curriculum_semesters (curriculum_id, name) VALUES ($cid, '1st Year - 1st Semester')");
+        echo json_encode(['success'=>true, 'id'=>$cid]); exit;
+    }
+
+    if ($action === 'delete_curriculum') {
+        $id = intval($_POST['id'] ?? 0);
+        $conn->query("DELETE FROM curriculums WHERE id = $id");
+        echo json_encode(['success'=>true]); exit;
+    }
+
+    if ($action === 'get') {
+        $id = intval($_POST['id'] ?? 0);
+        $res = $conn->query("SELECT * FROM curriculums WHERE id = $id");
+        $cur = $res->fetch_assoc();
+        if (!$cur) { echo json_encode(['success'=>false,'message'=>'Not found']); exit; }
+        $sems = [];
+        $sr = $conn->query("SELECT * FROM curriculum_semesters WHERE curriculum_id = $id ORDER BY id ASC");
+        while ($s = $sr->fetch_assoc()) {
+            $subs = [];
+            $subres = $conn->query("SELECT * FROM curriculum_subjects WHERE semester_id = {$s['id']} ORDER BY id ASC");
+            while ($sub = $subres->fetch_assoc()) $subs[] = $sub;
+            $s['subjects'] = $subs;
+            $sems[] = $s;
+        }
+        $cur['semesters'] = $sems;
+        echo json_encode(['success'=>true, 'data'=>$cur]); exit;
+    }
+
+    if ($action === 'add_semester') {
+        $cid = intval($_POST['curriculum_id'] ?? 0);
+        $name = trim($_POST['name'] ?? '');
+        if ($name === '') { echo json_encode(['success'=>false,'message'=>'Name required']); exit; }
+        $stmt = $conn->prepare("INSERT INTO curriculum_semesters (curriculum_id, name) VALUES (?, ?)");
+        $stmt->bind_param("is", $cid, $name);
+        $stmt->execute();
+        echo json_encode(['success'=>true]); exit;
+    }
+
+    if ($action === 'edit_semester') {
+        $sid = intval($_POST['semester_id'] ?? 0);
+        $name = trim($_POST['name'] ?? '');
+        $stmt = $conn->prepare("UPDATE curriculum_semesters SET name = ? WHERE id = ?");
+        $stmt->bind_param("si", $name, $sid);
+        $stmt->execute();
+        echo json_encode(['success'=>true]); exit;
+    }
+
+    if ($action === 'delete_semester') {
+        $sid = intval($_POST['semester_id'] ?? 0);
+        $conn->query("DELETE FROM curriculum_semesters WHERE id = $sid");
+        echo json_encode(['success'=>true]); exit;
+    }
+
+    if ($action === 'add_subject') {
+        $sid = intval($_POST['semester_id'] ?? 0);
+        $prereq = trim($_POST['prereq'] ?? 'None');
+        $code = trim($_POST['code'] ?? '');
+        $title = trim($_POST['title'] ?? '');
+        $lec = floatval($_POST['lec'] ?? 0);
+        $lab = floatval($_POST['lab'] ?? 0);
+        $units = floatval($_POST['units'] ?? 0);
+        $stmt = $conn->prepare("INSERT INTO curriculum_subjects (semester_id, prereq, code, title, lec, lab, units) VALUES (?,?,?,?,?,?,?)");
+        $stmt->bind_param("isssddd", $sid, $prereq, $code, $title, $lec, $lab, $units);
+        if (!$stmt->execute()) { echo json_encode(['success'=>false,'message'=>$stmt->error]); exit; }
+        echo json_encode(['success'=>true]); exit;
+    }
+
+    if ($action === 'edit_subject') {
+        $subId = intval($_POST['subject_id'] ?? 0);
+        $prereq = trim($_POST['prereq'] ?? 'None');
+        $code = trim($_POST['code'] ?? '');
+        $title = trim($_POST['title'] ?? '');
+        $lec = floatval($_POST['lec'] ?? 0);
+        $lab = floatval($_POST['lab'] ?? 0);
+        $units = floatval($_POST['units'] ?? 0);
+        $stmt = $conn->prepare("UPDATE curriculum_subjects SET prereq=?, code=?, title=?, lec=?, lab=?, units=? WHERE id=?");
+        $stmt->bind_param("sssdddi", $prereq, $code, $title, $lec, $lab, $units, $subId);
+        if (!$stmt->execute()) { echo json_encode(['success'=>false,'message'=>$stmt->error]); exit; }
+        echo json_encode(['success'=>true]); exit;
+    }
+
+    if ($action === 'delete_subject') {
+        $subId = intval($_POST['subject_id'] ?? 0);
+        $conn->query("DELETE FROM curriculum_subjects WHERE id = $subId");
+        echo json_encode(['success'=>true]); exit;
+    }
+
+    echo json_encode(['success'=>false, 'message'=>'Unknown action']); exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -36,9 +185,9 @@ $admin_name = htmlspecialchars($_SESSION['admin_name'] ?? $_SESSION['admin_user'
     .operation-modal-box { background:var(--bg-card); border:1px solid var(--border-teal); border-radius:16px; width:100%; max-width:500px; max-height:90vh; overflow-y:auto; box-shadow:0 20px 50px rgba(0,0,0,0.8); padding:30px; color:var(--text-high-contrast); text-align:center; }
     .operation-icon { font-size:50px; margin-bottom:15px; }
     .operation-modal-box.success { border-color:var(--success-green); box-shadow:0 20px 50px rgba(16,185,129,0.3); }
-    .operation-modal-box.warning { border-color:var(--warning-yellow); box-shadow:0 20px 50px rgba(245,158,11,0.3); }
+    .operation-modal-box.warning { border-color:#f59e0b; box-shadow:0 20px 50px rgba(245,158,11,0.3); }
     .operation-modal-box.success .operation-icon { color:var(--success-green); }
-    .operation-modal-box.warning .operation-icon { color:var(--warning-yellow); }
+    .operation-modal-box.warning .operation-icon { color:#f59e0b; }
     .operation-modal-box h3 { font-size:20px; font-weight:800; margin-bottom:10px; }
     .operation-modal-box p { font-size:14px; color:var(--text-muted-teal); margin-bottom:20px; line-height:1.6; }
     .operation-form-group { margin-bottom:15px; text-align:left; }
@@ -50,13 +199,12 @@ $admin_name = htmlspecialchars($_SESSION['admin_name'] ?? $_SESSION['admin_user'
     .op-btn.cancel:hover { background:var(--bg-card-hover); }
     .op-btn.confirm-success { background:var(--success-green); color:white; }
     .op-btn.confirm-success:hover { background:#059669; }
-    .op-btn.confirm-danger { background:var(--danger-red); color:white; }
+    .op-btn.confirm-danger { background:#dc2626; color:white; }
     .op-btn.confirm-danger:hover { background:#b91c1c; }
 
     .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(2,12,27,0.95); backdrop-filter:blur(8px); z-index:2000; justify-content:center; align-items:center; padding:20px; }
     .modal-overlay.active { display:flex; }
     .modal-container { background:var(--bg-card); border:1px solid var(--border-teal); border-radius:16px; width:100%; max-width:600px; max-height:90vh; overflow-y:auto; box-shadow:0 20px 50px rgba(0,0,0,0.8); padding:30px; color:var(--text-high-contrast); position:relative; }
-    @keyframes modalFadeIn { from{opacity:0; transform:translateY(-20px);} to{opacity:1; transform:translateY(0);} }
     .modal-close { position:absolute; top:15px; right:20px; background:transparent; border:none; color:var(--text-muted-teal); font-size:28px; cursor:pointer; }
     .modal-close:hover { color:#ef4444; }
     .modal-title { font-size:20px; font-weight:800; color:var(--primary-neon); margin-bottom:20px; display:flex; align-items:center; gap:10px; }
@@ -135,8 +283,8 @@ $admin_name = htmlspecialchars($_SESSION['admin_name'] ?? $_SESSION['admin_user'
     <div class="cards-grid">
       <div class="card"><h3>Total Curriculums</h3><div class="card-value" id="totalCurriculumsCard">0</div></div>
       <div class="card"><h3>Active Programs</h3><div class="card-value" id="activeProgramsCard">0</div></div>
-      <div class="card"><h3>Total Courses Offered</h3><div class="card-value">24</div></div>
-      <div class="card"><h3>Total Units Enrolled</h3><div class="card-value">156</div></div>
+      <div class="card"><h3>Total Courses Offered</h3><div class="card-value" id="totalCoursesCard">0</div></div>
+      <div class="card"><h3>Total Units Enrolled</h3><div class="card-value" id="totalUnitsCard">0</div></div>
     </div>
 
     <div class="table-card">
@@ -167,7 +315,7 @@ $admin_name = htmlspecialchars($_SESSION['admin_name'] ?? $_SESSION['admin_user'
     <div class="modal-container">
       <button class="modal-close" onclick="closeAddCurriculumModal()">&times;</button>
       <div class="modal-title"><i class="fas fa-plus-circle"></i> Add Course</div>
-      <form id="addCurriculumForm">
+      <form id="addCurriculumForm" onsubmit="event.preventDefault(); saveCurriculum();">
         <div class="form-group"><label>Course Code</label><input type="text" id="curriculumCode" placeholder="e.g., BSCS-2024" required /></div>
         <div class="form-group"><label>Course Title</label><input type="text" id="curriculumTitle" placeholder="e.g., Bachelor of Science in Computer Science" required /></div>
         <div class="form-group"><label>Year Level Covered</label><input type="text" id="curriculumYear" placeholder="e.g., 1st - 4th Year" required /></div>
@@ -205,53 +353,20 @@ $admin_name = htmlspecialchars($_SESSION['admin_name'] ?? $_SESSION['admin_user'
   <script>
     let sortDirection = 1;
     let operationCallback = null;
+    let currentCurriculumId = null;
+    let currentCurriculumData = null;
 
-    const curriculumData = [
-      { code:"BSCS-2024", title:"Bachelor of Science in Computer Science", year:"1st - 4th Year", academicYear:"S.Y. 2023-2024", totalUnits:210,
-        details:{ school:"INTERWORLD COLLEGES FOUNDATION, INC", address:"Burgos St., Paniqui, Tarlac", courseTitle:"Bachelor of Science in Computer Science", yearLevel:"S.Y. 2023-2024",
-          semesters:[
-            { name:"1st Year - 1st Semester", subjects:[
-              {prereq:"None", code:"GECCOED101YG1", title:"Understanding the Self", lec:3, lab:0, units:3},
-              {prereq:"None", code:"GECPCOM101YG1", title:"Purposive Communication", lec:3, lab:0, units:3},
-              {prereq:"None", code:"GECMATH101YG1", title:"Mathematics in the Modern World", lec:3, lab:0, units:3},
-              {prereq:"None", code:"GECRPHIL101YG1", title:"Readings in Philippine History", lec:3, lab:0, units:3},
-              {prereq:"None", code:"GECETHIC101YG1", title:"Ethics", lec:3, lab:0, units:3},
-              {prereq:"None", code:"GECSCTS101YG1", title:"Science, Technology and Society", lec:3, lab:0, units:3},
-              {prereq:"None", code:"CC1", title:"Introduction to Computing", lec:2, lab:3, units:3},
-              {prereq:"None", code:"PC1", title:"Computer Programming 1 (Fund. of Programming)", lec:2, lab:3, units:3},
-              {prereq:"None", code:"NSTP101YG1", title:"CWTS/ROTC 1", lec:3, lab:0, units:3},
-              {prereq:"None", code:"PE1", title:"Physical Activities Towards Health and Fitness 1", lec:2, lab:0, units:2}
-            ]},
-            { name:"1st Year - 2nd Semester", subjects:[
-              {prereq:"None", code:"GECRIZAL101YG1", title:"Rizal's Life and Works", lec:3, lab:0, units:3},
-              {prereq:"None", code:"GECARTAP101YG2", title:"Art Appreciation", lec:3, lab:0, units:3},
-              {prereq:"None", code:"CC2", title:"Computer Programming 2", lec:2, lab:3, units:3},
-              {prereq:"None", code:"CC3", title:"Discrete Structures", lec:3, lab:0, units:3},
-              {prereq:"None", code:"PC2", title:"Data Structures and Algorithms", lec:2, lab:3, units:3},
-              {prereq:"None", code:"PCOMPEI101", title:"Web Systems and Technologies 1", lec:2, lab:3, units:3},
-              {prereq:"None", code:"PC3", title:"Information Assurance and Security 1", lec:2, lab:3, units:3},
-              {prereq:"None", code:"NSTP102YG1", title:"CWTS/ROTC 2", lec:3, lab:0, units:3},
-              {prereq:"None", code:"PE2", title:"Physical Activities Towards Health and Fitness 2", lec:2, lab:0, units:2}
-            ]}
-          ]
-        }
-      },
-      { code:"BSACT-2023", title:"2-Year Associate in Computer Technology", year:"1st - 2nd Year", academicYear:"S.Y. 2022-2023", totalUnits:90,
-        details:{ school:"INTERWORLD COLLEGES FOUNDATION, INC", address:"Burgos St., Paniqui, Tarlac", courseTitle:"2-Year Associate in Computer Technology", yearLevel:"S.Y. 2022-2023",
-          semesters:[
-            { name:"1st Year - 1st Semester", subjects:[
-              {prereq:"None", code:"BRIDGING101 Math 2", title:"Plane Trigonometry", lec:0, lab:0, units:3},
-              {prereq:"None", code:"BRIDGING102 Math 3", title:"Probabilities and Statistics", lec:0, lab:0, units:3},
-              {prereq:"None", code:"ACTGECOD101YG1", title:"Understanding the Self", lec:3, lab:0, units:3}
-            ]},
-            { name:"1st Year - 2nd Semester", subjects:[
-              {prereq:"None", code:"BRIDGING103 Nat Sci 1", title:"College Physics 1", lec:0, lab:0, units:3},
-              {prereq:"None", code:"ACTGECOT102YG1", title:"Mathematics in the Modern World", lec:3, lab:0, units:3}
-            ]}
-          ]
-        }
-      }
-    ];
+    function escapeHtml(s) {
+      return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+
+    async function apiPost(action, data = {}) {
+      const fd = new FormData();
+      fd.append('action', action);
+      for (const k in data) fd.append(k, data[k]);
+      const res = await fetch('curriculum.php', { method: 'POST', body: fd });
+      return res.json();
+    }
 
     document.addEventListener('DOMContentLoaded', () => {
       loadCurriculumData();
@@ -263,28 +378,25 @@ $admin_name = htmlspecialchars($_SESSION['admin_name'] ?? $_SESSION['admin_user'
           row.style.display = row.textContent.toLowerCase().includes(term) ? '' : 'none';
         });
       });
-      updateSummaryCards();
     });
 
+    /* ============ Modals ============ */
     function showSuccessModal(title, message) {
       const modal = document.getElementById('operationModal');
       const box = document.getElementById('operationBox');
-      const icon = document.getElementById('operationIcon');
       box.className = 'operation-modal-box success';
-      icon.innerHTML = '<i class="fas fa-check-circle"></i>';
+      document.getElementById('operationIcon').innerHTML = '<i class="fas fa-check-circle"></i>';
       document.getElementById('operationTitle').textContent = title;
       document.getElementById('operationMessage').textContent = message;
       document.getElementById('operationFormContainer').style.display = 'none';
       document.getElementById('operationActions').innerHTML = `<button class="op-btn confirm-success" onclick="closeOperationModal()">OK</button>`;
       modal.classList.add('active');
     }
-
     function showWarningModal(title, message, confirmText, callback) {
       const modal = document.getElementById('operationModal');
       const box = document.getElementById('operationBox');
-      const icon = document.getElementById('operationIcon');
       box.className = 'operation-modal-box warning';
-      icon.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+      document.getElementById('operationIcon').innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
       document.getElementById('operationTitle').textContent = title;
       document.getElementById('operationMessage').textContent = message;
       document.getElementById('operationFormContainer').style.display = 'none';
@@ -294,18 +406,16 @@ $admin_name = htmlspecialchars($_SESSION['admin_name'] ?? $_SESSION['admin_user'
         <button class="op-btn confirm-danger" onclick="executeOperation()">${confirmText}</button>`;
       modal.classList.add('active');
     }
-
     function showInputModal(title, fields, callback) {
       const modal = document.getElementById('operationModal');
       const box = document.getElementById('operationBox');
-      const icon = document.getElementById('operationIcon');
       box.className = 'operation-modal-box';
-      icon.innerHTML = '<i class="fas fa-edit"></i>';
+      document.getElementById('operationIcon').innerHTML = '<i class="fas fa-edit"></i>';
       document.getElementById('operationTitle').textContent = title;
       document.getElementById('operationMessage').textContent = '';
       let formHtml = '';
       fields.forEach((field, i) => {
-        formHtml += `<div class="operation-form-group"><label>${field.label}</label><input type="text" id="op_field_${i}" value="${field.value || ''}" /></div>`;
+        formHtml += `<div class="operation-form-group"><label>${field.label}</label><input type="text" id="op_field_${i}" value="${escapeHtml(field.value || '')}" /></div>`;
       });
       document.getElementById('operationFormContainer').innerHTML = formHtml;
       document.getElementById('operationFormContainer').style.display = 'block';
@@ -315,38 +425,206 @@ $admin_name = htmlspecialchars($_SESSION['admin_name'] ?? $_SESSION['admin_user'
         <button class="op-btn confirm-success" onclick="executeInputOperation()">Save</button>`;
       modal.classList.add('active');
     }
-
-    function executeOperation() { if (operationCallback) operationCallback(); closeOperationModal(); }
+    function executeOperation() { const cb = operationCallback; closeOperationModal(); if (cb) cb(); }
     function executeInputOperation() {
-      if (operationCallback) {
-        const values = [];
-        document.querySelectorAll('#operationFormContainer input').forEach(i => values.push(i.value));
-        operationCallback(values);
-      }
+      const cb = operationCallback;
+      const values = [];
+      document.querySelectorAll('#operationFormContainer input').forEach(i => values.push(i.value));
       closeOperationModal();
+      if (cb) cb(values);
     }
     function closeOperationModal() {
       document.getElementById('operationModal').classList.remove('active');
       operationCallback = null;
     }
 
-    function loadCurriculumData() {
+    /* ============ Load list ============ */
+    async function loadCurriculumData() {
       const tbody = document.getElementById('curriculumTableBody');
+      const r = await apiPost('list');
+      if (!r.success) return;
       tbody.innerHTML = '';
-      curriculumData.forEach((c, index) => {
-        const row = document.createElement('tr');
-        row.innerHTML = `<td>${c.code}</td><td>${c.title}</td><td>${c.academicYear}</td><td>${c.totalUnits}</td>
-          <td><div class="action-group"><button class="btn-action view" onclick="viewCurriculum(${index})"><i class="fas fa-eye"></i> View</button></div></td>`;
-        tbody.appendChild(row);
+      let grandTotalUnits = 0;
+      r.data.forEach(c => {
+        grandTotalUnits += parseInt(c.total_units) || 0;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${escapeHtml(c.code)}</td><td>${escapeHtml(c.title)}</td><td>${escapeHtml(c.academic_year)}</td><td>${c.total_units}</td>
+          <td><div class="action-group">
+            <button class="btn-action view" onclick="viewCurriculum(${c.id})"><i class="fas fa-eye"></i> View</button>
+            <button class="btn-action delete" onclick="deleteCurriculum(${c.id})"><i class="fas fa-trash"></i></button>
+          </div></td>`;
+        tbody.appendChild(tr);
+      });
+      document.getElementById('totalCurriculumsCard').textContent = r.data.length;
+      document.getElementById('activeProgramsCard').textContent = r.data.length;
+      document.getElementById('totalCoursesCard').textContent = r.data.length;
+      document.getElementById('totalUnitsCard').textContent = grandTotalUnits;
+    }
+
+    /* ============ View curriculum ============ */
+    async function viewCurriculum(id) {
+      currentCurriculumId = id;
+      const r = await apiPost('get', { id });
+      if (!r.success) { alert(r.message); return; }
+      currentCurriculumData = r.data;
+      const c = r.data;
+      const body = document.getElementById('viewCurriculumBody');
+      let html = `<div class="curriculum-info">
+        <h2>INTERWORLD COLLEGES FOUNDATION, INC</h2>
+        <h3>Burgos St., Paniqui, Tarlac</h3>
+        <p><strong>${escapeHtml(c.title)}</strong></p>
+        <p>${escapeHtml(c.academic_year)}</p></div>`;
+      c.semesters.forEach(sem => {
+        html += `<div class="semester-section"><div class="semester-header">
+          <div class="semester-title">${escapeHtml(sem.name)}</div>
+          <div class="semester-actions">
+            <button class="btn-small add" onclick="addSubject(${sem.id})">+ Add Subject</button>
+            <button class="btn-small" onclick="editSemesterName(${sem.id})">Rename</button>
+            <button class="btn-small" onclick="deleteSemester(${sem.id})">Delete</button>
+          </div></div>
+          <table class="curriculum-table"><thead><tr><th>Pre-req</th><th>Code</th><th>Title</th><th>Lec</th><th>Lab</th><th>Units</th><th>Actions</th></tr></thead><tbody>`;
+        sem.subjects.forEach(s => {
+          html += `<tr><td>${escapeHtml(s.prereq)}</td><td>${escapeHtml(s.code)}</td><td>${escapeHtml(s.title)}</td>
+            <td>${s.lec}</td><td>${s.lab}</td><td>${s.units}</td>
+            <td><button class="btn-small" onclick="editSubject(${s.id})">Edit</button>
+            <button class="btn-small" onclick="deleteSubject(${s.id})">Delete</button></td></tr>`;
+        });
+        const tL = sem.subjects.reduce((sum, s) => sum + parseFloat(s.lec), 0);
+        const tB = sem.subjects.reduce((sum, s) => sum + parseFloat(s.lab), 0);
+        const tU = sem.subjects.reduce((sum, s) => sum + parseFloat(s.units), 0);
+        html += `</tbody><tr class="total-row"><td colspan="2" style="text-align:right;">TOTAL</td><td></td><td>${tL}</td><td>${tB}</td><td>${tU}</td><td></td></tr></table></div>`;
+      });
+      html += `<div style="text-align:center; margin-top:20px;"><button class="btn-save" onclick="addSemester()"><i class="fas fa-plus"></i> Add Semester</button></div>`;
+      body.innerHTML = html;
+      document.getElementById('viewCurriculumModal').classList.add('active');
+    }
+
+    function findSubject(subjectId) {
+      if (!currentCurriculumData) return null;
+      for (const sem of currentCurriculumData.semesters)
+        for (const sub of sem.subjects)
+          if (sub.id == subjectId) return sub;
+      return null;
+    }
+
+    /* ============ Semester CRUD ============ */
+    function addSemester() {
+      showInputModal("Add New Semester", [{label:"Semester Name", value:""}], async (values) => {
+        if (!values[0]) return;
+        const r = await apiPost('add_semester', { curriculum_id: currentCurriculumId, name: values[0] });
+        if (r.success) { await viewCurriculum(currentCurriculumId); showSuccessModal("Success!", "Semester added successfully."); }
+        else alert(r.message);
+      });
+    }
+    function editSemesterName(semesterId) {
+      const sem = currentCurriculumData.semesters.find(s => s.id == semesterId);
+      if (!sem) return;
+      showInputModal("Edit Semester Name", [{label:"Semester Name", value:sem.name}], async (values) => {
+        if (!values[0]) return;
+        const r = await apiPost('edit_semester', { semester_id: semesterId, name: values[0] });
+        if (r.success) { await viewCurriculum(currentCurriculumId); showSuccessModal("Updated!", "Semester name updated."); }
+        else alert(r.message);
+      });
+    }
+    function deleteSemester(semesterId) {
+      showWarningModal("Delete Semester", "Are you sure you want to delete this semester?", "Delete", async () => {
+        const r = await apiPost('delete_semester', { semester_id: semesterId });
+        if (r.success) { await viewCurriculum(currentCurriculumId); showSuccessModal("Deleted!", "Semester deleted successfully."); }
+        else alert(r.message);
       });
     }
 
-    function updateSummaryCards() {
-      const rows = document.querySelectorAll('#curriculumTableBody tr');
-      document.getElementById('totalCurriculumsCard').textContent = rows.length;
-      document.getElementById('activeProgramsCard').textContent = curriculumData.length;
+    /* ============ Subject CRUD ============ */
+    function addSubject(semesterId) {
+      showInputModal("Add New Subject", [
+        {label:"Pre-requisite", value:"None"},
+        {label:"Subject Code", value:""},
+        {label:"Subject Title", value:""},
+        {label:"Lecture Units", value:"3"},
+        {label:"Lab Units", value:"0"},
+        {label:"Total Units", value:"3"}
+      ], async (values) => {
+        const r = await apiPost('add_subject', {
+          semester_id: semesterId,
+          prereq: values[0] || "None",
+          code: values[1] || "",
+          title: values[2] || "",
+          lec: values[3] || 0,
+          lab: values[4] || 0,
+          units: values[5] || 0
+        });
+        if (r.success) { await viewCurriculum(currentCurriculumId); showSuccessModal("Success!", "Subject added successfully."); }
+        else alert(r.message);
+      });
+    }
+    function editSubject(subjectId) {
+      const sub = findSubject(subjectId);
+      if (!sub) return;
+      showInputModal("Edit Subject", [
+        {label:"Pre-requisite", value:sub.prereq},
+        {label:"Subject Code", value:sub.code},
+        {label:"Subject Title", value:sub.title},
+        {label:"Lecture Units", value:sub.lec},
+        {label:"Lab Units", value:sub.lab},
+        {label:"Total Units", value:sub.units}
+      ], async (values) => {
+        const r = await apiPost('edit_subject', {
+          subject_id: subjectId,
+          prereq: values[0] || sub.prereq,
+          code: values[1] || sub.code,
+          title: values[2] || sub.title,
+          lec: values[3] || sub.lec,
+          lab: values[4] || sub.lab,
+          units: values[5] || sub.units
+        });
+        if (r.success) { await viewCurriculum(currentCurriculumId); showSuccessModal("Updated!", "Subject updated successfully."); }
+        else alert(r.message);
+      });
+    }
+    function deleteSubject(subjectId) {
+      showWarningModal("Delete Subject", "Are you sure you want to delete this subject?", "Delete", async () => {
+        const r = await apiPost('delete_subject', { subject_id: subjectId });
+        if (r.success) { await viewCurriculum(currentCurriculumId); showSuccessModal("Deleted!", "Subject deleted successfully."); }
+        else alert(r.message);
+      });
     }
 
+    function deleteCurriculum(id) {
+      showWarningModal("Delete Curriculum", "Are you sure you want to delete this entire curriculum? All semesters and subjects will be removed.", "Delete", async () => {
+        const r = await apiPost('delete_curriculum', { id });
+        if (r.success) { await loadCurriculumData(); showSuccessModal("Deleted!", "Curriculum deleted successfully."); }
+        else alert(r.message);
+      });
+    }
+
+    function closeViewCurriculumModal() { document.getElementById('viewCurriculumModal').classList.remove('active'); }
+
+    /* ============ Add Course modal ============ */
+    function openAddCurriculumModal() {
+      document.getElementById('addCurriculumForm').reset();
+      document.getElementById('addCurriculumModal').classList.add('active');
+    }
+    function closeAddCurriculumModal() { document.getElementById('addCurriculumModal').classList.remove('active'); }
+
+    async function saveCurriculum() {
+      const code = document.getElementById('curriculumCode').value.trim();
+      const title = document.getElementById('curriculumTitle').value.trim();
+      const year = document.getElementById('curriculumYear').value.trim();
+      const academicYear = document.getElementById('curriculumAcademicYear').value.trim();
+      const units = document.getElementById('curriculumUnits').value.trim();
+      if (!code || !title || !year || !academicYear || !units) {
+        showWarningModal("Missing Information", "Please fill in all fields before saving.", "OK", null);
+        return;
+      }
+      const r = await apiPost('add_curriculum', { code, title, year, academic_year: academicYear, units });
+      if (r.success) {
+        await loadCurriculumData();
+        closeAddCurriculumModal();
+        showSuccessModal("Course Added!", "Course has been added successfully! Click 'View' to add detailed subjects.");
+      } else alert(r.message);
+    }
+
+    /* ============ Sorting ============ */
     function sortTable(columnIndex) {
       const table = document.getElementById('curriculumTable');
       const tbody = table.querySelector('tbody');
@@ -363,134 +641,6 @@ $admin_name = htmlspecialchars($_SESSION['admin_name'] ?? $_SESSION['admin_user'
       document.querySelectorAll('th.sortable i').forEach(i => i.className = 'fas fa-sort');
       const active = table.querySelector(`th.sortable:nth-child(${columnIndex + 1}) i`);
       if (active) active.className = sortDirection === 1 ? 'fas fa-sort-up' : 'fas fa-sort-down';
-    }
-
-    function viewCurriculum(index) {
-      const curriculum = curriculumData[index];
-      const body = document.getElementById('viewCurriculumBody');
-      let html = `<div class="curriculum-info">
-        <h2>${curriculum.details.school}</h2>
-        <h3>${curriculum.details.address}</h3>
-        <p><strong>${curriculum.details.courseTitle}</strong></p>
-        <p>${curriculum.details.yearLevel}</p></div>`;
-      curriculum.details.semesters.forEach((sem, sIdx) => {
-        html += `<div class="semester-section"><div class="semester-header">
-          <div class="semester-title">${sem.name}</div>
-          <div class="semester-actions">
-            <button class="btn-small add" onclick="addSubject(${index}, ${sIdx})">+ Add Subject</button>
-            <button class="btn-small" onclick="editSemesterName(${index}, ${sIdx})">Rename</button>
-            <button class="btn-small" onclick="deleteSemester(${index}, ${sIdx})">Delete</button>
-          </div></div>
-          <table class="curriculum-table"><thead><tr><th>Pre-req</th><th>Code</th><th>Title</th><th>Lec</th><th>Lab</th><th>Units</th><th>Actions</th></tr></thead><tbody>`;
-        sem.subjects.forEach((s, subIdx) => {
-          html += `<tr><td>${s.prereq}</td><td>${s.code}</td><td>${s.title}</td><td>${s.lec}</td><td>${s.lab}</td><td>${s.units}</td>
-            <td><button class="btn-small" onclick="editSubject(${index}, ${sIdx}, ${subIdx})">Edit</button> <button class="btn-small" onclick="deleteSubject(${index}, ${sIdx}, ${subIdx})">Delete</button></td></tr>`;
-        });
-        const tL = sem.subjects.reduce((sum, s) => sum + parseFloat(s.lec), 0);
-        const tB = sem.subjects.reduce((sum, s) => sum + parseFloat(s.lab), 0);
-        const tU = sem.subjects.reduce((sum, s) => sum + parseFloat(s.units), 0);
-        html += `</tbody><tr class="total-row"><td colspan="2" style="text-align:right;">TOTAL</td><td></td><td>${tL}</td><td>${tB}</td><td>${tU}</td><td></td></tr></table></div>`;
-      });
-      html += `<div style="text-align:center; margin-top:20px;"><button class="btn-save" onclick="addSemester(${index})"><i class="fas fa-plus"></i> Add Semester</button></div>`;
-      body.innerHTML = html;
-      document.getElementById('viewCurriculumModal').classList.add('active');
-    }
-
-    function addSemester(index) {
-      showInputModal("Add New Semester", [{label:"Semester Name", value:""}], (values) => {
-        if (values[0]) {
-          curriculumData[index].details.semesters.push({ name: values[0], subjects: [] });
-          viewCurriculum(index);
-          showSuccessModal("Success!", "Semester added successfully.");
-        }
-      });
-    }
-    function deleteSemester(index, sIdx) {
-      showWarningModal("Delete Semester", "Are you sure you want to delete this semester?", "Delete", () => {
-        curriculumData[index].details.semesters.splice(sIdx, 1);
-        viewCurriculum(index);
-        showSuccessModal("Deleted!", "Semester deleted successfully.");
-      });
-    }
-    function editSemesterName(index, sIdx) {
-      const currentName = curriculumData[index].details.semesters[sIdx].name;
-      showInputModal("Edit Semester Name", [{label:"Semester Name", value:currentName}], (values) => {
-        if (values[0]) {
-          curriculumData[index].details.semesters[sIdx].name = values[0];
-          viewCurriculum(index);
-          showSuccessModal("Updated!", "Semester name updated.");
-        }
-      });
-    }
-    function addSubject(index, sIdx) {
-      showInputModal("Add New Subject", [
-        {label:"Pre-requisite", value:"None"},
-        {label:"Subject Code", value:""},
-        {label:"Subject Title", value:""},
-        {label:"Lecture Units", value:"3"},
-        {label:"Lab Units", value:"0"},
-        {label:"Total Units", value:"3"}
-      ], (values) => {
-        curriculumData[index].details.semesters[sIdx].subjects.push({
-          prereq: values[0]||"None", code: values[1]||"", title: values[2]||"",
-          lec: values[3]||0, lab: values[4]||0, units: values[5]||0
-        });
-        viewCurriculum(index);
-        showSuccessModal("Success!", "Subject added successfully.");
-      });
-    }
-    function editSubject(index, sIdx, subIdx) {
-      const sub = curriculumData[index].details.semesters[sIdx].subjects[subIdx];
-      showInputModal("Edit Subject", [
-        {label:"Pre-requisite", value:sub.prereq},
-        {label:"Subject Code", value:sub.code},
-        {label:"Subject Title", value:sub.title},
-        {label:"Lecture Units", value:sub.lec},
-        {label:"Lab Units", value:sub.lab},
-        {label:"Total Units", value:sub.units}
-      ], (values) => {
-        curriculumData[index].details.semesters[sIdx].subjects[subIdx] = {
-          prereq: values[0]||sub.prereq, code: values[1]||sub.code, title: values[2]||sub.title,
-          lec: values[3]||sub.lec, lab: values[4]||sub.lab, units: values[5]||sub.units
-        };
-        viewCurriculum(index);
-        showSuccessModal("Updated!", "Subject updated successfully.");
-      });
-    }
-    function deleteSubject(index, sIdx, subIdx) {
-      showWarningModal("Delete Subject", "Are you sure you want to delete this subject?", "Delete", () => {
-        curriculumData[index].details.semesters[sIdx].subjects.splice(subIdx, 1);
-        viewCurriculum(index);
-        showSuccessModal("Deleted!", "Subject deleted successfully.");
-      });
-    }
-    function closeViewCurriculumModal() { document.getElementById('viewCurriculumModal').classList.remove('active'); }
-
-    function openAddCurriculumModal() {
-      document.getElementById('addCurriculumForm').reset();
-      document.getElementById('addCurriculumModal').classList.add('active');
-    }
-    function closeAddCurriculumModal() { document.getElementById('addCurriculumModal').classList.remove('active'); }
-    function saveCurriculum() {
-      const code = document.getElementById('curriculumCode').value;
-      const title = document.getElementById('curriculumTitle').value;
-      const year = document.getElementById('curriculumYear').value;
-      const academicYear = document.getElementById('curriculumAcademicYear').value;
-      const units = document.getElementById('curriculumUnits').value;
-      if (!code || !title || !year || !academicYear || !units) {
-        showWarningModal("Missing Information", "Please fill in all fields before saving.", "OK", null);
-        return;
-      }
-      curriculumData.push({
-        code: code, title: title, year: year, academicYear: academicYear, totalUnits: parseInt(units),
-        details: { school: "INTERWORLD COLLEGES FOUNDATION, INC", address: "Burgos St., Paniqui, Tarlac",
-          courseTitle: title, yearLevel: academicYear,
-          semesters: [{ name: "1st Year - 1st Semester", subjects: [] }]
-        }
-      });
-      loadCurriculumData(); updateSummaryCards();
-      closeAddCurriculumModal();
-      showSuccessModal("Course Added!", "Course has been added successfully! Click 'View' to add detailed subjects.");
     }
   </script>
 </body>

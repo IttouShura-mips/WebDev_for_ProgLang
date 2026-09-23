@@ -4,7 +4,193 @@ if (!isset($_SESSION['admin_user'])) {
     header("Location: login.html");
     exit();
 }
+require 'db.php';
+
 $admin_name = htmlspecialchars($_SESSION['admin_name'] ?? $_SESSION['admin_user']);
+
+/* ============================================
+   ENSURE TABLES EXIST
+   ============================================ */
+$conn->query("CREATE TABLE IF NOT EXISTS instructors (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    full_name VARCHAR(255) NOT NULL,
+    department VARCHAR(50) NOT NULL,
+    status ENUM('active','former') DEFAULT 'active',
+    profile_pic VARCHAR(255) DEFAULT '',
+    gender VARCHAR(20) DEFAULT '',
+    birthday DATE DEFAULT NULL,
+    citizenship VARCHAR(50) DEFAULT '',
+    civil_status VARCHAR(30) DEFAULT '',
+    employment VARCHAR(30) DEFAULT '',
+    email VARCHAR(255) DEFAULT '',
+    phone VARCHAR(30) DEFAULT '',
+    address VARCHAR(255) DEFAULT '',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+$conn->query("CREATE TABLE IF NOT EXISTS instructor_subjects (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    instructor_id INT NOT NULL,
+    code VARCHAR(50) DEFAULT '',
+    title VARCHAR(255) DEFAULT '',
+    units DECIMAL(4,1) DEFAULT 0,
+    FOREIGN KEY (instructor_id) REFERENCES instructors(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+$conn->query("CREATE TABLE IF NOT EXISTS instructor_schedules (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    instructor_id INT NOT NULL,
+    day VARCHAR(50) DEFAULT '',
+    time VARCHAR(100) DEFAULT '',
+    room VARCHAR(50) DEFAULT '',
+    subject VARCHAR(50) DEFAULT '',
+    FOREIGN KEY (instructor_id) REFERENCES instructors(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+/* ============================================
+   AJAX HANDLER
+   ============================================ */
+if (isset($_REQUEST['action'])) {
+    header('Content-Type: application/json; charset=utf-8');
+    $action = $_REQUEST['action'];
+
+    if ($action === 'list') {
+        $rows = [];
+        $res = $conn->query("SELECT * FROM instructors ORDER BY id ASC");
+        while ($r = $res->fetch_assoc()) {
+            // total units per instructor
+            $tid = intval($r['id']);
+            $u = $conn->query("SELECT COALESCE(SUM(units),0) AS total FROM instructor_subjects WHERE instructor_id = $tid")->fetch_assoc();
+            $r['total_units'] = floatval($u['total']);
+            $rows[] = $r;
+        }
+        echo json_encode(['success'=>true, 'data'=>$rows]); exit;
+    }
+
+    if ($action === 'get') {
+        $id = intval($_POST['id'] ?? 0);
+        $res = $conn->query("SELECT * FROM instructors WHERE id = $id");
+        $inst = $res->fetch_assoc();
+        if (!$inst) { echo json_encode(['success'=>false,'message'=>'Not found']); exit; }
+        $subs = [];
+        $sr = $conn->query("SELECT * FROM instructor_subjects WHERE instructor_id = $id ORDER BY id ASC");
+        while ($s = $sr->fetch_assoc()) $subs[] = $s;
+        $sch = [];
+        $scr = $conn->query("SELECT * FROM instructor_schedules WHERE instructor_id = $id ORDER BY id ASC");
+        while ($s = $scr->fetch_assoc()) $sch[] = $s;
+        $inst['subjects'] = $subs;
+        $inst['schedules'] = $sch;
+        echo json_encode(['success'=>true, 'data'=>$inst]); exit;
+    }
+
+    if ($action === 'add') {
+        $stmt = $conn->prepare("INSERT INTO instructors (full_name, department, gender, birthday, citizenship, civil_status, employment, email, phone, address, status) VALUES (?,?,?,?,?,?,?,?,?,?, 'active')");
+        $full = trim($_POST['full_name'] ?? '');
+        $dept = trim($_POST['department'] ?? 'CICS');
+        $gender = trim($_POST['gender'] ?? '');
+        $bday = trim($_POST['birthday'] ?? '') ?: null;
+        $cit = trim($_POST['citizenship'] ?? '');
+        $civil = trim($_POST['civil_status'] ?? '');
+        $emp = trim($_POST['employment'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+        $phone = trim($_POST['phone'] ?? '');
+        $addr = trim($_POST['address'] ?? '');
+        if ($full === '') { echo json_encode(['success'=>false,'message'=>'Full name required.']); exit; }
+        $stmt->bind_param("ssssssssss", $full, $dept, $gender, $bday, $cit, $civil, $emp, $email, $phone, $addr);
+        if (!$stmt->execute()) { echo json_encode(['success'=>false,'message'=>$stmt->error]); exit; }
+        echo json_encode(['success'=>true, 'id'=>$stmt->insert_id]); exit;
+    }
+
+    if ($action === 'edit') {
+        $id = intval($_POST['id'] ?? 0);
+        $full = trim($_POST['full_name'] ?? '');
+        $dept = trim($_POST['department'] ?? 'CICS');
+        $gender = trim($_POST['gender'] ?? '');
+        $bday = trim($_POST['birthday'] ?? '') ?: null;
+        $cit = trim($_POST['citizenship'] ?? '');
+        $civil = trim($_POST['civil_status'] ?? '');
+        $emp = trim($_POST['employment'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+        $phone = trim($_POST['phone'] ?? '');
+        $addr = trim($_POST['address'] ?? '');
+        $stmt = $conn->prepare("UPDATE instructors SET full_name=?, department=?, gender=?, birthday=?, citizenship=?, civil_status=?, employment=?, email=?, phone=?, address=? WHERE id=?");
+        $stmt->bind_param("ssssssssssi", $full, $dept, $gender, $bday, $cit, $civil, $emp, $email, $phone, $addr, $id);
+        if (!$stmt->execute()) { echo json_encode(['success'=>false,'message'=>$stmt->error]); exit; }
+        echo json_encode(['success'=>true]); exit;
+    }
+
+    if ($action === 'archive') {
+        $id = intval($_POST['id'] ?? 0);
+        $conn->query("UPDATE instructors SET status='former' WHERE id=$id");
+        echo json_encode(['success'=>true]); exit;
+    }
+    if ($action === 'restore') {
+        $id = intval($_POST['id'] ?? 0);
+        $conn->query("UPDATE instructors SET status='active' WHERE id=$id");
+        echo json_encode(['success'=>true]); exit;
+    }
+    if ($action === 'delete') {
+        $id = intval($_POST['id'] ?? 0);
+        $conn->query("DELETE FROM instructors WHERE id=$id");
+        echo json_encode(['success'=>true]); exit;
+    }
+
+    if ($action === 'add_subject') {
+        $iid = intval($_POST['instructor_id'] ?? 0);
+        $code = trim($_POST['code'] ?? '');
+        $title = trim($_POST['title'] ?? '');
+        $units = floatval($_POST['units'] ?? 0);
+        $stmt = $conn->prepare("INSERT INTO instructor_subjects (instructor_id, code, title, units) VALUES (?,?,?,?)");
+        $stmt->bind_param("issd", $iid, $code, $title, $units);
+        $stmt->execute();
+        echo json_encode(['success'=>true]); exit;
+    }
+    if ($action === 'edit_subject') {
+        $sid = intval($_POST['subject_id'] ?? 0);
+        $code = trim($_POST['code'] ?? '');
+        $title = trim($_POST['title'] ?? '');
+        $units = floatval($_POST['units'] ?? 0);
+        $stmt = $conn->prepare("UPDATE instructor_subjects SET code=?, title=?, units=? WHERE id=?");
+        $stmt->bind_param("ssdi", $code, $title, $units, $sid);
+        $stmt->execute();
+        echo json_encode(['success'=>true]); exit;
+    }
+    if ($action === 'delete_subject') {
+        $sid = intval($_POST['subject_id'] ?? 0);
+        $conn->query("DELETE FROM instructor_subjects WHERE id=$sid");
+        echo json_encode(['success'=>true]); exit;
+    }
+
+    if ($action === 'add_schedule') {
+        $iid = intval($_POST['instructor_id'] ?? 0);
+        $day = trim($_POST['day'] ?? '');
+        $time = trim($_POST['time'] ?? '');
+        $room = trim($_POST['room'] ?? '');
+        $subject = trim($_POST['subject'] ?? '');
+        $stmt = $conn->prepare("INSERT INTO instructor_schedules (instructor_id, day, time, room, subject) VALUES (?,?,?,?,?)");
+        $stmt->bind_param("issss", $iid, $day, $time, $room, $subject);
+        $stmt->execute();
+        echo json_encode(['success'=>true]); exit;
+    }
+    if ($action === 'edit_schedule') {
+        $sid = intval($_POST['schedule_id'] ?? 0);
+        $day = trim($_POST['day'] ?? '');
+        $time = trim($_POST['time'] ?? '');
+        $room = trim($_POST['room'] ?? '');
+        $subject = trim($_POST['subject'] ?? '');
+        $stmt = $conn->prepare("UPDATE instructor_schedules SET day=?, time=?, room=?, subject=? WHERE id=?");
+        $stmt->bind_param("ssssi", $day, $time, $room, $subject, $sid);
+        $stmt->execute();
+        echo json_encode(['success'=>true]); exit;
+    }
+    if ($action === 'delete_schedule') {
+        $sid = intval($_POST['schedule_id'] ?? 0);
+        $conn->query("DELETE FROM instructor_schedules WHERE id=$sid");
+        echo json_encode(['success'=>true]); exit;
+    }
+
+    echo json_encode(['success'=>false, 'message'=>'Unknown action']); exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -31,23 +217,23 @@ $admin_name = htmlspecialchars($_SESSION['admin_name'] ?? $_SESSION['admin_user'
     .operation-modal-box { background:var(--bg-card); border:1px solid var(--border-teal); border-radius:16px; width:100%; max-width:500px; max-height:90vh; overflow-y:auto; box-shadow:0 20px 50px rgba(0,0,0,0.8); padding:30px; color:var(--text-high-contrast); text-align:center; }
     .operation-icon { font-size:50px; margin-bottom:15px; }
     .operation-modal-box.success { border-color:var(--success-green); box-shadow:0 20px 50px rgba(16,185,129,0.3); }
-    .operation-modal-box.warning { border-color:var(--warning-yellow); box-shadow:0 20px 50px rgba(245,158,11,0.3); }
+    .operation-modal-box.warning { border-color:#f59e0b; box-shadow:0 20px 50px rgba(245,158,11,0.3); }
     .operation-modal-box.success .operation-icon { color:var(--success-green); }
-    .operation-modal-box.warning .operation-icon { color:var(--warning-yellow); }
+    .operation-modal-box.warning .operation-icon { color:#f59e0b; }
     .operation-modal-box h3 { font-size:20px; font-weight:800; margin-bottom:10px; }
     .operation-modal-box p { font-size:14px; color:var(--text-muted-teal); margin-bottom:20px; line-height:1.6; }
     .operation-form-group { margin-bottom:15px; text-align:left; }
     .operation-form-group label { display:block; font-size:12px; color:var(--text-muted-teal); font-weight:600; margin-bottom:6px; text-transform:uppercase; }
-    .operation-form-group input, .operation-form-group select, .operation-form-group textarea { width:100%; padding:10px; background:var(--bg-deep-abyss); border:1px solid var(--border-teal); border-radius:4px; font-size:0.9rem; color:var(--text-high-contrast); outline:none; font-family:inherit; }
+    .operation-form-group input { width:100%; padding:10px; background:var(--bg-deep-abyss); border:1px solid var(--border-teal); border-radius:4px; font-size:0.9rem; color:var(--text-high-contrast); outline:none; font-family:inherit; }
     .operation-form-group input[type="radio"] { width:auto; margin-right:5px; }
-    .operation-form-group .radio-label { display:inline-block; margin-right:15px; }
+    .operation-form-group .radio-label { display:inline-block; margin-right:15px; text-transform:none; font-size:0.9rem; }
     .operation-modal-actions { display:flex; justify-content:center; gap:10px; flex-wrap:wrap; }
     .op-btn { padding:10px 25px; border:none; border-radius:6px; cursor:pointer; font-weight:700; font-size:0.9rem; }
     .op-btn.cancel { background:var(--bg-card); color:var(--text-high-contrast); border:1px solid var(--border-teal); }
     .op-btn.cancel:hover { background:var(--bg-card-hover); }
     .op-btn.confirm-success { background:var(--success-green); color:white; }
     .op-btn.confirm-success:hover { background:#059669; }
-    .op-btn.confirm-danger { background:var(--danger-red); color:white; }
+    .op-btn.confirm-danger { background:#dc2626; color:white; }
     .op-btn.confirm-danger:hover { background:#b91c1c; }
 
     .view-modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(2,12,27,0.95); backdrop-filter:blur(8px); z-index:3000; justify-content:center; align-items:center; padding:20px; }
@@ -117,7 +303,7 @@ $admin_name = htmlspecialchars($_SESSION['admin_name'] ?? $_SESSION['admin_user'
       <div class="card"><h3>Total Instructors</h3><div class="card-value" id="totalInstructorsCard">0</div></div>
       <div class="card"><h3>Active Instructors</h3><div class="card-value" id="activeInstructorsCard">0</div></div>
       <div class="card"><h3>Former Instructors</h3><div class="card-value" id="formerInstructorsCard">0</div></div>
-      <div class="card"><h3>Total Departments</h3><div class="card-value">2</div></div>
+      <div class="card"><h3>Total Departments</h3><div class="card-value" id="totalDepartmentsCard">2</div></div>
     </div>
 
     <div class="department-section">
@@ -132,7 +318,7 @@ $admin_name = htmlspecialchars($_SESSION['admin_name'] ?? $_SESSION['admin_user'
         <div class="table-header"><h2>CICS - College of Information and Computing Sciences</h2></div>
         <div class="table-wrapper">
           <table class="instructor-table" data-department="CICS" data-status="active">
-            <thead><tr><th class="sortable">Full Name <i class="fas fa-sort"></i></th><th class="sortable">Department <i class="fas fa-sort"></i></th><th class="sortable">Units Handling <i class="fas fa-sort"></i></th><th class="no-sort">Action</th></tr></thead>
+            <thead><tr><th>Full Name</th><th>Department</th><th>Units Handling</th><th>Action</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
@@ -142,7 +328,7 @@ $admin_name = htmlspecialchars($_SESSION['admin_name'] ?? $_SESSION['admin_user'
         <div class="table-header"><h2>EDUC - College of Education</h2></div>
         <div class="table-wrapper">
           <table class="instructor-table" data-department="EDUC" data-status="active">
-            <thead><tr><th class="sortable">Full Name <i class="fas fa-sort"></i></th><th class="sortable">Department <i class="fas fa-sort"></i></th><th class="sortable">Units Handling <i class="fas fa-sort"></i></th><th class="no-sort">Action</th></tr></thead>
+            <thead><tr><th>Full Name</th><th>Department</th><th>Units Handling</th><th>Action</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
@@ -155,7 +341,7 @@ $admin_name = htmlspecialchars($_SESSION['admin_name'] ?? $_SESSION['admin_user'
         <div class="table-header"><h2>CICS - Former Instructors</h2></div>
         <div class="table-wrapper">
           <table class="instructor-table" data-department="CICS" data-status="former">
-            <thead><tr><th class="sortable">Full Name <i class="fas fa-sort"></i></th><th class="sortable">Department <i class="fas fa-sort"></i></th><th class="sortable">Units Handling <i class="fas fa-sort"></i></th><th class="no-sort">Action</th></tr></thead>
+            <thead><tr><th>Full Name</th><th>Department</th><th>Units Handling</th><th>Action</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
@@ -165,7 +351,7 @@ $admin_name = htmlspecialchars($_SESSION['admin_name'] ?? $_SESSION['admin_user'
         <div class="table-header"><h2>EDUC - Former Instructors</h2></div>
         <div class="table-wrapper">
           <table class="instructor-table" data-department="EDUC" data-status="former">
-            <thead><tr><th class="sortable">Full Name <i class="fas fa-sort"></i></th><th class="sortable">Department <i class="fas fa-sort"></i></th><th class="sortable">Units Handling <i class="fas fa-sort"></i></th><th class="no-sort">Action</th></tr></thead>
+            <thead><tr><th>Full Name</th><th>Department</th><th>Units Handling</th><th>Action</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
@@ -196,7 +382,20 @@ $admin_name = htmlspecialchars($_SESSION['admin_name'] ?? $_SESSION['admin_user'
   <script src="script.js"></script>
   <script>
     let operationCallback = null;
-    let currentViewIndex = null;
+    let currentInstructorId = null;
+    let currentInstructorData = null;
+
+    function escapeHtml(s) {
+      return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+
+    async function apiPost(action, data = {}) {
+      const fd = new FormData();
+      fd.append('action', action);
+      for (const k in data) fd.append(k, data[k]);
+      const res = await fetch('instructor.php', { method: 'POST', body: fd });
+      return res.json();
+    }
 
     function formatPhoneInput(input) {
       let value = input.value.replace(/\D/g, '');
@@ -208,88 +407,23 @@ $admin_name = htmlspecialchars($_SESSION['admin_name'] ?? $_SESSION['admin_user'
       input.value = f;
     }
 
-    const instructors = [
-      { id:1, fullName:"Engr. Cesar C. Gaspar", profilePic:"", department:"CICS", status:"active",
-        bioData:{gender:"Male", birthday:"1980-01-15", citizenship:"Filipino", civilStatus:"Married", employment:"Full-Time"},
-        contactInfo:{email:"cesar.gaspar@icf.edu.ph", phone:"0917-123-4567", address:"Burgos St., Paniqui, Tarlac"},
-        subjectHandling:[
-          {code:"PC7", title:"Automata Theory & Formal Languages", units:3},
-          {code:"PC8", title:"Architecture and Organization", units:3},
-          {code:"PC11", title:"Programming Languages", units:3},
-          {code:"PC10", title:"Information Assurance and Security", units:3},
-          {code:"PC12", title:"Software Engineering 2", units:3},
-          {code:"PC13", title:"Intelligent Systems", units:3}
-        ],
-        schedule:[
-          {day:"MON/WED", time:"07:30 AM - 09:00 AM", room:"208 / CL1", subject:"PC7"},
-          {day:"MON/WED", time:"09:00 AM - 10:30 AM", room:"208 / CL1", subject:"PC8"},
-          {day:"MON/WED", time:"01:00 PM - 02:30 PM", room:"208 / CL1", subject:"PC11"},
-          {day:"MON/WED", time:"02:30 PM - 04:00 PM", room:"208 / CL1", subject:"PC10"},
-          {day:"S", time:"01:00 PM - 04:00 PM", room:"ILAB", subject:"PC12"}
-        ]
-      },
-      { id:2, fullName:"Prof. Alma Reyes", profilePic:"", department:"CICS", status:"active",
-        bioData:{gender:"Female", birthday:"1988-03-10", citizenship:"Filipino", civilStatus:"Single", employment:"Full-Time"},
-        contactInfo:{email:"alma.reyes@icf.edu.ph", phone:"0918-456-7890", address:"Tarlac City"},
-        subjectHandling:[
-          {code:"PC1", title:"Computer Programming 1", units:3},
-          {code:"PC2", title:"Data Structures & Algorithms", units:3},
-          {code:"PC4", title:"Networks and Communication", units:3},
-          {code:"PC5", title:"Object-Oriented Programming", units:3}
-        ],
-        schedule:[
-          {day:"TUE/THU", time:"07:30 AM - 09:00 AM", room:"202 / CL2", subject:"PC1"},
-          {day:"TUE/THU", time:"09:00 AM - 10:30 AM", room:"202 / CL2", subject:"PC2"},
-          {day:"S", time:"09:00 AM - 12:00 PM", room:"202 / CL2", subject:"PC4"}
-        ]
-      },
-      { id:3, fullName:"Dr. Maria Santos", profilePic:"", department:"EDUC", status:"active",
-        bioData:{gender:"Female", birthday:"1985-05-22", citizenship:"Filipino", civilStatus:"Single", employment:"Full-Time"},
-        contactInfo:{email:"maria.santos@icf.edu.ph", phone:"0928-987-6543", address:"Tarlac City"},
-        subjectHandling:[
-          {code:"EDUC101", title:"Child and Adolescent Development", units:3},
-          {code:"EDUC102", title:"The Teaching Profession", units:3},
-          {code:"EDUC103", title:"Facilitating Learner-Centered Teaching", units:3}
-        ],
-        schedule:[
-          {day:"TUE/THU", time:"08:00 AM - 09:30 AM", room:"101 / EDUC", subject:"EDUC101"},
-          {day:"TUE/THU", time:"10:00 AM - 11:30 AM", room:"101 / EDUC", subject:"EDUC102"},
-          {day:"S", time:"09:00 AM - 12:00 PM", room:"102 / EDUC", subject:"EDUC103"}
-        ]
-      },
-      { id:4, fullName:"Prof. Dante Cruz", profilePic:"", department:"CICS", status:"former",
-        bioData:{gender:"Male", birthday:"1975-11-30", citizenship:"Filipino", civilStatus:"Married", employment:"Part-Time"},
-        contactInfo:{email:"dante.cruz@icf.edu.ph", phone:"0917-222-3344", address:"Paniqui, Tarlac"},
-        subjectHandling:[
-          {code:"PC6", title:"Information Assurance 2", units:3},
-          {code:"PC9", title:"Software Engineering 1", units:3}
-        ],
-        schedule:[
-          {day:"MON/WED", time:"04:00 PM - 05:30 PM", room:"208 / CL1", subject:"PC6"},
-          {day:"S", time:"09:00 AM - 12:00 PM", room:"209 / CL2", subject:"PC9"}
-        ]
-      }
-    ];
-
+    /* ============ Modals ============ */
     function showSuccessModal(title, message) {
       const modal = document.getElementById('operationModal');
       const box = document.getElementById('operationBox');
-      const icon = document.getElementById('operationIcon');
       box.className = 'operation-modal-box success';
-      icon.innerHTML = '<i class="fas fa-check-circle"></i>';
+      document.getElementById('operationIcon').innerHTML = '<i class="fas fa-check-circle"></i>';
       document.getElementById('operationTitle').textContent = title;
       document.getElementById('operationMessage').textContent = message;
       document.getElementById('operationFormContainer').style.display = 'none';
       document.getElementById('operationActions').innerHTML = `<button class="op-btn confirm-success" onclick="closeOperationModal()">OK</button>`;
       modal.classList.add('active');
     }
-
     function showWarningModal(title, message, confirmText, callback) {
       const modal = document.getElementById('operationModal');
       const box = document.getElementById('operationBox');
-      const icon = document.getElementById('operationIcon');
       box.className = 'operation-modal-box warning';
-      icon.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+      document.getElementById('operationIcon').innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
       document.getElementById('operationTitle').textContent = title;
       document.getElementById('operationMessage').textContent = message;
       document.getElementById('operationFormContainer').style.display = 'none';
@@ -299,13 +433,11 @@ $admin_name = htmlspecialchars($_SESSION['admin_name'] ?? $_SESSION['admin_user'
         <button class="op-btn confirm-danger" onclick="executeOperation()">${confirmText}</button>`;
       modal.classList.add('active');
     }
-
     function showInputModal(title, fields, callback) {
       const modal = document.getElementById('operationModal');
       const box = document.getElementById('operationBox');
-      const icon = document.getElementById('operationIcon');
       box.className = 'operation-modal-box';
-      icon.innerHTML = '<i class="fas fa-edit"></i>';
+      document.getElementById('operationIcon').innerHTML = '<i class="fas fa-edit"></i>';
       document.getElementById('operationTitle').textContent = title;
       document.getElementById('operationMessage').textContent = '';
       let formHtml = '';
@@ -317,7 +449,7 @@ $admin_name = htmlspecialchars($_SESSION['admin_name'] ?? $_SESSION['admin_user'
         } else if (field.type === 'phone') {
           formHtml += `<div class="operation-form-group"><label>${field.label}</label><input type="text" inputmode="numeric" id="op_field_${i}" value="${field.value || ''}" oninput="formatPhoneInput(this)" placeholder="0912-345-6789" /></div>`;
         } else {
-          formHtml += `<div class="operation-form-group"><label>${field.label}</label><input type="text" id="op_field_${i}" value="${field.value || ''}" /></div>`;
+          formHtml += `<div class="operation-form-group"><label>${field.label}</label><input type="text" id="op_field_${i}" value="${escapeHtml(field.value || '')}" /></div>`;
         }
       });
       document.getElementById('operationFormContainer').innerHTML = formHtml;
@@ -328,179 +460,110 @@ $admin_name = htmlspecialchars($_SESSION['admin_name'] ?? $_SESSION['admin_user'
         <button class="op-btn confirm-success" onclick="executeInputOperation()">Save</button>`;
       modal.classList.add('active');
     }
-
-    function executeOperation() { if (operationCallback) operationCallback(); closeOperationModal(); }
+    function executeOperation() { const cb = operationCallback; closeOperationModal(); if (cb) cb(); }
     function executeInputOperation() {
-      if (operationCallback) {
-        const values = [];
-        document.querySelectorAll('#operationFormContainer input').forEach(input => {
-          if (input.type === 'radio') { if (input.checked) values.push(input.value); }
-          else values.push(input.value);
-        });
-        operationCallback(values);
-      }
+      const cb = operationCallback;
+      const values = [];
+      document.querySelectorAll('#operationFormContainer input').forEach(input => {
+        if (input.type === 'radio') { if (input.checked) values.push(input.value); }
+        else values.push(input.value);
+      });
       closeOperationModal();
+      if (cb) cb(values);
     }
     function closeOperationModal() {
       document.getElementById('operationModal').classList.remove('active');
       operationCallback = null;
     }
 
-    function loadInstructors() {
+    /* ============ Load instructors ============ */
+    async function loadInstructors() {
+      const r = await apiPost('list');
+      if (!r.success) return;
+      const all = r.data;
+
       document.querySelectorAll('.instructor-table').forEach(table => {
-        const department = table.getAttribute('data-department');
+        const dept = table.getAttribute('data-department');
         const status = table.getAttribute('data-status');
         const tbody = table.querySelector('tbody');
         tbody.innerHTML = '';
-        instructors.forEach((instructor, index) => {
-          if (instructor.department === department && instructor.status === status) {
-            const totalUnits = instructor.subjectHandling.reduce((sum, s) => sum + parseFloat(s.units), 0);
-            let actions = status === 'active'
-              ? `<button class="btn-action view" onclick="viewInstructor(${index})"><i class="fas fa-eye"></i> View</button>
-                 <button class="btn-action archive" onclick="archiveInstructor(${index})"><i class="fas fa-archive"></i> Archive</button>`
-              : `<button class="btn-action view" onclick="viewInstructor(${index})"><i class="fas fa-eye"></i> View</button>
-                 <button class="btn-action restore" onclick="restoreInstructor(${index})"><i class="fas fa-undo"></i> Restore</button>
-                 <button class="btn-action delete" onclick="deleteInstructor(${index})"><i class="fas fa-trash"></i> Delete</button>`;
-            const row = document.createElement('tr');
-            row.innerHTML = `<td>${instructor.fullName}</td><td>${instructor.department}</td><td>${totalUnits}</td><td><div class="action-group">${actions}</div></td>`;
-            tbody.appendChild(row);
-          }
+        all.filter(i => i.department === dept && i.status === status).forEach(i => {
+          const actions = status === 'active'
+            ? `<button class="btn-action view" onclick="viewInstructor(${i.id})"><i class="fas fa-eye"></i> View</button>
+               <button class="btn-action archive" onclick="archiveInstructor(${i.id})"><i class="fas fa-archive"></i> Archive</button>`
+            : `<button class="btn-action view" onclick="viewInstructor(${i.id})"><i class="fas fa-eye"></i> View</button>
+               <button class="btn-action restore" onclick="restoreInstructor(${i.id})"><i class="fas fa-undo"></i> Restore</button>
+               <button class="btn-action delete" onclick="deleteInstructor(${i.id})"><i class="fas fa-trash"></i> Delete</button>`;
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${escapeHtml(i.full_name)}</td><td>${escapeHtml(i.department)}</td><td>${i.total_units}</td><td><div class="action-group">${actions}</div></td>`;
+          tbody.appendChild(tr);
         });
       });
-      updateSummaryCards();
+
+      document.getElementById('totalInstructorsCard').textContent = all.length;
+      document.getElementById('activeInstructorsCard').textContent = all.filter(i => i.status === 'active').length;
+      document.getElementById('formerInstructorsCard').textContent = all.filter(i => i.status === 'former').length;
     }
 
-    function updateSummaryCards() {
-      document.getElementById('totalInstructorsCard').textContent = instructors.length;
-      document.getElementById('activeInstructorsCard').textContent = instructors.filter(i => i.status === 'active').length;
-      document.getElementById('formerInstructorsCard').textContent = instructors.filter(i => i.status === 'former').length;
-    }
+    /* ============ View instructor ============ */
+    async function viewInstructor(id) {
+      currentInstructorId = id;
+      const r = await apiPost('get', { id });
+      if (!r.success) { alert(r.message); return; }
+      currentInstructorData = r.data;
+      const inst = r.data;
+      const canEdit = inst.status === 'active';
+      const initials = (inst.full_name || '').split(' ').filter(w => w[0] && w[0] === w[0].toUpperCase()).map(w => w[0]).slice(0,2).join('');
+      const totalUnits = inst.subjects.reduce((s, x) => s + parseFloat(x.units), 0);
 
-    function viewInstructor(index) {
-      const instructor = instructors[index];
-      const body = document.getElementById('viewInstructorBody');
-      const canEdit = instructor.status === 'active';
-      const initials = instructor.fullName.split(' ').filter(w => w[0] && w[0] === w[0].toUpperCase()).map(w => w[0]).slice(0,2).join('');
       let subjectHtml = '';
-      instructor.subjectHandling.forEach((subject, subIdx) => {
-        subjectHtml += `<tr><td>${subject.code}</td><td>${subject.title}</td><td>${subject.units}</td>${canEdit ? `<td><button class="btn-small" onclick="editSubject(${index}, ${subIdx})">Edit</button> <button class="btn-small" onclick="deleteSubject(${index}, ${subIdx})">Delete</button></td>` : ''}</tr>`;
+      inst.subjects.forEach(s => {
+        subjectHtml += `<tr><td>${escapeHtml(s.code)}</td><td>${escapeHtml(s.title)}</td><td>${s.units}</td>${canEdit ? `<td><button class="btn-small" onclick="editSubject(${s.id})">Edit</button> <button class="btn-small" onclick="deleteSubject(${s.id})">Delete</button></td>` : ''}</tr>`;
       });
       let scheduleHtml = '';
-      instructor.schedule.forEach((sched, schIdx) => {
-        scheduleHtml += `<tr><td>${sched.day}</td><td>${sched.time}</td><td>${sched.room}</td><td>${sched.subject}</td>${canEdit ? `<td><button class="btn-small" onclick="editSchedule(${index}, ${schIdx})">Edit</button> <button class="btn-small" onclick="deleteSchedule(${index}, ${schIdx})">Delete</button></td>` : ''}</tr>`;
+      inst.schedules.forEach(s => {
+        scheduleHtml += `<tr><td>${escapeHtml(s.day)}</td><td>${escapeHtml(s.time)}</td><td>${escapeHtml(s.room)}</td><td>${escapeHtml(s.subject)}</td>${canEdit ? `<td><button class="btn-small" onclick="editSchedule(${s.id})">Edit</button> <button class="btn-small" onclick="deleteSchedule(${s.id})">Delete</button></td>` : ''}</tr>`;
       });
-      const totalUnits = instructor.subjectHandling.reduce((sum, s) => sum + parseFloat(s.units), 0);
-      body.innerHTML = `
+
+      document.getElementById('viewInstructorBody').innerHTML = `
         <div class="profile-pic-container">
-          <div class="profile-pic">${instructor.profilePic ? `<img src="${instructor.profilePic}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` : initials}</div>
-          <h2>${instructor.fullName}</h2>
-          <p>${instructor.department} Department</p>
+          <div class="profile-pic">${initials}</div>
+          <h2>${escapeHtml(inst.full_name)}</h2>
+          <p>${escapeHtml(inst.department)} Department</p>
           <p style="color:var(--text-muted-teal); margin-top:5px;">Total Units Handling: <strong style="color:var(--primary-neon);">${totalUnits}</strong></p>
         </div>
         <div class="info-section"><div class="info-section-title">Bio Data</div>
           <div class="info-grid">
-            <div class="info-item"><span class="info-label">Gender:</span><span class="info-value">${instructor.bioData.gender}</span></div>
-            <div class="info-item"><span class="info-label">Birthday:</span><span class="info-value">${instructor.bioData.birthday}</span></div>
-            <div class="info-item"><span class="info-label">Citizenship:</span><span class="info-value">${instructor.bioData.citizenship}</span></div>
-            <div class="info-item"><span class="info-label">Civil Status:</span><span class="info-value">${instructor.bioData.civilStatus}</span></div>
-            <div class="info-item"><span class="info-label">Employment:</span><span class="info-value">${instructor.bioData.employment}</span></div>
+            <div class="info-item"><span class="info-label">Gender:</span><span class="info-value">${escapeHtml(inst.gender)}</span></div>
+            <div class="info-item"><span class="info-label">Birthday:</span><span class="info-value">${escapeHtml(inst.birthday)}</span></div>
+            <div class="info-item"><span class="info-label">Citizenship:</span><span class="info-value">${escapeHtml(inst.citizenship)}</span></div>
+            <div class="info-item"><span class="info-label">Civil Status:</span><span class="info-value">${escapeHtml(inst.civil_status)}</span></div>
+            <div class="info-item"><span class="info-label">Employment:</span><span class="info-value">${escapeHtml(inst.employment)}</span></div>
           </div>
         </div>
         <div class="info-section"><div class="info-section-title">Contact Info</div>
           <div class="info-grid">
-            <div class="info-item"><span class="info-label">Email:</span><span class="info-value">${instructor.contactInfo.email}</span></div>
-            <div class="info-item"><span class="info-label">Phone:</span><span class="info-value">${instructor.contactInfo.phone}</span></div>
-            <div class="info-item"><span class="info-label">Address:</span><span class="info-value">${instructor.contactInfo.address}</span></div>
+            <div class="info-item"><span class="info-label">Email:</span><span class="info-value">${escapeHtml(inst.email)}</span></div>
+            <div class="info-item"><span class="info-label">Phone:</span><span class="info-value">${escapeHtml(inst.phone)}</span></div>
+            <div class="info-item"><span class="info-label">Address:</span><span class="info-value">${escapeHtml(inst.address)}</span></div>
           </div>
         </div>
         <div class="info-section"><div class="info-section-title">Subject Handling</div>
-          ${canEdit ? `<div style="margin-bottom:10px;"><button class="btn-small add" onclick="addSubject(${index})">+ Add Subject</button></div>` : ''}
+          ${canEdit ? `<div style="margin-bottom:10px;"><button class="btn-small add" onclick="addSubject()">+ Add Subject</button></div>` : ''}
           <table class="subject-table"><thead><tr><th>Code</th><th>Title</th><th>Units</th>${canEdit ? '<th>Actions</th>' : ''}</tr></thead><tbody>${subjectHtml}</tbody></table>
         </div>
         <div class="info-section"><div class="info-section-title">Schedule List</div>
-          ${canEdit ? `<div style="margin-bottom:10px;"><button class="btn-small add" onclick="addSchedule(${index})">+ Add Schedule</button></div>` : ''}
+          ${canEdit ? `<div style="margin-bottom:10px;"><button class="btn-small add" onclick="addSchedule()">+ Add Schedule</button></div>` : ''}
           <table class="schedule-table"><thead><tr><th>Day</th><th>Time</th><th>Room</th><th>Subject</th>${canEdit ? '<th>Actions</th>' : ''}</tr></thead><tbody>${scheduleHtml}</tbody></table>
         </div>
-        ${canEdit ? `<div style="text-align:center; margin-top:20px;"><button class="btn primary" onclick="openEditInstructorModal(${index})"><i class="fas fa-edit"></i> Edit Instructor</button></div>` : ''}`;
+        ${canEdit ? `<div style="text-align:center; margin-top:20px;"><button class="btn primary" onclick="openEditInstructorModal()"><i class="fas fa-edit"></i> Edit Instructor</button></div>` : ''}`;
+
       document.getElementById('viewInstructorModal').classList.add('active');
     }
 
     function closeViewInstructorModal() { document.getElementById('viewInstructorModal').classList.remove('active'); }
 
-    function openEditInstructorModal(index) {
-      const i = instructors[index];
-      showInputModal("Edit Instructor Information", [
-        {label:"Full Name", value:i.fullName},
-        {label:"Department", value:i.department},
-        {label:"Gender", type:"radio", options:["Male","Female"], value:i.bioData.gender},
-        {label:"Birthday", type:"date", value:i.bioData.birthday},
-        {label:"Citizenship", value:i.bioData.citizenship},
-        {label:"Civil Status", type:"radio", options:["Single","Married"], value:i.bioData.civilStatus},
-        {label:"Employment", type:"radio", options:["Full-Time","Part-Time"], value:i.bioData.employment},
-        {label:"Email", value:i.contactInfo.email},
-        {label:"Phone Number", type:"phone", value:i.contactInfo.phone},
-        {label:"Address", value:i.contactInfo.address}
-      ], (values) => {
-        const inst = instructors[index];
-        inst.fullName = values[0] || inst.fullName;
-        inst.department = values[1] || inst.department;
-        inst.bioData.gender = values[2] || inst.bioData.gender;
-        inst.bioData.birthday = values[3] || inst.bioData.birthday;
-        inst.bioData.citizenship = values[4] || inst.bioData.citizenship;
-        inst.bioData.civilStatus = values[5] || inst.bioData.civilStatus;
-        inst.bioData.employment = values[6] || inst.bioData.employment;
-        inst.contactInfo.email = values[7] || inst.contactInfo.email;
-        inst.contactInfo.phone = values[8] || inst.contactInfo.phone;
-        inst.contactInfo.address = values[9] || inst.contactInfo.address;
-        loadInstructors(); closeViewInstructorModal();
-        showSuccessModal("Updated!", "Instructor information updated successfully.");
-      });
-    }
-
-    function addSubject(index) {
-      showInputModal("Add Subject", [{label:"Code",value:""},{label:"Title",value:""},{label:"Units",value:"3"}], (v) => {
-        instructors[index].subjectHandling.push({code:v[0]||"", title:v[1]||"", units:v[2]||0});
-        loadInstructors(); viewInstructor(index);
-        showSuccessModal("Added!", "Subject added successfully.");
-      });
-    }
-    function editSubject(index, subIdx) {
-      const s = instructors[index].subjectHandling[subIdx];
-      showInputModal("Edit Subject", [{label:"Code",value:s.code},{label:"Title",value:s.title},{label:"Units",value:s.units}], (v) => {
-        instructors[index].subjectHandling[subIdx] = {code:v[0]||s.code, title:v[1]||s.title, units:v[2]||s.units};
-        loadInstructors(); viewInstructor(index);
-        showSuccessModal("Updated!", "Subject updated successfully.");
-      });
-    }
-    function deleteSubject(index, subIdx) {
-      showWarningModal("Delete Subject", "Are you sure you want to delete this subject?", "Delete", () => {
-        instructors[index].subjectHandling.splice(subIdx, 1);
-        loadInstructors(); viewInstructor(index);
-        showSuccessModal("Deleted!", "Subject deleted successfully.");
-      });
-    }
-    function addSchedule(index) {
-      showInputModal("Add Schedule", [{label:"Day (e.g. MON/WED)",value:""},{label:"Time (e.g. 07:30 AM - 09:00 AM)",value:""},{label:"Room",value:""},{label:"Subject Code",value:""}], (v) => {
-        instructors[index].schedule.push({day:v[0]||"", time:v[1]||"", room:v[2]||"", subject:v[3]||""});
-        loadInstructors(); viewInstructor(index);
-        showSuccessModal("Added!", "Schedule added successfully.");
-      });
-    }
-    function editSchedule(index, schIdx) {
-      const s = instructors[index].schedule[schIdx];
-      showInputModal("Edit Schedule", [{label:"Day",value:s.day},{label:"Time",value:s.time},{label:"Room",value:s.room},{label:"Subject Code",value:s.subject}], (v) => {
-        instructors[index].schedule[schIdx] = {day:v[0]||s.day, time:v[1]||s.time, room:v[2]||s.room, subject:v[3]||s.subject};
-        loadInstructors(); viewInstructor(index);
-        showSuccessModal("Updated!", "Schedule updated successfully.");
-      });
-    }
-    function deleteSchedule(index, schIdx) {
-      showWarningModal("Delete Schedule", "Are you sure you want to delete this schedule?", "Delete", () => {
-        instructors[index].schedule.splice(schIdx, 1);
-        loadInstructors(); viewInstructor(index);
-        showSuccessModal("Deleted!", "Schedule deleted successfully.");
-      });
-    }
+    /* ============ Add / Edit instructor ============ */
     function openAddInstructorModal() {
       showInputModal("Add New Instructor", [
         {label:"Full Name", value:""},
@@ -513,34 +576,154 @@ $admin_name = htmlspecialchars($_SESSION['admin_name'] ?? $_SESSION['admin_user'
         {label:"Email", value:""},
         {label:"Phone Number", type:"phone", value:""},
         {label:"Address", value:""}
-      ], (v) => {
-        if (!v[0]) { showWarningModal("Missing Information","Please enter the Instructor's Full Name.","OK",null); return; }
-        instructors.push({
-          id: instructors.length + 1, fullName: v[0], department: v[1] || "CICS", status: "active", profilePic: "",
-          bioData: { gender: v[2]||"Male", birthday: v[3]||"", citizenship: v[4]||"Filipino", civilStatus: v[5]||"Single", employment: v[6]||"Full-Time" },
-          contactInfo: { email: v[7]||"", phone: v[8]||"", address: v[9]||"" },
-          subjectHandling: [], schedule: []
+      ], async (v) => {
+        if (!v[0]) { showWarningModal("Missing Information", "Please enter the Instructor's Full Name.", "OK", null); return; }
+        const r = await apiPost('add', {
+          full_name: v[0], department: v[1] || "CICS",
+          gender: v[2] || "", birthday: v[3] || "",
+          citizenship: v[4] || "", civil_status: v[5] || "",
+          employment: v[6] || "", email: v[7] || "",
+          phone: v[8] || "", address: v[9] || ""
         });
-        loadInstructors();
-        showSuccessModal("Added!", "New instructor added successfully.");
+        if (r.success) { await loadInstructors(); showSuccessModal("Added!", "New instructor added successfully."); }
+        else alert(r.message);
       });
     }
-    function archiveInstructor(index) {
-      showWarningModal("Archive Instructor","Are you sure you want to archive this instructor? They will move to Former Instructors.","Archive",() => {
-        instructors[index].status = 'former'; loadInstructors();
-        showSuccessModal("Archived!", "Instructor moved to Former Instructors.");
+
+    function openEditInstructorModal() {
+      const i = currentInstructorData;
+      if (!i) return;
+      showInputModal("Edit Instructor Information", [
+        {label:"Full Name", value:i.full_name},
+        {label:"Department", value:i.department},
+        {label:"Gender", type:"radio", options:["Male","Female"], value:i.gender},
+        {label:"Birthday", type:"date", value:i.birthday || ''},
+        {label:"Citizenship", value:i.citizenship},
+        {label:"Civil Status", type:"radio", options:["Single","Married"], value:i.civil_status},
+        {label:"Employment", type:"radio", options:["Full-Time","Part-Time"], value:i.employment},
+        {label:"Email", value:i.email},
+        {label:"Phone Number", type:"phone", value:i.phone},
+        {label:"Address", value:i.address}
+      ], async (v) => {
+        const r = await apiPost('edit', {
+          id: i.id,
+          full_name: v[0] || i.full_name,
+          department: v[1] || i.department,
+          gender: v[2] || i.gender,
+          birthday: v[3] || i.birthday,
+          citizenship: v[4] || i.citizenship,
+          civil_status: v[5] || i.civil_status,
+          employment: v[6] || i.employment,
+          email: v[7] || i.email,
+          phone: v[8] || i.phone,
+          address: v[9] || i.address
+        });
+        if (r.success) {
+          await loadInstructors();
+          closeViewInstructorModal();
+          showSuccessModal("Updated!", "Instructor information updated successfully.");
+        } else alert(r.message);
       });
     }
-    function restoreInstructor(index) {
-      showWarningModal("Restore Instructor","Are you sure you want to restore this instructor?","Restore",() => {
-        instructors[index].status = 'active'; loadInstructors();
-        showSuccessModal("Restored!", "Instructor restored.");
+
+    /* ============ Subject CRUD ============ */
+    function addSubject() {
+      showInputModal("Add Subject", [{label:"Code",value:""},{label:"Title",value:""},{label:"Units",value:"3"}], async (v) => {
+        const r = await apiPost('add_subject', {
+          instructor_id: currentInstructorId,
+          code: v[0] || "", title: v[1] || "", units: v[2] || 0
+        });
+        if (r.success) {
+          await viewInstructor(currentInstructorId);
+          await loadInstructors();
+          showSuccessModal("Added!", "Subject added successfully.");
+        } else alert(r.message);
       });
     }
-    function deleteInstructor(index) {
-      showWarningModal("Delete Instructor","Are you sure you want to permanently delete this instructor?","Delete",() => {
-        instructors.splice(index, 1); loadInstructors();
-        showSuccessModal("Deleted!", "Instructor deleted permanently.");
+    function editSubject(subjectId) {
+      const s = currentInstructorData.subjects.find(x => x.id == subjectId);
+      if (!s) return;
+      showInputModal("Edit Subject", [{label:"Code",value:s.code},{label:"Title",value:s.title},{label:"Units",value:s.units}], async (v) => {
+        const r = await apiPost('edit_subject', {
+          subject_id: subjectId,
+          code: v[0] || s.code, title: v[1] || s.title, units: v[2] || s.units
+        });
+        if (r.success) {
+          await viewInstructor(currentInstructorId);
+          await loadInstructors();
+          showSuccessModal("Updated!", "Subject updated successfully.");
+        } else alert(r.message);
+      });
+    }
+    function deleteSubject(subjectId) {
+      showWarningModal("Delete Subject", "Are you sure you want to delete this subject?", "Delete", async () => {
+        const r = await apiPost('delete_subject', { subject_id: subjectId });
+        if (r.success) {
+          await viewInstructor(currentInstructorId);
+          await loadInstructors();
+          showSuccessModal("Deleted!", "Subject deleted successfully.");
+        } else alert(r.message);
+      });
+    }
+
+    /* ============ Schedule CRUD ============ */
+    function addSchedule() {
+      showInputModal("Add Schedule", [
+        {label:"Day (e.g. MON/WED)",value:""},
+        {label:"Time (e.g. 07:30 AM - 09:00 AM)",value:""},
+        {label:"Room",value:""},
+        {label:"Subject Code",value:""}
+      ], async (v) => {
+        const r = await apiPost('add_schedule', {
+          instructor_id: currentInstructorId,
+          day: v[0] || "", time: v[1] || "", room: v[2] || "", subject: v[3] || ""
+        });
+        if (r.success) { await viewInstructor(currentInstructorId); showSuccessModal("Added!", "Schedule added successfully."); }
+        else alert(r.message);
+      });
+    }
+    function editSchedule(scheduleId) {
+      const s = currentInstructorData.schedules.find(x => x.id == scheduleId);
+      if (!s) return;
+      showInputModal("Edit Schedule", [
+        {label:"Day",value:s.day},{label:"Time",value:s.time},{label:"Room",value:s.room},{label:"Subject Code",value:s.subject}
+      ], async (v) => {
+        const r = await apiPost('edit_schedule', {
+          schedule_id: scheduleId,
+          day: v[0] || s.day, time: v[1] || s.time, room: v[2] || s.room, subject: v[3] || s.subject
+        });
+        if (r.success) { await viewInstructor(currentInstructorId); showSuccessModal("Updated!", "Schedule updated successfully."); }
+        else alert(r.message);
+      });
+    }
+    function deleteSchedule(scheduleId) {
+      showWarningModal("Delete Schedule", "Are you sure you want to delete this schedule?", "Delete", async () => {
+        const r = await apiPost('delete_schedule', { schedule_id: scheduleId });
+        if (r.success) { await viewInstructor(currentInstructorId); showSuccessModal("Deleted!", "Schedule deleted successfully."); }
+        else alert(r.message);
+      });
+    }
+
+    /* ============ Archive / Restore / Delete ============ */
+    function archiveInstructor(id) {
+      showWarningModal("Archive Instructor", "Are you sure you want to archive this instructor? They will move to Former Instructors.", "Archive", async () => {
+        const r = await apiPost('archive', { id });
+        if (r.success) { await loadInstructors(); showSuccessModal("Archived!", "Instructor moved to Former Instructors."); }
+        else alert(r.message);
+      });
+    }
+    function restoreInstructor(id) {
+      showWarningModal("Restore Instructor", "Are you sure you want to restore this instructor?", "Restore", async () => {
+        const r = await apiPost('restore', { id });
+        if (r.success) { await loadInstructors(); showSuccessModal("Restored!", "Instructor restored."); }
+        else alert(r.message);
+      });
+    }
+    function deleteInstructor(id) {
+      showWarningModal("Delete Instructor", "Are you sure you want to permanently delete this instructor?", "Delete", async () => {
+        const r = await apiPost('delete', { id });
+        if (r.success) { await loadInstructors(); showSuccessModal("Deleted!", "Instructor deleted permanently."); }
+        else alert(r.message);
       });
     }
 

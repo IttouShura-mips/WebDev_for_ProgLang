@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Philippine Address Picker</title>
+    <style>
+        /* ... keep all your existing CSS ... */
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: #f5f5f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .form-container { background: white; padding: 24px; border-radius: 8px; width: 100%; max-width: 450px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .form-group { margin-bottom: 16px; position: relative; }
+        label { display: block; font-size: 14px; color: #555; margin-bottom: 6px; font-weight: 500; }
+        .address-picker-box { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; outline: none; background-color: #fff; cursor: pointer; text-align: left; position: relative; color: #aaa; }
+        .address-picker-box.has-value { color: #333; }
+        .address-picker-box::after { content: "❯"; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 12px; color: #bbb; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-box { background: white; width: 100%; max-width: 450px; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.15); animation: slideUp 0.25s ease-out; }
+        @keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal-header { padding: 16px; font-size: 16px; font-weight: bold; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .close-btn { cursor: pointer; font-size: 20px; color: #888; }
+        .step-tabs { display: flex; background: #f9f9f9; border-bottom: 1px solid #eee; }
+        .tab { flex: 1; text-align: center; padding: 10px; font-size: 13px; color: #888; border-bottom: 2px solid transparent; font-weight: 500; }
+        .tab.active { color: #ff4400; border-bottom-color: #ff4400; font-weight: bold; }
+        .options-list { max-height: 300px; overflow-y: auto; }
+        .option-item { padding: 14px 16px; font-size: 14px; color: #333; cursor: pointer; border-bottom: 1px solid #f5f5f5; transition: background 0.1s; }
+        .option-item:hover { background-color: #fff8f5; color: #ff4400; }
+        .loading { padding: 20px; text-align: center; color: #888; font-size: 13px; }
+        .error { padding: 20px; text-align: center; color: #d9534f; font-size: 13px; }
+    </style>
+</head>
+<body>
+
+    <div class="form-container">
+        <div class="form-group">
+            <label>Area / Region</label>
+            <div id="addressTrigger" class="address-picker-box" onclick="openPicker()">
+                Select Province / City / Barangay
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="pickerModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <span>Select Area</span>
+                <span class="close-btn" onclick="closePicker()">&times;</span>
+            </div>
+            <div class="step-tabs">
+                <div class="tab active" id="tab-province" onclick="goToStep('province')">Province</div>
+                <div class="tab" id="tab-city" onclick="goToStep('city')">City/Mun</div>
+                <div class="tab" id="tab-barangay" onclick="goToStep('barangay')">Barangay</div>
+            </div>
+            <div class="options-list" id="optionsContainer">
+                <div class="loading">Loading provinces...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // Replace this with your actual token
+        // ============================================
+        const PSA_TOKEN = 'YOUR_TOKEN_HERE';
+        const PSA_BASE = 'https://classification.psa.gov.ph/psgc/Q2_2024';
+
+        let currentStep = 'province';
+        let selections = { province: null, city: null, barangay: null };
+        let cache = { provinces: [], cities: [], barangays: [] };
+
+        const modal = document.getElementById('pickerModal');
+        const container = document.getElementById('optionsContainer');
+        const triggerBox = document.getElementById('addressTrigger');
+
+        // ---------- NAVIGATION ----------
+        function openPicker() {
+            modal.style.display = 'flex';
+            loadProvinces();
+        }
+
+        function closePicker() {
+            modal.style.display = 'none';
+        }
+
+        function updateTabs() {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('tab-' + currentStep).classList.add('active');
+        }
+
+        // ---------- API HELPER ----------
+        async function apiFetch(path) {
+            const url = `${PSA_BASE}/${path}?token=${PSA_TOKEN}`;
+            const res = await fetch(url);
+            if (!res.ok) throw new Error(`API error: ${res.status}`);
+            return await res.json();
+        }
+
+        // ---------- STEP 1: PROVINCES ----------
+        async function loadProvinces() {
+            currentStep = 'province';
+            updateTabs();
+            container.innerHTML = '<div class="loading">Loading provinces...</div>';
+
+            try {
+                if (cache.provinces.length) {
+                    return renderProvinces(cache.provinces);
+                }
+
+                const data = await apiFetch('provinces');
+                // The response structure depends on the API version
+                // Usually returns an array of objects with code and name
+                const provinces = (data.data || data).map(p => ({
+                    code: p.code || p.psgcCode,
+                    name: p.name || p.provinceName || p.display
+                }));
+
+                cache.provinces = provinces;
+                renderProvinces(provinces);
+            } catch (err) {
+                container.innerHTML = `<div class="error">
+                    Failed to load provinces.<br>
+                    <small>${err.message}</small><br>
+                    Make sure your token is valid.
+                </div>`;
+            }
+        }
+
+        function renderProvinces(provinces) {
+            container.innerHTML = '';
+            provinces.forEach(p => {
+                const div = document.createElement('div');
+                div.className = 'option-item';
+                div.textContent = p.name;
+                div.onclick = () => {
+                    selections.province = p;
+                    selections.city = null;
+                    selections.barangay = null;
+                    loadCities(p);
+                };
+                container.appendChild(div);
+            });
+        }
+
+        // ---------- STEP 2: CITIES ----------
+        async function loadCities(province) {
+            currentStep = 'city';
+            updateTabs();
+            container.innerHTML = '<div class="loading">Loading cities &amp; municipalities...</div>';
+
+            try {
+                const data = await apiFetch(`municipalities?prv=${province.code}`);
+                const cities = (data.data || data).map(c => ({
+                    code: c.code || c.psgcCode,
+                    name: c.name || c.cityMunName || c.display
+                }));
+
+                cache.cities = cities;
+                renderCities(cities);
+            } catch (err) {
+                container.innerHTML = `<div class="error">Failed to load cities. ${err.message}</div>`;
+            }
+        }
+
+        function renderCities(cities) {
+            container.innerHTML = '';
+            if (!cities.length) {
+                container.innerHTML = '<div class="loading">No cities found.</div>';
+                return;
+            }
+            cities.forEach(c => {
+                const div = document.createElement('div');
+                div.className = 'option-item';
+                div.textContent = c.name;
+                div.onclick = () => {
+                    selections.city = c;
+                    selections.barangay = null;
+                    loadBarangays(c);
+                };
+                container.appendChild(div);
+            });
+        }
+
+        // ---------- STEP 3: BARANGAYS ----------
+        async function loadBarangays(city) {
+            currentStep = 'barangay';
+            updateTabs();
+            container.innerHTML = '<div class="loading">Loading barangays...</div>';
+
+            try {
+                const data = await apiFetch(`barangays?mun=${city.code}`);
+                const barangays = (data.data || data).map(b => ({
+                    code: b.code || b.psgcCode,
+                    name: b.name || b.barangayName || b.display
+                }));
+
+                cache.barangays = barangays;
+                renderBarangays(barangays);
+            } catch (err) {
+                container.innerHTML = `<div class="error">Failed to load barangays. ${err.message}</div>`;
+            }
+        }
+
+        function renderBarangays(barangays) {
+            container.innerHTML = '';
+            if (!barangays.length) {
+                container.innerHTML = '<div class="loading">No barangays found.</div>';
+                return;
+            }
+            barangays.forEach(b => {
+                const div = document.createElement('div');
+                div.className = 'option-item';
+                div.textContent = b.name;
+                div.onclick = () => {
+                    selections.barangay = b;
+                    // Final output
+                    const finalString = `${selections.province.name}, ${selections.city.name}, ${selections.barangay.name}`;
+                    triggerBox.textContent = finalString;
+                    triggerBox.classList.add('has-value');
+                    closePicker();
+                };
+                container.appendChild(div);
+            });
+        }
+
+        // Close on overlay click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closePicker();
+        });
+    </script>
+</body>
+</html>

@@ -4,10 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>All Department Details | ICF Interworld Colleges Foundation Inc.</title>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-    <!-- Font Awesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="icon" type="image/png" href="/WebDev_for_ProgLang/BackGroundimage/ICFLogo.png">
     <style>
         * {
             margin: 0;
@@ -16,19 +15,25 @@
         }
 
         :root {
-            --bg-deep-abyss: #020c1b;      /* Deep dark oceanic background */
-            --bg-card: #0a192f;            /* Dark teal-tinted card background */
-            --bg-card-hover: #112240;      /* Elevated glass depth background */
-            --primary-neon: #0df5e3;       /* Bioluminescent vibrant teal */
-            --primary-neon-hover: #00cbb9; /* Slightly darker neon active */
-            --text-high-contrast: #e2e8f0; /* Crisp white-silver */
-            --text-muted-teal: #8892b0;    /* Soft teal gray */
-            --border-teal: #172a45;        /* Subdued border color */
-            --success-green: #10b981;      
+            --bg-deep-abyss: #020c1b;
+            --bg-card: #0a192f;
+            --bg-card-hover: #112240;
+            --primary-neon: #0df5e3;
+            --primary-neon-hover: #00cbb9;
+            --text-high-contrast: #e2e8f0;
+            --text-muted-teal: #8892b0;
+            --border-teal: #172a45;
+            --success-green: #10b981;
+            --purple-accent: #8b5cf6;
+            --blue-accent: #3b82f6;
             --border-radius: 12px;
             --transition-smooth: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --transition-slow: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
             --neon-glow: 0 0 15px rgba(13, 245, 227, 0.3);
+            --card-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
         }
+
+        html { scroll-behavior: smooth; }
 
         body {
             font-family: 'Inter', sans-serif;
@@ -41,64 +46,132 @@
             min-height: 100vh;
         }
 
-        .container { 
+        .container {
             width: 90%;
-            max-width: 1200px;
+            max-width: 1280px;
             margin: 0 auto;
         }
 
-        /* --- Header / Navigation --- */
+        /* ============================================
+           HEADER / NAVIGATION
+           ============================================ */
         header {
             background-color: rgba(2, 12, 27, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border-bottom: 1px solid var(--border-teal);
             position: sticky;
             top: 0;
             z-index: 100;
+            transition: var(--transition-smooth);
+        }
+
+        header.scrolled {
+            background-color: rgba(2, 12, 27, 0.95);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
         }
 
         .nav-container {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1.2rem 0;
+            padding: 1rem 0;
         }
 
         .logo {
             display: flex;
             align-items: center;
             gap: 12px;
+            text-decoration: none;
+            color: inherit;
         }
 
         .logo img {
-            height: 40px;
+            height: 44px;
+            transition: var(--transition-smooth);
+            filter: drop-shadow(0 0 10px rgba(13, 245, 227, 0.2));
         }
+
+        .logo:hover img {
+            transform: scale(1.05);
+            filter: drop-shadow(0 0 15px rgba(13, 245, 227, 0.5));
+        }
+
+        .logo-text { display: flex; flex-direction: column; }
 
         .logo h2 {
             font-size: 1.3rem;
-            font-weight: 700;
+            font-weight: 800;
             letter-spacing: 0.5px;
             color: var(--text-high-contrast);
+            line-height: 1;
         }
 
         .logo span {
             display: block;
-            font-size: 0.75rem;
-            font-weight: 400;
+            font-size: 0.68rem;
+            font-weight: 500;
             color: var(--primary-neon);
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
+            margin-top: 4px;
         }
 
-        /* --- Menu Toggle Button for Mobile --- */
+        .desktop-nav-links {
+            display: flex;
+            list-style: none;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .desktop-nav-links a {
+            position: relative;
+            text-decoration: none;
+            color: var(--text-muted-teal);
+            font-weight: 500;
+            font-size: 0.95rem;
+            padding: 0.6rem 1rem;
+            border-radius: 8px;
+            transition: var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .desktop-nav-links a i {
+            font-size: 0.85rem;
+            transition: var(--transition-smooth);
+        }
+
+        .desktop-nav-links a:hover {
+            color: var(--primary-neon);
+            background: rgba(13, 245, 227, 0.06);
+        }
+
+        .desktop-nav-links a:hover i { transform: translateY(-2px); }
+
+        .desktop-nav-links a.active { color: var(--primary-neon); }
+
+        .desktop-nav-links a.active::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 2px;
+            background: var(--primary-neon);
+            border-radius: 2px;
+            box-shadow: 0 0 10px var(--primary-neon);
+        }
+
         .mobile-menu-btn {
             display: none;
             background: transparent;
             border: 1px solid var(--border-teal);
             color: var(--primary-neon);
-            font-size: 1.3rem;
-            padding: 0.5rem 0.8rem;
+            font-size: 1.15rem;
+            padding: 0.55rem 0.8rem;
             border-radius: 8px;
             cursor: pointer;
             transition: var(--transition-smooth);
@@ -107,71 +180,43 @@
         .mobile-menu-btn:hover {
             background-color: rgba(13, 245, 227, 0.1);
             border-color: var(--primary-neon);
+            box-shadow: var(--neon-glow);
         }
 
-        .desktop-nav-links {
-            display: flex;
-            list-style: none;
-            gap: 2rem;
-        }
-
-        .desktop-nav-links a {
-            text-decoration: none;
-            color: var(--text-muted-teal);
-            font-weight: 500;
-            font-size: 1.1rem;
-            transition: var(--transition-smooth);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .desktop-nav-links a:hover, .desktop-nav-links a.active {
-            color: var(--primary-neon);
-            text-shadow: 0 0 40px var(--primary-neon);
-        }
-
-        /* --- Mobile Off-Canvas Sidebar Drawer --- */
+        /* ============================================
+           MOBILE SIDEBAR
+           ============================================ */
         .sidebar-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(2, 12, 27, 0.7);
-            backdrop-filter: blur(4px);
+            inset: 0;
+            background: rgba(2, 12, 27, 0.75);
+            backdrop-filter: blur(6px);
             z-index: 998;
             opacity: 0;
             visibility: hidden;
             transition: all 0.3s ease;
         }
 
-        .sidebar-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
+        .sidebar-overlay.active { opacity: 1; visibility: visible; }
 
         .mobile-sidebar {
             position: fixed;
             top: 0;
-            right: -320px;
-            width: 300px;
+            right: -340px;
+            width: 320px;
             height: 100vh;
-            background: rgba(10, 25, 47, 0.98);
+            background: linear-gradient(180deg, #0a192f 0%, #020c1b 100%);
             border-left: 1px solid var(--border-teal);
-            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.8);
+            box-shadow: -10px 0 40px rgba(0, 0, 0, 0.8);
             z-index: 999;
             display: flex;
             flex-direction: column;
             padding: 2rem 1.5rem;
-            transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             overflow-y: auto;
         }
 
-        .mobile-sidebar.active {
-            right: 0;
-        }
+        .mobile-sidebar.active { right: 0; }
 
         .sidebar-close-btn {
             position: absolute;
@@ -180,10 +225,10 @@
             background: transparent;
             border: none;
             color: var(--text-muted-teal);
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             cursor: pointer;
-            width: 36px;
-            height: 36px;
+            width: 38px;
+            height: 38px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -194,6 +239,7 @@
         .sidebar-close-btn:hover {
             color: var(--primary-neon);
             background: rgba(13, 245, 227, 0.1);
+            transform: rotate(90deg);
         }
 
         .sidebar-brand {
@@ -206,37 +252,53 @@
         }
 
         .sidebar-brand img {
-            height: 75px;
-            margin-bottom: 10px;
+            height: 80px;
+            margin-bottom: 12px;
+            filter: drop-shadow(0 0 15px rgba(13, 245, 227, 0.3));
+        }
+
+        .sidebar-brand h3 {
+            font-size: 1.1rem;
+            color: var(--primary-neon);
+            letter-spacing: 0.5px;
         }
 
         .sidebar-nav-links {
             list-style: none;
             display: flex;
             flex-direction: column;
-            gap: 1.2rem;
+            gap: 0.4rem;
             width: 100%;
-            text-align: center;
             margin-bottom: 2rem;
         }
 
         .sidebar-nav-links a {
             text-decoration: none;
             color: var(--text-high-contrast);
-            font-size: 1.1rem;
-            font-weight: 600;
+            font-size: 1rem;
+            font-weight: 500;
             display: flex;
             align-items: center;
-            justify-content: left;
-            gap: 10px;
-            padding: 0.6rem;
-            border-radius: 8px;
+            gap: 12px;
+            padding: 0.8rem 1rem;
+            border-radius: 10px;
             transition: var(--transition-smooth);
+            border: 1px solid transparent;
         }
 
-        .sidebar-nav-links a:hover, .sidebar-nav-links a.active {
+        .sidebar-nav-links a i {
+            width: 24px;
+            text-align: center;
+            color: var(--primary-neon);
+            font-size: 1rem;
+        }
+
+        .sidebar-nav-links a:hover,
+        .sidebar-nav-links a.active {
             color: var(--primary-neon);
             background: rgba(13, 245, 227, 0.08);
+            border-color: rgba(13, 245, 227, 0.2);
+            transform: translateX(6px);
         }
 
         .sidebar-footer-portal {
@@ -245,115 +307,218 @@
             flex-direction: column;
             align-items: center;
             gap: 10px;
-            padding-top: 1rem;
+            padding-top: 1.5rem;
             border-top: 1px solid var(--border-teal);
+            margin-top: auto;
         }
 
-        .sidebar-footer-portal .btn-secondary {
-            transform: scale(0.88);
-            width: 100%;
-            font-size: 0.85rem;
-            height: 42px;
-        }
-
-        /* --- Portal Dropdown --- */
-        .portal-dropdown-wrapper {
-            position: relative;
-            display: inline-block;
-        }
+        /* ============================================
+           PORTAL DROPDOWN
+           ============================================ */
+        .portal-dropdown-wrapper { position: relative; display: inline-block; }
 
         .portal-box {
             position: absolute;
             top: calc(100% + 12px);
             right: 0;
-            width: 260px;
-            background: rgba(10, 25, 47, 0.95);
-            backdrop-filter: blur(12px);
+            width: 280px;
+            background: rgba(10, 25, 47, 0.98);
+            backdrop-filter: blur(16px);
             border: 1px solid var(--border-teal);
-            border-radius: 12px;
-            padding: 12px;
-            box-shadow: 
-                0 20px 40px rgba(0, 0, 0, 0.7),
-                0 0 25px rgba(13, 245, 227, 0.15);
+            border-radius: 14px;
+            padding: 10px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7), 0 0 30px rgba(13, 245, 227, 0.1);
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
             z-index: 1000;
-            
             opacity: 0;
             visibility: hidden;
-            transform: translateY(-15px) scaleY(0.9);
-            transform-origin: top center;
+            transform: translateY(-15px) scale(0.96);
+            transform-origin: top right;
             transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .portal-box.show {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0) scaleY(1);
-        }
+        .portal-box.show { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
 
         .portal-box-title {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 700;
             color: var(--primary-neon);
             text-transform: uppercase;
-            letter-spacing: 1px;
-            padding: 4px 8px;
+            letter-spacing: 1.2px;
+            padding: 6px 10px 4px;
         }
 
         .portal-option {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 10px 12px;
+            gap: 14px;
+            padding: 12px 14px;
             text-decoration: none;
             color: var(--text-high-contrast);
-            border-radius: 8px;
+            border-radius: 10px;
             background: rgba(2, 12, 27, 0.5);
             border: 1px solid transparent;
-            transition: all 0.2s ease;
+            transition: all 0.25s ease;
         }
 
         .portal-option i {
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             color: var(--primary-neon);
-        }
-
-        .portal-option .option-text {
+            width: 32px;
+            height: 32px;
             display: flex;
-            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(13, 245, 227, 0.08);
+            border-radius: 8px;
+            transition: var(--transition-smooth);
         }
 
-        .portal-option strong {
-            font-size: 0.9rem;
-        }
-
-        .portal-option small {
-            font-size: 0.75rem;
-            color: var(--text-muted-teal);
-        }
+        .portal-option .option-text { display: flex; flex-direction: column; }
+        .portal-option strong { font-size: 0.88rem; letter-spacing: 0.3px; }
+        .portal-option small { font-size: 0.72rem; color: var(--text-muted-teal); }
 
         .portal-option:hover {
-            background: rgba(13, 245, 227, 0.1);
+            background: rgba(13, 245, 227, 0.08);
             border-color: var(--primary-neon);
             transform: translateX(4px);
         }
 
-        .portal-option:hover strong {
-            color: var(--primary-neon);
+        .portal-option:hover i {
+            background: var(--primary-neon);
+            color: var(--bg-deep-abyss);
+            box-shadow: var(--neon-glow);
         }
 
-        /* --- Floating Person Button --- */
+        .portal-option:hover strong { color: var(--primary-neon); }
+
+        /* ============================================
+           LEFT FLOATING WIDGET BUTTONS
+           ============================================ */
+        .widget-stack {
+            position: fixed;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 95;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .widget-btn {
+            position: relative;
+            display: flex;
+            align-items: center;
+            height: 52px;
+            padding: 0 22px 0 16px;
+            min-width: 52px;
+            max-width: 52px;
+            overflow: hidden;
+            white-space: nowrap;
+            background: linear-gradient(135deg, rgba(10, 25, 47, 0.95), rgba(17, 34, 64, 0.95));
+            border: 1px solid var(--border-teal);
+            border-left: none;
+            border-radius: 0 50px 50px 0;
+            color: var(--text-high-contrast);
+            text-decoration: none;
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            cursor: pointer;
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            box-shadow: 4px 4px 20px rgba(0, 0, 0, 0.5);
+            transition:
+                max-width 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 0.3s ease,
+                background 0.3s ease,
+                box-shadow 0.3s ease,
+                transform 0.3s ease;
+        }
+
+        .widget-btn .widget-icon {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            color: var(--primary-neon);
+            flex-shrink: 0;
+            transition: var(--transition-smooth);
+        }
+
+        .widget-btn .widget-label {
+            margin-left: 12px;
+            opacity: 0;
+            transform: translateX(-8px);
+            transition: opacity 0.3s ease 0.1s, transform 0.3s ease 0.1s;
+            pointer-events: none;
+        }
+
+        .widget-btn:hover,
+        .widget-btn:focus-visible {
+            max-width: 240px;
+            border-color: var(--primary-neon);
+            background: linear-gradient(135deg, rgba(13, 245, 227, 0.12), rgba(10, 25, 47, 0.98));
+            box-shadow: 6px 0 25px rgba(13, 245, 227, 0.3), 4px 4px 20px rgba(0, 0, 0, 0.5);
+            transform: translateX(4px);
+            outline: none;
+        }
+
+        .widget-btn:hover .widget-icon,
+        .widget-btn:focus-visible .widget-icon {
+            color: var(--primary-neon);
+            transform: scale(1.15) rotate(-4deg);
+        }
+
+        .widget-btn:hover .widget-label,
+        .widget-btn:focus-visible .widget-label {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* Per-widget accent colors */
+        .widget-btn.widget-facebook .widget-icon { color: #1877f2; }
+        .widget-btn.widget-facebook:hover { border-color: #1877f2; background: linear-gradient(135deg, rgba(24, 119, 242, 0.15), rgba(10, 25, 47, 0.98)); box-shadow: 6px 0 25px rgba(24, 119, 242, 0.35), 4px 4px 20px rgba(0, 0, 0, 0.5); }
+        .widget-btn.widget-facebook:hover .widget-icon { color: #1877f2; }
+
+        .widget-btn.widget-inquiry .widget-icon { color: var(--purple-accent); }
+        .widget-btn.widget-inquiry:hover { border-color: var(--purple-accent); background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(10, 25, 47, 0.98)); box-shadow: 6px 0 25px rgba(139, 92, 246, 0.35), 4px 4px 20px rgba(0, 0, 0, 0.5); }
+        .widget-btn.widget-inquiry:hover .widget-icon { color: var(--purple-accent); }
+
+        .widget-btn.widget-news .widget-icon { color: #f59e0b; }
+        .widget-btn.widget-news:hover { border-color: #f59e0b; background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(10, 25, 47, 0.98)); box-shadow: 6px 0 25px rgba(245, 158, 11, 0.35), 4px 4px 20px rgba(0, 0, 0, 0.5); }
+        .widget-btn.widget-news:hover .widget-icon { color: #f59e0b; }
+
+        .widget-btn.widget-announcement .widget-icon { color: #ec4899; }
+        .widget-btn.widget-announcement:hover { border-color: #ec4899; background: linear-gradient(135deg, rgba(236, 72, 153, 0.15), rgba(10, 25, 47, 0.98)); box-shadow: 6px 0 25px rgba(236, 72, 153, 0.35), 4px 4px 20px rgba(0, 0, 0, 0.5); }
+        .widget-btn.widget-announcement:hover .widget-icon { color: #ec4899; }
+
+        .widget-btn.widget-download .widget-icon { color: var(--success-green); }
+        .widget-btn.widget-download:hover { border-color: var(--success-green); background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(10, 25, 47, 0.98)); box-shadow: 6px 0 25px rgba(16, 185, 129, 0.35), 4px 4px 20px rgba(0, 0, 0, 0.5); }
+        .widget-btn.widget-download:hover .widget-icon { color: var(--success-green); }
+
+        @media (max-width: 900px) {
+            .widget-stack { display: none; }
+        }
+
+        /* ============================================
+           FLOATING PERSON BUTTON
+           ============================================ */
         .floating-person-btn {
             position: fixed;
-            top: 100px;
-            right: 25px;
+            bottom: 30px;
+            right: 30px;
             z-index: 90;
-            width: 50px;
-            height: 50px;
+            width: 56px;
+            height: 56px;
             border-radius: 50%;
-            background: var(--bg-card);
+            background: linear-gradient(135deg, var(--bg-card), var(--bg-card-hover));
             border: 2px solid var(--primary-neon);
             color: var(--primary-neon);
             font-size: 1.2rem;
@@ -361,24 +526,38 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            box-shadow: var(--neon-glow);
+            box-shadow: var(--neon-glow), 0 8px 20px rgba(0, 0, 0, 0.5);
             transition: var(--transition-smooth);
+        }
+
+        .floating-person-btn::before {
+            content: '';
+            position: absolute;
+            inset: -6px;
+            border-radius: 50%;
+            border: 1px solid rgba(13, 245, 227, 0.3);
+            animation: pulseRing 2s ease-out infinite;
+        }
+
+        @keyframes pulseRing {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.3); opacity: 0; }
         }
 
         .floating-person-btn:hover {
             background: var(--primary-neon);
             color: var(--bg-deep-abyss);
-            transform: scale(1.1);
+            transform: scale(1.1) rotate(8deg);
+            box-shadow: 0 0 30px rgba(13, 245, 227, 0.6);
         }
 
-        /* --- Profile Modal --- */
+        /* ============================================
+           PROFILE MODAL
+           ============================================ */
         .profile-modal-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(2, 12, 27, 0.85);
+            inset: 0;
+            background: rgba(2, 12, 27, 0.9);
             backdrop-filter: blur(8px);
             z-index: 1000;
             display: flex;
@@ -387,38 +566,43 @@
             opacity: 0;
             visibility: hidden;
             transition: all 0.3s ease;
+            padding: 20px;
         }
 
-        .profile-modal-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
+        .profile-modal-overlay.active { opacity: 1; visibility: visible; }
 
         .profile-modal-content {
-            background: var(--bg-card);
+            background: linear-gradient(180deg, #0a192f 0%, #06152b 100%);
             border: 1px solid var(--primary-neon);
-            border-radius: var(--border-radius);
-            width: 90%;
-            max-width: 750px;
-            max-height: 85vh;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 800px;
+            max-height: 90vh;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 0 30px rgba(13, 245, 227, 0.2);
+            box-shadow: 0 0 40px rgba(13, 245, 227, 0.2), 0 25px 60px rgba(0, 0, 0, 0.8);
             overflow: hidden;
-            position: relative;
+            transform: scale(0.95);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
+        .profile-modal-overlay.active .profile-modal-content { transform: scale(1); }
+
         .profile-modal-header {
-            padding: 1rem 1.5rem;
+            padding: 1.2rem 1.8rem;
             border-bottom: 1px solid var(--border-teal);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            background: rgba(2, 12, 27, 0.5);
         }
 
         .profile-modal-header h3 {
             color: var(--primary-neon);
-            font-size: 1.2rem;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .profile-modal-close {
@@ -428,47 +612,63 @@
             font-size: 1.4rem;
             cursor: pointer;
             transition: var(--transition-smooth);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .profile-modal-close:hover {
             color: var(--primary-neon);
+            background: rgba(13, 245, 227, 0.1);
+            transform: rotate(90deg);
         }
 
         .profile-scroll-slot {
-            padding: 1.5rem;
+            padding: 1.5rem 1.8rem;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 2.5rem;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
+            gap: 2rem;
         }
 
-        .profile-scroll-slot::-webkit-scrollbar {
-            display: none;
-        }
+        .profile-scroll-slot::-webkit-scrollbar { display: none; }
+        .profile-scroll-slot { -ms-overflow-style: none; scrollbar-width: none; }
 
-        .profile-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
+        .profile-group { display: flex; flex-direction: column; gap: 10px; }
 
         .profile-role-title {
-            font-size: 1.2rem;
+            font-size: 0.85rem;
             font-weight: 700;
             color: var(--primary-neon);
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
+            padding: 6px 12px;
+            background: rgba(13, 245, 227, 0.08);
+            border: 1px solid rgba(13, 245, 227, 0.2);
+            border-radius: 20px;
+            display: inline-block;
+            align-self: flex-start;
         }
 
         .profile-card-layout {
-            border: 2px solid var(--primary-neon);
+            border: 1px solid var(--border-teal);
+            border-left: 3px solid var(--primary-neon);
             padding: 1.5rem;
             display: flex;
             gap: 2rem;
             background: rgba(2, 12, 27, 0.6);
+            border-radius: 14px;
             align-items: center;
+            transition: var(--transition-smooth);
+        }
+
+        .profile-card-layout:hover {
+            border-color: var(--primary-neon);
+            background: rgba(13, 245, 227, 0.03);
+            box-shadow: 0 0 25px rgba(13, 245, 227, 0.15);
         }
 
         .profile-left {
@@ -480,10 +680,10 @@
         }
 
         .profile-pic-circle {
-            width: 110px;
-            height: 110px;
+            width: 100px;
+            height: 100px;
             border-radius: 50%;
-            border: 2px solid var(--text-high-contrast);
+            border: 2px solid var(--primary-neon);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -492,28 +692,23 @@
             color: var(--text-muted-teal);
             background: var(--bg-deep-abyss);
             overflow: hidden;
+            box-shadow: var(--neon-glow);
         }
 
-        .profile-pic-circle img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+        .profile-pic-circle img { width: 100%; height: 100%; object-fit: cover; }
 
-        .profile-fullname {
-            font-size: 0.85rem;
-            color: var(--text-high-contrast);
-        }
+        .profile-fullname { font-size: 0.78rem; color: var(--text-muted-teal); }
 
         .profile-nickname {
-            font-size: 1.3rem;
-            font-weight: 700;
+            font-size: 1.2rem;
+            font-weight: 800;
             color: var(--primary-neon);
+            letter-spacing: 0.5px;
         }
 
         .profile-divider-v {
-            width: 2px;
-            background-color: var(--primary-neon);
+            width: 1px;
+            background: linear-gradient(180deg, transparent, var(--primary-neon), transparent);
             align-self: stretch;
         }
 
@@ -521,61 +716,74 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            gap: 0.6rem;
-            font-size: 0.95rem;
+            gap: 0.5rem;
+            font-size: 0.88rem;
         }
 
-        .profile-info-row {
-            color: var(--text-high-contrast);
-        }
+        .profile-info-row { color: var(--text-high-contrast); line-height: 1.5; }
 
         .profile-info-row span.label {
             color: var(--primary-neon);
             font-weight: 600;
+            margin-right: 4px;
         }
 
         .profile-divider-h {
-            height: 2px;
-            background-color: var(--primary-neon);
+            height: 1px;
+            background: linear-gradient(90deg, var(--primary-neon), transparent);
             margin: 0.5rem 0;
             width: 100%;
         }
 
-        .profile-tags {
-            display: flex;
-            gap: 1.5rem;
+        .profile-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+
+        .profile-tags span {
             color: var(--primary-neon);
             font-weight: 600;
+            font-size: 0.72rem;
+            padding: 4px 12px;
+            background: rgba(13, 245, 227, 0.08);
+            border: 1px solid rgba(13, 245, 227, 0.25);
+            border-radius: 20px;
+            letter-spacing: 0.3px;
         }
 
-        /* --- Buttons --- */
+        /* ============================================
+           BUTTONS
+           ============================================ */
         .btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            padding: 0.75rem 1.6rem;
-            border-radius: var(--border-radius);
+            gap: 10px;
+            padding: 0.85rem 1.8rem;
+            border-radius: 12px;
             font-weight: 600;
             cursor: pointer;
             text-decoration: none;
             transition: var(--transition-smooth);
             border: none;
             font-size: 0.95rem;
-            height: 48px;
+            height: 52px;
+            position: relative;
+            overflow: hidden;
+            font-family: inherit;
         }
 
+        .btn i { font-size: 0.95rem; transition: var(--transition-smooth); }
+
         .btn-primary {
-            background-color: var(--primary-neon);
+            background: linear-gradient(135deg, var(--primary-neon) 0%, #00b4a4 100%);
             color: var(--bg-deep-abyss);
             box-shadow: var(--neon-glow);
         }
 
         .btn-primary:hover {
-            background-color: var(--primary-neon-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 0 20px rgba(13, 245, 227, 0.5);
+            transform: translateY(-3px);
+            box-shadow: 0 0 25px rgba(13, 245, 227, 0.5), 0 10px 25px rgba(0, 0, 0, 0.4);
         }
+
+        .btn-primary:hover i { transform: translateX(4px); }
 
         .btn-secondary {
             background-color: var(--bg-card-hover);
@@ -587,22 +795,63 @@
             background-color: var(--primary-neon);
             color: var(--bg-deep-abyss);
             box-shadow: var(--neon-glow);
+            transform: translateY(-3px);
         }
 
-        .btn-block {
-            width: 100%;
+        .btn-outline {
+            border: 1px solid var(--border-teal);
+            color: var(--text-high-contrast);
+            background-color: transparent;
         }
 
-        /* --- Hero Banner --- */
+        .btn-outline:hover {
+            background-color: rgba(13, 245, 227, 0.05);
+            border-color: var(--primary-neon);
+            color: var(--primary-neon);
+            box-shadow: var(--neon-glow);
+            transform: translateY(-3px);
+        }
+
+        .btn-block { width: 100%; }
+
+        /* ============================================
+           HERO SECTION
+           ============================================ */
         .hero {
             position: relative;
-            text-align: center;
-            padding: 5rem 1rem 3rem;
-            background: 
-                radial-gradient(circle at top, rgba(13, 245, 227, 0.15) 0%, rgba(10, 25, 47, 0.85) 60%, var(--bg-deep-abyss) 100%),
-                linear-gradient(180deg, rgba(2, 12, 27, 0.6) 0%, var(--bg-deep-abyss) 100%),
-                url('../BackGroundimage/FB_IMG_1784601454598.jpg') top/cover no-repeat; 
+            padding: 6rem 0 8rem;
+            background:
+                radial-gradient(circle at 20% 20%, rgba(13, 245, 227, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                linear-gradient(180deg, rgba(2, 12, 27, 0.85) 0%, var(--bg-deep-abyss) 100%),
+                url('../BackGroundimage/FB_IMG_1784601454598.jpg') center/cover no-repeat;
             border-bottom: 1px solid var(--border-teal);
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(13, 245, 227, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(13, 245, 227, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            mask-image: radial-gradient(circle at center, black 30%, transparent 80%);
+            -webkit-mask-image: radial-gradient(circle at center, black 30%, transparent 80%);
+        }
+
+        .hero .container {
+            position: relative;
+            z-index: 1;
+            animation: heroFadeIn 1s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes heroFadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .badge {
@@ -612,77 +861,305 @@
             background: rgba(13, 245, 227, 0.1);
             color: var(--primary-neon);
             border: 1px solid rgba(13, 245, 227, 0.3);
-            padding: 0.4rem 1.2rem;
+            padding: 0.5rem 1.2rem;
             border-radius: 50px;
-            font-size: 0.85rem;
-            margin-bottom: 1rem;
-            box-shadow: 0 0 10px rgba(13, 245, 227, 0.1);
+            font-size: 0.82rem;
+            font-weight: 600;
+            margin-bottom: 1.8rem;
+            box-shadow: 0 0 15px rgba(13, 245, 227, 0.15);
+            backdrop-filter: blur(8px);
+        }
+
+        .badge i { animation: pulse 2s ease-in-out infinite; }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
         }
 
         .hero h1 {
-            font-size: 2.8rem;
-            font-weight: 800;
-            margin-bottom: 1rem;
+            font-size: 3.6rem;
+            font-weight: 900;
             color: var(--text-high-contrast);
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+            line-height: 1.08;
+            margin-bottom: 1.2rem;
+            letter-spacing: -1.5px;
+        }
+
+        .hero h1 .accent {
+            background: linear-gradient(135deg, #0df5e3 30%, #00a89d 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .hero p {
+            font-size: 1.15rem;
             color: var(--text-muted-teal);
-            max-width: 650px;
             margin: 0 auto;
-            font-size: 1.1rem;
+            max-width: 750px;
+            line-height: 1.7;
         }
 
-        /* --- Full Details Sections --- */
-        .all-departments-container {
-            padding: 4rem 0;
-            background-color: var(--bg-deep-abyss);
+        /* Quick jump pills */
+        .quick-jump {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 2.5rem;
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+            position: relative;
+            z-index: 1;
         }
 
-        .dept-detail-card {
-            background-color: var(--bg-card);
+        .quick-jump a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(10, 25, 47, 0.7);
             border: 1px solid var(--border-teal);
-            border-radius: var(--border-radius);
+            border-radius: 50px;
+            color: var(--text-muted-teal);
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: var(--transition-smooth);
+            backdrop-filter: blur(8px);
+            letter-spacing: 0.3px;
+        }
+
+        .quick-jump a i {
+            font-size: 0.75rem;
+            color: var(--primary-neon);
+            transition: var(--transition-smooth);
+        }
+
+        .quick-jump a:hover {
+            border-color: var(--primary-neon);
+            color: var(--primary-neon);
+            background: rgba(13, 245, 227, 0.08);
+            box-shadow: 0 0 15px rgba(13, 245, 227, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .quick-jump a:hover i { transform: scale(1.2); }
+
+        /* ============================================
+           DEPARTMENT SECTION
+           ============================================ */
+        .all-departments-container {
+            padding: 5rem 0;
+            background: linear-gradient(180deg, var(--bg-deep-abyss) 0%, #041020 100%);
+            position: relative;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+            animation: heroFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .section-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--primary-neon);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 1rem;
+            padding: 6px 14px;
+            background: rgba(13, 245, 227, 0.06);
+            border: 1px solid rgba(13, 245, 227, 0.2);
+            border-radius: 20px;
+        }
+
+        .section-header h2 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: var(--text-high-contrast);
+            letter-spacing: -1px;
+            line-height: 1.15;
+        }
+
+        .section-header h2 .accent {
+            background: linear-gradient(135deg, #0df5e3 30%, #00a89d 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-header p {
+            color: var(--text-muted-teal);
+            margin-top: 1rem;
+            max-width: 680px;
+            margin-left: auto;
+            margin-right: auto;
+            font-size: 1rem;
+            line-height: 1.7;
+        }
+
+        /* ============================================
+           DEPARTMENT DETAIL CARD
+           ============================================ */
+        .dept-detail-card {
+            position: relative;
+            background: linear-gradient(160deg, var(--bg-card) 0%, #06152b 100%);
+            border: 1px solid var(--border-teal);
+            border-radius: 20px;
             padding: 2.5rem;
             margin-bottom: 3rem;
+            overflow: hidden;
             transition: var(--transition-smooth);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            scroll-margin-top: 100px;
+        }
+
+        .dept-detail-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-neon), #00b4d8, var(--purple-accent));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .dept-detail-card:hover::before { transform: scaleX(1); }
+
+        .dept-detail-card::after {
+            content: '\f19c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            right: -30px;
+            bottom: -40px;
+            font-size: 12rem;
+            color: rgba(13, 245, 227, 0.025);
+            pointer-events: none;
+            transition: var(--transition-slow);
+            z-index: 0;
+        }
+
+        .dept-detail-card:hover::after {
+            color: rgba(13, 245, 227, 0.05);
+            transform: rotate(-10deg) scale(1.1);
         }
 
         .dept-detail-card:hover {
             border-color: var(--primary-neon);
-            box-shadow: var(--neon-glow);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 30px rgba(13, 245, 227, 0.12);
         }
 
+        /* ============================================
+           DEPARTMENT HEADER
+           ============================================ */
         .dept-header {
+            position: relative;
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: space-between;
             border-bottom: 1px solid var(--border-teal);
             padding-bottom: 1.5rem;
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
             flex-wrap: wrap;
             gap: 1rem;
+            z-index: 1;
         }
 
-        .dept-header h2 {
-            color: var(--primary-neon);
-            font-size: 1.8rem;
+        .dept-header-left {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 16px;
+            flex: 1;
+            min-width: 260px;
         }
 
-        /* --- Department Image Container Styles --- */
+        .dept-header-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(13, 245, 227, 0.15), rgba(13, 245, 227, 0.05));
+            border: 1px solid rgba(13, 245, 227, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-neon);
+            font-size: 1.4rem;
+            flex-shrink: 0;
+            transition: var(--transition-smooth);
+        }
+
+        .dept-detail-card:hover .dept-header-icon {
+            background: var(--primary-neon);
+            color: var(--bg-deep-abyss);
+            box-shadow: var(--neon-glow);
+            transform: scale(1.08) rotate(-4deg);
+        }
+
+        .dept-title-wrap { display: flex; flex-direction: column; }
+
+        .dept-title-wrap h2 {
+            color: var(--text-high-contrast);
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: -0.4px;
+            line-height: 1.25;
+        }
+
+        .dept-title-wrap .dept-dept {
+            color: var(--primary-neon);
+            font-size: 0.82rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 4px;
+        }
+
+        .dept-badge-wrap {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(13, 245, 227, 0.08);
+            border: 1px solid rgba(13, 245, 227, 0.25);
+            border-radius: 20px;
+            color: var(--primary-neon);
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            white-space: nowrap;
+        }
+
+        .dept-badge-wrap i { font-size: 0.8rem; }
+
+        /* ============================================
+           DEPARTMENT IMAGE
+           ============================================ */
         .dept-image-container {
+            position: relative;
             width: 100%;
-            max-height: 400px;
+            height: 340px;
             overflow: hidden;
-            border-radius: 8px;
+            border-radius: 14px;
             border: 1px solid var(--border-teal);
             margin-bottom: 2rem;
             background-color: var(--bg-deep-abyss);
+            z-index: 1;
+        }
+
+        .dept-image-container::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, transparent 40%, rgba(2, 12, 27, 0.7) 100%);
+            pointer-events: none;
         }
 
         .dept-image-container img {
@@ -690,46 +1167,138 @@
             height: 100%;
             object-fit: cover;
             display: block;
-            transition: transform 0.5s ease;
-            opacity: .8;
+            transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            opacity: 0.85;
         }
 
         .dept-detail-card:hover .dept-image-container img {
-            transform: scale(1.03);
+            transform: scale(1.06);
+            opacity: 1;
         }
 
+        .dept-image-tag {
+            position: absolute;
+            bottom: 16px;
+            left: 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(2, 12, 27, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(13, 245, 227, 0.35);
+            border-radius: 30px;
+            color: var(--primary-neon);
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            z-index: 1;
+        }
+
+        .dept-image-tag i { font-size: 0.7rem; }
+
+        /* ============================================
+           DEPARTMENT CONTENT BLOCKS
+           ============================================ */
         .dept-content-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            position: relative;
+            z-index: 1;
         }
 
         .detail-block {
-            margin-bottom: 1rem;
+            position: relative;
+            background: rgba(2, 12, 27, 0.6);
+            border: 1px solid var(--border-teal);
+            border-radius: 14px;
+            padding: 1.5rem;
+            transition: var(--transition-smooth);
+            overflow: hidden;
         }
+
+        .detail-block::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; bottom: 0;
+            width: 3px;
+            background: linear-gradient(180deg, var(--primary-neon), transparent);
+            transform: scaleY(0);
+            transform-origin: top;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .detail-block:hover::before { transform: scaleY(1); }
+
+        .detail-block:hover {
+            border-color: rgba(13, 245, 227, 0.3);
+            background: rgba(2, 12, 27, 0.8);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+        }
+
+        .detail-block.full-width { grid-column: 1 / -1; }
 
         .detail-block h4 {
             color: var(--primary-neon);
-            font-size: 1.15rem;
-            margin-bottom: 0.8rem;
+            font-size: 0.92rem;
+            margin-bottom: 1rem;
             display: flex;
             align-items: center;
             gap: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            padding-bottom: 0.75rem;
             border-bottom: 1px solid rgba(13, 245, 227, 0.15);
-            padding-bottom: 0.4rem;
+        }
+
+        .detail-block h4 i {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(13, 245, 227, 0.1);
+            border-radius: 8px;
+            font-size: 0.8rem;
+            transition: var(--transition-smooth);
+        }
+
+        .detail-block:hover h4 i {
+            background: var(--primary-neon);
+            color: var(--bg-deep-abyss);
+            box-shadow: var(--neon-glow);
+        }
+
+        .detail-block p {
+            color: var(--text-muted-teal);
+            font-size: 0.88rem;
+            line-height: 1.75;
         }
 
         .detail-block ul {
             list-style-type: none;
             padding-left: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.65rem;
         }
 
         .detail-block ul li {
             position: relative;
-            padding-left: 1.5rem;
+            padding-left: 1.6rem;
             color: var(--text-high-contrast);
-            margin-bottom: 0.6rem;
-            font-size: 0.95rem;
+            font-size: 0.87rem;
+            line-height: 1.65;
+            transition: var(--transition-smooth);
+        }
+
+        .detail-block ul li:hover {
+            color: var(--primary-neon);
+            transform: translateX(4px);
         }
 
         .detail-block ul li::before {
@@ -738,10 +1307,26 @@
             font-weight: 900;
             position: absolute;
             left: 0;
+            top: 0;
             color: var(--primary-neon);
+            font-size: 0.9rem;
+            transition: var(--transition-smooth);
         }
 
+        .detail-block ul li:hover::before {
+            transform: translateX(2px);
+        }
+
+        .detail-block ul li strong {
+            color: var(--primary-neon);
+            font-weight: 700;
+        }
+
+        /* ============================================
+           DEPARTMENT FOOTER ACTION
+           ============================================ */
         .dept-footer-action {
+            position: relative;
             margin-top: 2rem;
             padding-top: 1.5rem;
             border-top: 1px solid var(--border-teal);
@@ -749,238 +1334,336 @@
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 1rem;
+            gap: 1.5rem;
+            z-index: 1;
         }
 
-        /* --- Footer Styles --- */
+        .dept-req {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            color: var(--text-muted-teal);
+            font-size: 0.83rem;
+            line-height: 1.6;
+            flex: 1;
+            min-width: 260px;
+        }
+
+        .dept-req i {
+            color: var(--primary-neon);
+            font-size: 0.9rem;
+            margin-top: 3px;
+            flex-shrink: 0;
+        }
+
+        .dept-req strong {
+            color: var(--text-high-contrast);
+            font-weight: 700;
+        }
+
+        /* ============================================
+           CTA BANNER
+           ============================================ */
+        .cta-banner {
+            position: relative;
+            padding: 5rem 0;
+            background:
+                radial-gradient(circle at 20% 20%, rgba(13, 245, 227, 0.12) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+                linear-gradient(180deg, var(--bg-deep-abyss) 0%, #041020 100%);
+            border-top: 1px solid var(--border-teal);
+            border-bottom: 1px solid var(--border-teal);
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .cta-banner::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(13, 245, 227, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(13, 245, 227, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            mask-image: radial-gradient(circle at center, black 30%, transparent 80%);
+            -webkit-mask-image: radial-gradient(circle at center, black 30%, transparent 80%);
+        }
+
+        .cta-banner .container { position: relative; z-index: 1; }
+
+        .cta-banner h2 {
+            font-size: 2.4rem;
+            font-weight: 800;
+            color: var(--text-high-contrast);
+            letter-spacing: -1px;
+            line-height: 1.15;
+            margin-bottom: 1rem;
+        }
+
+        .cta-banner h2 .accent {
+            background: linear-gradient(135deg, #0df5e3 30%, #00a89d 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .cta-banner p {
+            color: var(--text-muted-teal);
+            font-size: 1.05rem;
+            max-width: 650px;
+            margin: 0 auto 2rem;
+            line-height: 1.7;
+        }
+
+        .cta-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* ============================================
+           FOOTER
+           ============================================ */
         footer {
-            background-color: #01060f;
+            background: linear-gradient(180deg, #01060f 0%, #000308 100%);
             border-top: 1px solid var(--border-teal);
             color: var(--text-muted-teal);
-            padding: 3rem 0 2rem;
+            padding: 4rem 0 2rem;
             font-size: 0.9rem;
+            position: relative;
             margin-top: auto;
         }
 
-        footer .footer-info {
-            display: flex;
-            justify-content: space-between;
-            max-width: 1200px;
-            margin: 0 auto 30px;
-            padding: 0 5%;
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary-neon), transparent);
+            opacity: 0.5;
         }
 
-        .footer-info img {
-            height: 16px;
-            margin-right: 12px;
-            vertical-align: middle;
+        .footer-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            max-width: 1200px;
+            margin: 0 auto 3rem;
+            padding: 0 5%;
         }
 
         .footer-info h4 {
             width: 100%;
-            border-bottom: 1px solid var(--primary-neon);
+            border-bottom: 1px solid rgba(13, 245, 227, 0.3);
             margin-bottom: 20px;
-            padding-bottom: 10px;
+            padding-bottom: 12px;
             color: var(--text-high-contrast);
-            font-size: 1.1rem;
-        }
-
-        .contact p {
-            margin-bottom: 10px;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
             display: flex;
             align-items: center;
+            gap: 10px;
+        }
+
+        .footer-info h4 i { color: var(--primary-neon); font-size: 0.9rem; }
+
+        .contact p {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.85rem;
+        }
+
+        .contact p img {
+            height: 16px;
+            width: 16px;
+            object-fit: contain;
+            opacity: 0.9;
         }
 
         .office-hours p {
             display: flex;
             justify-content: space-between;
             gap: 40px;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            padding-bottom: 6px;
+            border-bottom: 1px dashed rgba(23, 42, 69, 0.5);
         }
+
+        .office-hours p:last-child { border-bottom: none; }
+
+        .office-hours p span { color: var(--primary-neon); font-weight: 600; }
 
         .school-name {
             display: flex;
             align-items: center;
             justify-content: center;
+            flex-direction: column;
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0 5%;
+            padding: 2.5rem 5% 0;
+            gap: 1.5rem;
+            text-align: center;
+            border-top: 1px solid var(--border-teal);
         }
 
         .school-name img.icflogo {
             height: 100px;
-        }
-
-        .school-name h1 {
-            text-align: left;
-            margin-left: 20px;
-            font-size: 2.2rem;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            color: var(--text-high-contrast);
-            line-height: 1.2;
-        }
-
-        .school-name span {
-            display: inline-block;
-            font-size: 1rem;
-            font-weight: 400;
-            color: var(--primary-neon);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        footer .social-icon {
-            display: flex;
-            align-items: center;
-            border-left: 1px solid var(--primary-neon);
-            margin-left: 50px;
-            padding-left: 20px;
-            gap: 12px;
-        }
-
-        footer .icon img {
-            object-fit: cover;
-            border-radius: 50%;
-            border: 1px solid var(--primary-neon);
-            height: 42px;
-            width: 42px;
+            filter: drop-shadow(0 0 20px rgba(13, 245, 227, 0.25));
             transition: var(--transition-smooth);
         }
 
-        footer .icon img:hover {
-            transform: scale(1.1);
+        .school-name img.icflogo:hover {
+            transform: scale(1.05);
+            filter: drop-shadow(0 0 30px rgba(13, 245, 227, 0.4));
+        }
+
+        .school-name h1 {
+            font-size: 1.7rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            color: var(--text-high-contrast);
+            line-height: 1.3;
+        }
+
+        .school-name h1 span {
+            display: inline;
+            font-size: 1.7rem;
+            font-weight: 800;
+            color: var(--primary-neon);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* ============================================
+           SOCIAL ICONS (Font Awesome version)
+           ============================================ */
+        .social-icon {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .social-icon .icon a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: rgba(10, 25, 47, 0.8);
+            border: 1px solid var(--border-teal);
+            color: var(--text-muted-teal);
+            font-size: 1.05rem;
+            text-decoration: none;
+            transition: var(--transition-smooth);
+        }
+
+        .social-icon .icon a:hover {
+            transform: translateY(-4px) scale(1.1);
+            border-color: var(--primary-neon);
+            color: var(--primary-neon);
+            background: rgba(13, 245, 227, 0.08);
             box-shadow: var(--neon-glow);
         }
 
-        footer .footer-container {
-            align-items: center;
-            margin-top: 30px;
-            text-align: center;
-        }
+        .social-icon .icon a[aria-label="Facebook"]:hover   { color: #1877f2; border-color: #1877f2; background: rgba(24, 119, 242, 0.1); box-shadow: 0 0 15px rgba(24, 119, 242, 0.4); }
+        .social-icon .icon a[aria-label="YouTube"]:hover    { color: #ff0000; border-color: #ff0000; background: rgba(255, 0, 0, 0.1); box-shadow: 0 0 15px rgba(255, 0, 0, 0.4); }
+        .social-icon .icon a[aria-label="Twitter/X"]:hover  { color: #ffffff; border-color: #ffffff; background: rgba(255, 255, 255, 0.1); box-shadow: 0 0 15px rgba(255, 255, 255, 0.35); }
+        .social-icon .icon a[aria-label="TikTok"]:hover     { color: #ff0050; border-color: #ff0050; background: rgba(255, 0, 80, 0.1); box-shadow: 0 0 15px rgba(255, 0, 80, 0.4); }
+        .social-icon .icon a[aria-label="Pinterest"]:hover  { color: #e60023; border-color: #e60023; background: rgba(230, 0, 35, 0.1); box-shadow: 0 0 15px rgba(230, 0, 35, 0.4); }
+        .social-icon .icon a[aria-label="Instagram"]:hover  { color: #e1306c; border-color: #e1306c; background: rgba(225, 48, 108, 0.1); box-shadow: 0 0 15px rgba(225, 48, 108, 0.4); }
 
-        footer .footer-container p {
-            padding-top: 20px;
+        .footer-container {
+            margin-top: 2.5rem;
+            text-align: center;
+            padding-top: 1.5rem;
             border-top: 1px solid var(--border-teal);
         }
 
-        /* ==========================================================================
-           RESPONSIVE LAYOUT BREAKPOINTS
-           ========================================================================== */
+        .footer-container p { font-size: 0.8rem; color: var(--text-muted-teal); letter-spacing: 0.5px; }
+
+        /* ============================================
+           RESPONSIVE
+           ============================================ */
         @media screen and (max-width: 1024px) {
-            .nav-container {
-                flex-wrap: wrap;
-                gap: 1.5rem;
-            }
-
-            .school-name {
-                flex-direction: column;
-                text-align: center;
-                gap: 1.5rem;
-            }
-
-            .school-name h1 {
-                text-align: center;
-                margin-left: 0;
-                font-size: 1.8rem;
-            }
-
-            footer .social-icon {
-                border-left: none;
-                margin-left: 0;
-                padding-left: 0;
-                justify-content: center;
-                flex-wrap: wrap;
-            }
+            .hero h1 { font-size: 2.8rem; }
+            .section-header h2 { font-size: 2.2rem; }
+            .dept-content-grid { grid-template-columns: 1fr; }
         }
 
-        @media screen and (max-width: 600px) {
-            .profile-card-layout {
-                flex-direction: column;
-            }
-            .profile-divider-v {
-                width: 100%;
-                height: 2px;
-            }
+        @media screen and (max-width: 900px) {
+            .footer-info { grid-template-columns: 1fr; gap: 2.5rem; }
+            .widget-stack { display: none; }
         }
 
         @media screen and (max-width: 768px) {
-            nav.desktop-nav, 
-            .desktop-portal-wrapper {
-                display: none !important;
-            }
-
-            .mobile-menu-btn {
-                display: block;
-            }
-
-            .hero {
-                padding: 3.5rem 1rem 2rem;
-            }
-
-            .hero h1 {
-                font-size: 2.1rem;
-            }
-
-            .dept-detail-card {
-                padding: 1.5rem;
-            }
-
-            .dept-footer-action {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            footer .footer-info {
-                flex-direction: column;
-                gap: 2rem;
-            }
-
-            .office-hours p {
-                gap: 20px;
-            }
-
-            .portal-box {
-                right: 0;
-            }
+            nav.desktop-nav, .desktop-portal-wrapper { display: none !important; }
+            .mobile-menu-btn { display: block; }
+            .hero { padding: 4rem 0 5rem; }
+            .hero h1 { font-size: 2.3rem; letter-spacing: -0.8px; }
+            .hero p { font-size: 1rem; }
+            .section-header h2 { font-size: 2rem; }
+            .dept-detail-card { padding: 1.75rem; }
+            .dept-header-left { min-width: 100%; }
+            .dept-title-wrap h2 { font-size: 1.25rem; }
+            .dept-header-icon { width: 48px; height: 48px; font-size: 1.1rem; }
+            .dept-image-container { height: 220px; }
+            .dept-footer-action { flex-direction: column; align-items: stretch; }
+            .dept-footer-action .btn { width: 100%; }
+            .cta-banner h2 { font-size: 1.8rem; }
+            .cta-actions { flex-direction: column; align-items: stretch; }
+            .cta-actions .btn { width: 100%; }
+            .school-name h1, .school-name h1 span { font-size: 1.3rem; }
+            .profile-card-layout { flex-direction: column; gap: 1.5rem; }
+            .profile-divider-v { width: 100%; height: 1px; }
+            .floating-person-btn { bottom: 20px; right: 20px; width: 50px; height: 50px; }
+            .portal-box { right: 0; }
         }
 
         @media screen and (max-width: 480px) {
-            .logo h2 {
-                font-size: 1.1rem;
-            }
-
-            .logo span {
-                font-size: 0.5rem;
-            }
-
-            .school-name h1 {
-                font-size: 1.4rem;
-            }
-
-            footer .icon img {
-                height: 36px;
-                width: 36px;
-            }
+            .logo h2 { font-size: 1.05rem; }
+            .logo span { font-size: 0.55rem; letter-spacing: 1px; }
+            .logo img { height: 36px; }
+            .hero h1 { font-size: 1.85rem; }
+            .section-header h2 { font-size: 1.65rem; }
+            .dept-detail-card { padding: 1.25rem; }
+            .detail-block { padding: 1.15rem; }
+            .dept-title-wrap h2 { font-size: 1.05rem; }
+            .dept-image-container { height: 180px; }
+            .school-name img.icflogo { height: 75px; }
+            .school-name h1, .school-name h1 span { font-size: 1rem; letter-spacing: 1px; }
+            .profile-modal-content { max-width: 100%; }
+            .profile-card-layout { padding: 1rem; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Header Navigation -->
-    <header>
+    <!-- ============================================
+         HEADER
+         ============================================ -->
+    <header id="mainHeader">
         <div class="container nav-container">
-            <div class="logo">
-               <a href="../index.html"><img src="../BackGroundimage/ICFLogo.png" alt="Logo"></a> 
-                <h2>ICF <span>Interworld Colleges Foundation Inc.</span></h2>
-            </div>
+            <a href="../index.html" class="logo">
+                <img src="../BackGroundimage/ICFLogo.png" alt="ICF Logo">
+                <div class="logo-text">
+                    <h2>ICF</h2>
+                    <span>Interworld Colleges Foundation Inc.</span>
+                </div>
+            </a>
 
-            <!-- Hamburger Toggle Button -->
             <button class="mobile-menu-btn" id="menuToggle" aria-label="Toggle Navigation">
                 <i class="fa-solid fa-bars"></i>
             </button>
 
-            <!-- Desktop Navigation Links -->
             <nav class="desktop-nav">
                 <ul class="desktop-nav-links">
                     <li><a href="../index.html"><i class="fa-solid fa-house"></i> Home</a></li>
@@ -990,7 +1673,6 @@
                 </ul>
             </nav>
 
-            <!-- Desktop Portal Login Button -->
             <div class="portal-dropdown-wrapper desktop-portal-wrapper">
                 <button id="portalLoginBtn" class="btn btn-secondary">
                     <i class="fa-solid fa-right-to-bracket"></i> Portal Login
@@ -1002,7 +1684,7 @@
                         <i class="fa-solid fa-user-shield"></i>
                         <div class="option-text">
                             <strong>ADMIN</strong>
-                            <small>Faculty & Staff Access</small>
+                            <small>Faculty &amp; Staff Access</small>
                         </div>
                     </a>
                     <a href="../student/login.html" class="portal-option">
@@ -1015,21 +1697,57 @@
                 </div>
             </div>
         </div>
-    </header>  
+    </header>
 
-    <!-- Floating Person Icon Button -->
+    <!-- ============================================
+         LEFT FLOATING WIDGET BUTTONS
+         ============================================ -->
+    <div class="widget-stack" aria-label="Quick action widgets">
+        <a href="https://web.facebook.com/ICFPaniquiOfficial"
+           target="_blank" rel="noopener noreferrer"
+           class="widget-btn widget-facebook" aria-label="Visit Facebook Page">
+            <span class="widget-icon"><i class="fa-brands fa-facebook-f"></i></span>
+            <span class="widget-label">Facebook Page</span>
+        </a>
+
+        <a href="contact.html"
+           class="widget-btn widget-inquiry" aria-label="Send Inquiry">
+            <span class="widget-icon"><i class="fa-solid fa-envelope-open-text"></i></span>
+            <span class="widget-label">Send Inquiry</span>
+        </a>
+
+        <a href="../index.html#news"
+           class="widget-btn widget-news" aria-label="Latest News">
+            <span class="widget-icon"><i class="fa-solid fa-newspaper"></i></span>
+            <span class="widget-label">Latest News</span>
+        </a>
+
+        <a href="../index.html#announcements"
+           class="widget-btn widget-announcement" aria-label="Announcements">
+            <span class="widget-icon"><i class="fa-solid fa-bullhorn"></i></span>
+            <span class="widget-label">Announcements</span>
+        </a>
+
+        <a href="../BackGroundimage/ICF-Prospectus-2026.pdf"
+           download class="widget-btn widget-download" aria-label="Download Prospectus">
+            <span class="widget-icon"><i class="fa-solid fa-file-pdf"></i></span>
+            <span class="widget-label">Download Prospectus</span>
+        </a>
+    </div>
+
+    <!-- Floating Person Button -->
     <button class="floating-person-btn" id="openProfileModal" aria-label="View Profiles">
         <i class="fa-solid fa-user"></i>
     </button>
 
-    <!-- Profile Information Modal -->
+    <!-- Profile Modal -->
     <div class="profile-modal-overlay" id="profileModalOverlay">
         <div class="profile-modal-content">
             <div class="profile-modal-header">
-                <h3>Team Profile Information</h3>
+                <h3><i class="fa-solid fa-users"></i> Team Profile Information</h3>
                 <button class="profile-modal-close" id="closeProfileModal">&times;</button>
             </div>
-            
+
             <div class="profile-scroll-slot">
                 <!-- LEADER -->
                 <div class="profile-group">
@@ -1200,21 +1918,19 @@
         </div>
     </div>
 
-    <!-- Mobile Sidebar Drawer & Overlay -->
+    <!-- Mobile Sidebar -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
-    
+
     <aside class="mobile-sidebar" id="mobileSidebar">
-        <!-- Close Button -->
         <button class="sidebar-close-btn" id="sidebarCloseBtn" aria-label="Close Menu">
             <i class="fa-solid fa-xmark"></i>
         </button>
 
-        <!-- Centered ICF Logo -->
         <div class="sidebar-brand">
             <img src="../BackGroundimage/ICFLogo.png" alt="ICF Logo">
+            <h3>ICF Portal</h3>
         </div>
 
-        <!-- Vertical Navigation Links -->
         <ul class="sidebar-nav-links">
             <li><a href="../index.html"><i class="fa-solid fa-house"></i> Home</a></li>
             <li><a href="department.html" class="active"><i class="fa-solid fa-building-columns"></i> Department</a></li>
@@ -1222,9 +1938,8 @@
             <li><a href="contact.html"><i class="fa-solid fa-envelope"></i> Contact</a></li>
         </ul>
 
-        <!-- Scaled Down Portal Login Button Below Navigation Links -->
         <div class="sidebar-footer-portal portal-dropdown-wrapper">
-            <button id="mobilePortalBtn" class="btn btn-secondary">
+            <button id="mobilePortalBtn" class="btn btn-secondary btn-block">
                 <i class="fa-solid fa-right-to-bracket"></i> Portal Login
             </button>
 
@@ -1234,7 +1949,7 @@
                     <i class="fa-solid fa-user-shield"></i>
                     <div class="option-text">
                         <strong>ADMIN</strong>
-                        <small>Faculty & Staff Access</small>
+                        <small>Faculty &amp; Staff Access</small>
                     </div>
                 </a>
                 <a href="../student/login.html" class="portal-option">
@@ -1248,33 +1963,68 @@
         </div>
     </aside>
 
-    <!-- Hero Banner -->
+    <!-- ============================================
+         HERO SECTION
+         ============================================ -->
     <section class="hero">
-        <div class="badge"><i class="fa-solid fa-book-bookmark"></i> Comprehensive Directory</div>
-        <h1>All Academic Departments & Programs</h1>
-        <p>Explore complete program descriptions, course outlines, career outlooks, and admission criteria across all departments.</p>
+        <div class="container">
+            <div class="badge"><i class="fa-solid fa-book-bookmark"></i> Comprehensive Directory</div>
+            <h1>All Academic <span class="accent">Departments &amp; Programs</span></h1>
+            <p>Explore complete program descriptions, course outlines, career outlooks, and admission criteria across all departments offered by ICF Interworld Colleges Foundation Inc.</p>
+
+            <!-- Quick Jump Pills -->
+            <div class="quick-jump">
+                <a href="#bscs"><i class="fa-solid fa-laptop-code"></i> Computer Science</a>
+                <a href="#bspa"><i class="fa-solid fa-scale-balanced"></i> Public Administration</a>
+                <a href="#bstm"><i class="fa-solid fa-plane-departure"></i> Tourism Management</a>
+                <a href="#bsed"><i class="fa-solid fa-chalkboard-user"></i> Secondary Education</a>
+                <a href="#btvted"><i class="fa-solid fa-gears"></i> Tech-Voc Education</a>
+                <a href="#beed"><i class="fa-solid fa-child-reaching"></i> Elementary Education</a>
+                <a href="#bsba"><i class="fa-solid fa-briefcase"></i> Business Administration</a>
+                <a href="#bsa"><i class="fa-solid fa-calculator"></i> Accountancy</a>
+                <a href="#act"><i class="fa-solid fa-microchip"></i> Computer Technology</a>
+            </div>
+        </div>
     </section>
 
-    <!-- Full Department Details Section -->
+    <!-- ============================================
+         DEPARTMENT DETAILS
+         ============================================ -->
     <section class="all-departments-container">
         <div class="container">
+
+            <div class="section-header">
+                <span class="section-eyebrow"><i class="fa-solid fa-graduation-cap"></i> Program Guide</span>
+                <h2>Explore Our <span class="accent">Programs</span></h2>
+                <p>Each program includes a full overview, learning objectives, curriculum structure, career pathways, and admission requirements.</p>
+            </div>
 
             <!-- 1. BS Computer Science -->
             <div class="dept-detail-card" id="bscs">
                 <div class="dept-header">
-                    <h2><i class="fa-solid fa-laptop-code"></i> Bachelor of Science in Computer Science</h2>
-                    <span class="badge"><i class="fa-solid fa-microchip"></i> College of Computer Studies</span>
+                    <div class="dept-header-left">
+                        <div class="dept-header-icon"><i class="fa-solid fa-laptop-code"></i></div>
+                        <div class="dept-title-wrap">
+                            <span class="dept-dept">College of Computer Studies</span>
+                            <h2>Bachelor of Science in Computer Science</h2>
+                        </div>
+                    </div>
+                    <span class="dept-badge-wrap"><i class="fa-solid fa-clock"></i> 4-Year Program</span>
                 </div>
+
                 <div class="dept-image-container">
                     <img src="../BackGroundimage/ProfilePic/BSCS.jpg" alt="Bachelor of Science in Computer Science">
+                    <div class="dept-image-tag"><i class="fa-solid fa-microchip"></i> BSCS</div>
                 </div>
+
                 <div class="dept-content-grid">
-                    <div class="detail-block">
-                        <h4><i class="fa-solid fa-align-left"></i> Program Overview & Detailed Description</h4>
-                        <p style="color: var(--text-muted-teal);">The Bachelor of Science in Computer Science (BSCS) is a comprehensive 4-year degree program focused on the study of computing concepts, algorithmic problem solving, advanced software engineering paradigms, intelligent systems, and computational theory. The curriculum is meticulously designed to foster technical proficiency, creative coding innovation, and deep analytical reasoning to build robust applications for contemporary industrial sectors.</p>
+                    <div class="detail-block full-width">
+                        <h4><i class="fa-solid fa-align-left"></i> Program Overview</h4>
+                        <p>The Bachelor of Science in Computer Science (BSCS) is a comprehensive 4-year degree program focused on the study of computing concepts, algorithmic problem solving, advanced software engineering paradigms, intelligent systems, and computational theory. The curriculum is meticulously designed to foster technical proficiency, creative coding innovation, and deep analytical reasoning to build robust applications for contemporary industrial sectors.</p>
                     </div>
+
                     <div class="detail-block">
-                        <h4><i class="fa-solid fa-bullseye"></i> Program Objectives & Competencies</h4>
+                        <h4><i class="fa-solid fa-bullseye"></i> Program Objectives</h4>
                         <ul>
                             <li>Design, test, and implement complex, scalable software solutions across multiple tech platforms.</li>
                             <li>Apply high-level theoretical and mathematical principles of computing to solve intricate real-world automation problems.</li>
@@ -1282,44 +2032,62 @@
                             <li>Cultivate teamwork, project management capabilities, and agile methodology adaptation for enterprise tech environments.</li>
                         </ul>
                     </div>
+
                     <div class="detail-block">
-                        <h4><i class="fa-solid fa-book-open"></i> Full Curriculum Structure & Milestone Timeline</h4>
+                        <h4><i class="fa-solid fa-book-open"></i> Curriculum Timeline</h4>
                         <ul>
-                            <li><strong>Year 1:</strong> Programming Fundamentals, Discrete Mathematics, Introduction to Computing, Data Structures & Basic Algorithms, General Education Courses</li>
-                            <li><strong>Year 2:</strong> Object-Oriented Programming, Computer Architecture & Organization, Relational Database Management Systems, Web Design & Client-Side Scripting</li>
-                            <li><strong>Year 3:</strong> Advanced Software Engineering, Design and Analysis of Algorithms, Operating Systems, Server-Side Web Development, Human-Computer Interaction</li>
-                            <li><strong>Year 4:</strong> Artificial Intelligence & Machine Learning Fundamentals, Capstone Research Project & Implementation, Professional Industry Internship (Practicum)</li>
+                            <li><strong>Year 1:</strong> Programming Fundamentals, Discrete Mathematics, Intro to Computing, Data Structures</li>
+                            <li><strong>Year 2:</strong> Object-Oriented Programming, Computer Architecture, Relational Databases, Web Design</li>
+                            <li><strong>Year 3:</strong> Advanced Software Engineering, Algorithms, Operating Systems, Server-Side Web Dev, HCI</li>
+                            <li><strong>Year 4:</strong> AI &amp; Machine Learning, Capstone Research Project, Industry Internship</li>
                         </ul>
                     </div>
-                    <div class="detail-block">
-                        <h4><i class="fa-solid fa-user-tie"></i> Career Opportunities & Industry Pathways</h4>
+
+                    <div class="detail-block full-width">
+                        <h4><i class="fa-solid fa-user-tie"></i> Career Opportunities</h4>
                         <ul>
-                            <li>Software Engineer / Developer, Systems Analyst, Full Stack Web Developer, Data Scientist, Artificial Intelligence Specialist, Database Administrator, IT Solutions Architect</li>
+                            <li>Software Engineer / Developer, Systems Analyst, Full Stack Web Developer, Data Scientist, AI Specialist, Database Administrator, IT Solutions Architect</li>
                         </ul>
                     </div>
                 </div>
+
                 <div class="dept-footer-action">
-                    <span style="color: var(--text-muted-teal); font-size: 0.9rem;"><i class="fa-solid fa-clipboard-check"></i> Requirements: Form 138, Good Moral Certificate, PSA Birth Certificate, Entrance Assessment Result</span>
-                    <a href="./enrollmentpage.html" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Apply Now</a>
+                    <div class="dept-req">
+                        <i class="fa-solid fa-clipboard-check"></i>
+                        <span><strong>Requirements:</strong> Form 138, Good Moral Certificate, PSA Birth Certificate, Entrance Assessment Result</span>
+                    </div>
+                    <a href="./enrollmentpage.html" class="btn btn-primary">
+                        <i class="fa-solid fa-paper-plane"></i> Apply Now
+                    </a>
                 </div>
             </div>
 
             <!-- 2. BS Public Administration -->
             <div class="dept-detail-card" id="bspa">
                 <div class="dept-header">
-                    <h2><i class="fa-solid fa-scale-balanced"></i> Bachelor of Science in Public Administration</h2>
-                    <span class="badge"><i class="fa-solid fa-landmark"></i> College of Arts & Governance</span>
+                    <div class="dept-header-left">
+                        <div class="dept-header-icon"><i class="fa-solid fa-scale-balanced"></i></div>
+                        <div class="dept-title-wrap">
+                            <span class="dept-dept">College of Arts &amp; Governance</span>
+                            <h2>Bachelor of Science in Public Administration</h2>
+                        </div>
+                    </div>
+                    <span class="dept-badge-wrap"><i class="fa-solid fa-clock"></i> 4-Year Program</span>
                 </div>
+
                 <div class="dept-image-container">
                     <img src="../BackGroundimage/ProfilePic/BSPA.jpg" alt="Bachelor of Science in Public Administration">
+                    <div class="dept-image-tag"><i class="fa-solid fa-landmark"></i> BSPA</div>
                 </div>
+
                 <div class="dept-content-grid">
-                    <div class="detail-block">
-                        <h4><i class="fa-solid fa-align-left"></i> Program Overview & Detailed Description</h4>
-                        <p style="color: var(--text-muted-teal);">The Bachelor of Science in Public Administration (BSPA) program is structured to prepare students for effective executive and leadership roles within government agencies, policy formulation bureaus, non-profit institutions, and civic organizations. It emphasizes organizational theory, transparent public service stewardship, fiscal administration, and community development management.</p>
+                    <div class="detail-block full-width">
+                        <h4><i class="fa-solid fa-align-left"></i> Program Overview</h4>
+                        <p>The Bachelor of Science in Public Administration (BSPA) program is structured to prepare students for effective executive and leadership roles within government agencies, policy formulation bureaus, non-profit institutions, and civic organizations. It emphasizes organizational theory, transparent public service stewardship, fiscal administration, and community development management.</p>
                     </div>
+
                     <div class="detail-block">
-                        <h4><i class="fa-solid fa-bullseye"></i> Program Objectives & Competencies</h4>
+                        <h4><i class="fa-solid fa-bullseye"></i> Program Objectives</h4>
                         <ul>
                             <li>Master public policy formulation, evaluation frameworks, and community management procedures.</li>
                             <li>Cultivate accountable, transparent, highly responsive, and service-oriented administrative leadership.</li>
@@ -1327,44 +2095,62 @@
                             <li>Promote civic engagement and sustainable socio-economic governance programs.</li>
                         </ul>
                     </div>
+
                     <div class="detail-block">
-                        <h4><i class="fa-solid fa-book-open"></i> Full Curriculum Structure & Milestone Timeline</h4>
+                        <h4><i class="fa-solid fa-book-open"></i> Curriculum Timeline</h4>
                         <ul>
-                            <li><strong>Year 1:</strong> Introduction to Public Administration, Philippine Governance & Politics, Administrative Ethics and Accountability</li>
-                            <li><strong>Year 2:</strong> Organization and Management Theory, Local Legislation and Intergovernmental Relations, Public Personnel Management</li>
-                            <li><strong>Year 3:</strong> Public Fiscal Administration, Public Policy Analysis, Government Budgeting Systems, Philippine Public Finance</li>
-                            <li><strong>Year 4:</strong> Research Methods in Public Administration, Comprehensive Public Sector On-the-Job Training / Internship</li>
+                            <li><strong>Year 1:</strong> Intro to Public Administration, Philippine Governance &amp; Politics, Administrative Ethics</li>
+                            <li><strong>Year 2:</strong> Organization &amp; Management Theory, Local Legislation, Public Personnel Management</li>
+                            <li><strong>Year 3:</strong> Public Fiscal Administration, Public Policy Analysis, Government Budgeting, Public Finance</li>
+                            <li><strong>Year 4:</strong> Research Methods in Public Admin, Comprehensive Public Sector Internship</li>
                         </ul>
                     </div>
-                    <div class="detail-block">
-                        <h4><i class="fa-solid fa-user-tie"></i> Career Opportunities & Industry Pathways</h4>
+
+                    <div class="detail-block full-width">
+                        <h4><i class="fa-solid fa-user-tie"></i> Career Opportunities</h4>
                         <ul>
-                            <li>Public Policy Analyst, Civil Servant / Government Officer, Human Resource Specialist, City / Municipal Administrator, NGO Executive Director, Local Legislative Staff</li>
+                            <li>Public Policy Analyst, Civil Servant / Government Officer, HR Specialist, City / Municipal Administrator, NGO Executive Director, Legislative Staff</li>
                         </ul>
                     </div>
                 </div>
+
                 <div class="dept-footer-action">
-                    <span style="color: var(--text-muted-teal); font-size: 0.9rem;"><i class="fa-solid fa-clipboard-check"></i> Requirements: Form 138, Good Moral Certificate, PSA Birth Certificate, Admission Screening Interview</span>
-                    <a href="./enrollmentpage.html" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Apply Now</a>
+                    <div class="dept-req">
+                        <i class="fa-solid fa-clipboard-check"></i>
+                        <span><strong>Requirements:</strong> Form 138, Good Moral Certificate, PSA Birth Certificate, Admission Screening Interview</span>
+                    </div>
+                    <a href="./enrollmentpage.html" class="btn btn-primary">
+                        <i class="fa-solid fa-paper-plane"></i> Apply Now
+                    </a>
                 </div>
             </div>
 
             <!-- 3. BS Tourism Management -->
             <div class="dept-detail-card" id="bstm">
                 <div class="dept-header">
-                    <h2><i class="fa-solid fa-plane-departure"></i> Bachelor of Science in Tourism Management</h2>
-                    <span class="badge"><i class="fa-solid fa-earth-americas"></i> College of Hospitality & Tourism</span>
+                    <div class="dept-header-left">
+                        <div class="dept-header-icon"><i class="fa-solid fa-plane-departure"></i></div>
+                        <div class="dept-title-wrap">
+                            <span class="dept-dept">College of Hospitality &amp; Tourism</span>
+                            <h2>Bachelor of Science in Tourism Management</h2>
+                        </div>
+                    </div>
+                    <span class="dept-badge-wrap"><i class="fa-solid fa-clock"></i> 4-Year Program</span>
                 </div>
+
                 <div class="dept-image-container">
                     <img src="../BackGroundimage/ProfilePic/BSTM.jpg" alt="Bachelor of Science in Tourism Management">
+                    <div class="dept-image-tag"><i class="fa-solid fa-earth-americas"></i> BSTM</div>
                 </div>
+
                 <div class="dept-content-grid">
-                    <div class="detail-block">
-                        <h4><i class="fa-solid fa-align-left"></i> Program Overview & Detailed Description</h4>
-                        <p style="color: var(--text-muted-teal);">The Bachelor of Science in Tourism Management (BSTM) equips professionals with deep operational skills and administrative know-how for dynamic careers in global destination management, eco-tourism development, flight and ticketing operations, convention logistics, and international hospitality enterprises.</p>
+                    <div class="detail-block full-width">
+                        <h4><i class="fa-solid fa-align-left"></i> Program Overview</h4>
+                        <p>The Bachelor of Science in Tourism Management (BSTM) equips professionals with deep operational skills and administrative know-how for dynamic careers in global destination management, eco-tourism development, flight and ticketing operations, convention logistics, and international hospitality enterprises.</p>
                     </div>
+
                     <div class="detail-block">
-                        <h4><i class="fa-solid fa-bullseye"></i> Program Objectives & Competencies</h4>
+                        <h4><i class="fa-solid fa-bullseye"></i> Program Objectives</h4>
                         <ul>
                             <li>Master global tour operations, ticketing systems, and large-scale event management skills.</li>
                             <li>Promote sustainable cultural, environmental, and ecological tourism development practices.</li>
@@ -1372,44 +2158,62 @@
                             <li>Understand travel safety protocols, risk assessment, and tourism marketing campaigns.</li>
                         </ul>
                     </div>
+
                     <div class="detail-block">
-                        <h4><i class="fa-solid fa-book-open"></i> Full Curriculum Structure & Milestone Timeline</h4>
+                        <h4><i class="fa-solid fa-book-open"></i> Curriculum Timeline</h4>
                         <ul>
-                            <li><strong>Year 1:</strong> Micro Perspective of Tourism & Hospitality, Tourism Risk Management, Philippine Culture and Tourism Geography</li>
-                            <li><strong>Year 2:</strong> Foreign Languages for Tourism, Travel Agency & Tour Operations Procedures, Transportation Management</li>
-                            <li><strong>Year 3:</strong> Tourism Destination Marketing, MICE (Meetings, Incentives, Conferences, Exhibitions) Management, E-Commerce in Tourism</li>
-                            <li><strong>Year 4:</strong> Comprehensive Tourism Practicum (Local or International Corporate Internship Program)</li>
+                            <li><strong>Year 1:</strong> Micro Perspective of Tourism, Tourism Risk Management, Philippine Culture and Tourism Geography</li>
+                            <li><strong>Year 2:</strong> Foreign Languages for Tourism, Travel Agency &amp; Tour Operations, Transportation Management</li>
+                            <li><strong>Year 3:</strong> Destination Marketing, MICE Management, E-Commerce in Tourism</li>
+                            <li><strong>Year 4:</strong> Comprehensive Tourism Practicum (Local or International Internship)</li>
                         </ul>
                     </div>
-                    <div class="detail-block">
-                        <h4><i class="fa-solid fa-user-tie"></i> Career Opportunities & Industry Pathways</h4>
+
+                    <div class="detail-block full-width">
+                        <h4><i class="fa-solid fa-user-tie"></i> Career Opportunities</h4>
                         <ul>
-                            <li>Tour Operations Manager, Flight Attendant, Travel Consultant, Events & Convention Planner, Resort Operations Supervisor, Tourism Promotion Officer</li>
+                            <li>Tour Operations Manager, Flight Attendant, Travel Consultant, Events &amp; Convention Planner, Resort Operations Supervisor, Tourism Promotion Officer</li>
                         </ul>
                     </div>
                 </div>
+
                 <div class="dept-footer-action">
-                    <span style="color: var(--text-muted-teal); font-size: 0.9rem;"><i class="fa-solid fa-clipboard-check"></i> Requirements: Form 138, Good Moral Certificate, Medical Clearance, PSA Birth Certificate</span>
-                    <a href="./enrollmentpage.html" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Apply Now</a>
+                    <div class="dept-req">
+                        <i class="fa-solid fa-clipboard-check"></i>
+                        <span><strong>Requirements:</strong> Form 138, Good Moral Certificate, Medical Clearance, PSA Birth Certificate</span>
+                    </div>
+                    <a href="./enrollmentpage.html" class="btn btn-primary">
+                        <i class="fa-solid fa-paper-plane"></i> Apply Now
+                    </a>
                 </div>
             </div>
 
             <!-- 4. BS Secondary Education -->
             <div class="dept-detail-card" id="bsed">
                 <div class="dept-header">
-                    <h2><i class="fa-solid fa-chalkboard-user"></i> Bachelor of Secondary Education</h2>
-                    <span class="badge"><i class="fa-solid fa-graduation-cap"></i> College of Teacher Education</span>
+                    <div class="dept-header-left">
+                        <div class="dept-header-icon"><i class="fa-solid fa-chalkboard-user"></i></div>
+                        <div class="dept-title-wrap">
+                            <span class="dept-dept">College of Teacher Education</span>
+                            <h2>Bachelor of Secondary Education</h2>
+                        </div>
+                    </div>
+                    <span class="dept-badge-wrap"><i class="fa-solid fa-clock"></i> 4-Year Program</span>
                 </div>
+
                 <div class="dept-image-container">
                     <img src="../BackGroundimage/ProfilePic/BSED.jpg" alt="Bachelor of Secondary Education">
+                    <div class="dept-image-tag"><i class="fa-solid fa-graduation-cap"></i> BSEd</div>
                 </div>
+
                 <div class="dept-content-grid">
-                    <div class="detail-block">
-                        <h4><i class="fa-solid fa-align-left"></i> Program Overview & Detailed Description</h4>
-                        <p style="color: var(--text-muted-teal);">The Bachelor of Secondary Education (BSEd) program trains future high school educators, imparting specialized pedagogy and deep academic content knowledge across majors such as Mathematics, English, Science, and Social Studies to shape competent and inspiring secondary classroom leaders.</p>
+                    <div class="detail-block full-width">
+                        <h4><i class="fa-solid fa-align-left"></i> Program Overview</h4>
+                        <p>The Bachelor of Secondary Education (BSEd) program trains future high school educators, imparting specialized pedagogy and deep academic content knowledge across majors such as Mathematics, English, Science, and Social Studies to shape competent and inspiring secondary classroom leaders.</p>
                     </div>
+
                     <div class="detail-block">
-                        <h4><i class="fa-solid fa-bullseye"></i> Program Objectives & Competencies</h4>
+                        <h4><i class="fa-solid fa-bullseye"></i> Program Objectives</h4>
                         <ul>
                             <li>Develop comprehensive mastery over secondary school curriculum contents and specialized major topics.</li>
                             <li>Apply modern, interactive, and digital teaching methodologies to maximize student engagement.</li>
@@ -1417,44 +2221,62 @@
                             <li>Implement reliable learner assessment tools and instructional design frameworks.</li>
                         </ul>
                     </div>
+
                     <div class="detail-block">
-                        <h4><i class="fa-solid fa-book-open"></i> Full Curriculum Structure & Milestone Timeline</h4>
+                        <h4><i class="fa-solid fa-book-open"></i> Curriculum Timeline</h4>
                         <ul>
-                            <li><strong>Year 1:</strong> Child and Adolescent Development, Facilitating Learning, The Teaching Profession, General Education Core</li>
-                            <li><strong>Year 2:</strong> Assessment of Learning 1 & 2, The Teacher and the Community, Curriculum Development, Subject Specialization Content</li>
-                            <li><strong>Year 3:</strong> Technology for Teaching and Learning, Pedagogical Content Knowledge, Field Study 1 & 2 (Observation & Participation)</li>
-                            <li><strong>Year 4:</strong> Teaching Internship (Full-Term Live Practice Teaching in Partner Secondary Schools)</li>
+                            <li><strong>Year 1:</strong> Child &amp; Adolescent Development, Facilitating Learning, The Teaching Profession</li>
+                            <li><strong>Year 2:</strong> Assessment of Learning, Teacher and Community, Curriculum Development, Subject Specialization</li>
+                            <li><strong>Year 3:</strong> Technology for Teaching, Pedagogical Content Knowledge, Field Study 1 &amp; 2</li>
+                            <li><strong>Year 4:</strong> Teaching Internship (Full-Term Practice Teaching in Partner Schools)</li>
                         </ul>
                     </div>
-                    <div class="detail-block">
-                        <h4><i class="fa-solid fa-user-tie"></i> Career Opportunities & Industry Pathways</h4>
+
+                    <div class="detail-block full-width">
+                        <h4><i class="fa-solid fa-user-tie"></i> Career Opportunities</h4>
                         <ul>
                             <li>High School Subject Teacher, Curriculum Developer, Academic Coordinator, Educational Specialist, Private Tutor, Instructional Materials Designer</li>
                         </ul>
                     </div>
                 </div>
+
                 <div class="dept-footer-action">
-                    <span style="color: var(--text-muted-teal); font-size: 0.9rem;"><i class="fa-solid fa-clipboard-check"></i> Requirements: Form 138 / SHS Card, Good Moral Certificate, PSA Birth Certificate</span>
-                    <a href="./enrollmentpage.html" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Apply Now</a>
+                    <div class="dept-req">
+                        <i class="fa-solid fa-clipboard-check"></i>
+                        <span><strong>Requirements:</strong> Form 138 / SHS Card, Good Moral Certificate, PSA Birth Certificate</span>
+                    </div>
+                    <a href="./enrollmentpage.html" class="btn btn-primary">
+                        <i class="fa-solid fa-paper-plane"></i> Apply Now
+                    </a>
                 </div>
             </div>
 
             <!-- 5. BS Technical Vocational Teacher Education -->
             <div class="dept-detail-card" id="btvted">
                 <div class="dept-header">
-                    <h2><i class="fa-solid fa-gears"></i> Bachelor of Technical Vocational Teacher Education</h2>
-                    <span class="badge"><i class="fa-solid fa-graduation-cap"></i> College of Teacher Education</span>
+                    <div class="dept-header-left">
+                        <div class="dept-header-icon"><i class="fa-solid fa-gears"></i></div>
+                        <div class="dept-title-wrap">
+                            <span class="dept-dept">College of Teacher Education</span>
+                            <h2>Bachelor of Technical Vocational Teacher Education</h2>
+                        </div>
+                    </div>
+                    <span class="dept-badge-wrap"><i class="fa-solid fa-clock"></i> 4-Year Program</span>
                 </div>
+
                 <div class="dept-image-container">
                     <img src="../BackGroundimage/ProfilePic/BTVTE.jpg" alt="Bachelor of Technical Vocational Teacher Education">
+                    <div class="dept-image-tag"><i class="fa-solid fa-screwdriver-wrench"></i> BTVTEd</div>
                 </div>
+
                 <div class="dept-content-grid">
-                    <div class="detail-block">
-                        <h4><i class="fa-solid fa-align-left"></i> Program Overview & Detailed Description</h4>
-                        <p style="color: var(--text-muted-teal);">The Bachelor of Technical Vocational Teacher Education (BTVTEd) program equips student-teachers with advanced technical craftsmanship and pedagogical skills required to teach technical-vocational courses across senior high schools and technical training institutions.</p>
+                    <div class="detail-block full-width">
+                        <h4><i class="fa-solid fa-align-left"></i> Program Overview</h4>
+                        <p>The Bachelor of Technical Vocational Teacher Education (BTVTEd) program equips student-teachers with advanced technical craftsmanship and pedagogical skills required to teach technical-vocational courses across senior high schools and technical training institutions.</p>
                     </div>
+
                     <div class="detail-block">
-                        <h4><i class="fa-solid fa-bullseye"></i> Program Objectives & Competencies</h4>
+                        <h4><i class="fa-solid fa-bullseye"></i> Program Objectives</h4>
                         <ul>
                             <li>Acquire official National Certifications (NC) in specialized technical and industrial fields.</li>
                             <li>Implement modern competency-based Technical, Vocational, and Education Training (TVET) standards.</li>
@@ -1462,44 +2284,62 @@
                             <li>Manage workshop safety, equipment maintenance, and technical instructional modules.</li>
                         </ul>
                     </div>
+
                     <div class="detail-block">
-                        <h4><i class="fa-solid fa-book-open"></i> Full Curriculum Structure & Milestone Timeline</h4>
+                        <h4><i class="fa-solid fa-book-open"></i> Curriculum Timeline</h4>
                         <ul>
-                            <li><strong>Year 1:</strong> Foundations of Technical Education, Technical Drafting, Workshop Safety & Orientation, Basic Mathematics</li>
-                            <li><strong>Year 2:</strong> Competency-Based Training Frameworks, Applied Electronics and Mechanics, Technical Communication</li>
-                            <li><strong>Year 3:</strong> Shop Layout & Resource Management, Instructional Courseware Design, Advanced Trade Practices</li>
+                            <li><strong>Year 1:</strong> Foundations of Technical Education, Technical Drafting, Workshop Safety, Basic Math</li>
+                            <li><strong>Year 2:</strong> Competency-Based Training, Applied Electronics and Mechanics, Technical Communication</li>
+                            <li><strong>Year 3:</strong> Shop Layout &amp; Resource Management, Instructional Courseware Design, Advanced Trade Practices</li>
                             <li><strong>Year 4:</strong> Industry Immersion, Technical Vocational Practice Teaching Internship</li>
                         </ul>
                     </div>
-                    <div class="detail-block">
-                        <h4><i class="fa-solid fa-user-tie"></i> Career Opportunities & Industry Pathways</h4>
+
+                    <div class="detail-block full-width">
+                        <h4><i class="fa-solid fa-user-tie"></i> Career Opportunities</h4>
                         <ul>
                             <li>TVET Instructor, Senior High School TVL Teacher, Vocational Training Center Trainer, Technical Skills Assessor, Industrial Workshop Supervisor</li>
                         </ul>
                     </div>
                 </div>
+
                 <div class="dept-footer-action">
-                    <span style="color: var(--text-muted-teal); font-size: 0.9rem;"><i class="fa-solid fa-clipboard-check"></i> Requirements: Form 138 / SHS Card, Good Moral Certificate, PSA Birth Certificate</span>
-                    <a href="./enrollmentpage.html" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Apply Now</a>
+                    <div class="dept-req">
+                        <i class="fa-solid fa-clipboard-check"></i>
+                        <span><strong>Requirements:</strong> Form 138 / SHS Card, Good Moral Certificate, PSA Birth Certificate</span>
+                    </div>
+                    <a href="./enrollmentpage.html" class="btn btn-primary">
+                        <i class="fa-solid fa-paper-plane"></i> Apply Now
+                    </a>
                 </div>
             </div>
 
             <!-- 6. BS Elementary Education -->
             <div class="dept-detail-card" id="beed">
                 <div class="dept-header">
-                    <h2><i class="fa-solid fa-child-reaching"></i> Bachelor of Elementary Education</h2>
-                    <span class="badge"><i class="fa-solid fa-graduation-cap"></i> College of Teacher Education</span>
+                    <div class="dept-header-left">
+                        <div class="dept-header-icon"><i class="fa-solid fa-child-reaching"></i></div>
+                        <div class="dept-title-wrap">
+                            <span class="dept-dept">College of Teacher Education</span>
+                            <h2>Bachelor of Elementary Education</h2>
+                        </div>
+                    </div>
+                    <span class="dept-badge-wrap"><i class="fa-solid fa-clock"></i> 4-Year Program</span>
                 </div>
+
                 <div class="dept-image-container">
                     <img src="../BackGroundimage/ProfilePic/BEED.jpg" alt="Bachelor of Elementary Education">
+                    <div class="dept-image-tag"><i class="fa-solid fa-graduation-cap"></i> BEEd</div>
                 </div>
+
                 <div class="dept-content-grid">
-                    <div class="detail-block">
-                        <h4><i class="fa-solid fa-align-left"></i> Program Overview & Detailed Description</h4>
-                        <p style="color: var(--text-muted-teal);">The Bachelor of Elementary Education (BEEd) program focuses on holistic primary education training designed specifically for child development, foundational literacy, numeracy instruction, and early-stage pedagogical psychology to mold dedicated elementary school mentors.</p>
+                    <div class="detail-block full-width">
+                        <h4><i class="fa-solid fa-align-left"></i> Program Overview</h4>
+                        <p>The Bachelor of Elementary Education (BEEd) program focuses on holistic primary education training designed specifically for child development, foundational literacy, numeracy instruction, and early-stage pedagogical psychology to mold dedicated elementary school mentors.</p>
                     </div>
+
                     <div class="detail-block">
-                        <h4><i class="fa-solid fa-bullseye"></i> Program Objectives & Competencies</h4>
+                        <h4><i class="fa-solid fa-bullseye"></i> Program Objectives</h4>
                         <ul>
                             <li>Master foundational elementary subjects, reading literacy strategies, and basic mathematical concepts.</li>
                             <li>Understand early childhood psychological, emotional, and social development milestones.</li>
@@ -1507,44 +2347,62 @@
                             <li>Implement inclusive education strategies catering to diverse young learners.</li>
                         </ul>
                     </div>
+
                     <div class="detail-block">
-                        <h4><i class="fa-solid fa-book-open"></i> Full Curriculum Structure & Milestone Timeline</h4>
+                        <h4><i class="fa-solid fa-book-open"></i> Curriculum Timeline</h4>
                         <ul>
-                            <li><strong>Year 1:</strong> Child Development, Teaching Elementary Math & Science, Foundations of Education</li>
-                            <li><strong>Year 2:</strong> Primary Language Literacy, Arts and Music Education, Teaching Social Studies in Elementary</li>
-                            <li><strong>Year 3:</strong> Elementary Classroom Management, Special Needs Education Basics, Educational Technology Integration</li>
+                            <li><strong>Year 1:</strong> Child Development, Teaching Elementary Math &amp; Science, Foundations of Education</li>
+                            <li><strong>Year 2:</strong> Primary Language Literacy, Arts and Music Education, Teaching Social Studies</li>
+                            <li><strong>Year 3:</strong> Elementary Classroom Management, Special Needs Education, Educational Technology</li>
                             <li><strong>Year 4:</strong> Full-Term Practice Teaching Internship in Accredited Primary Schools</li>
                         </ul>
                     </div>
-                    <div class="detail-block">
-                        <h4><i class="fa-solid fa-user-tie"></i> Career Opportunities & Industry Pathways</h4>
+
+                    <div class="detail-block full-width">
+                        <h4><i class="fa-solid fa-user-tie"></i> Career Opportunities</h4>
                         <ul>
                             <li>Elementary School Teacher, Primary Educator, Child Care Center Director, Educational Material Author, Kindergarten Teacher</li>
                         </ul>
                     </div>
                 </div>
+
                 <div class="dept-footer-action">
-                    <span style="color: var(--text-muted-teal); font-size: 0.9rem;"><i class="fa-solid fa-clipboard-check"></i> Requirements: Form 138 / SHS Card, Good Moral Certificate, PSA Birth Certificate</span>
-                    <a href="./enrollmentpage.html" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Apply Now</a>
+                    <div class="dept-req">
+                        <i class="fa-solid fa-clipboard-check"></i>
+                        <span><strong>Requirements:</strong> Form 138 / SHS Card, Good Moral Certificate, PSA Birth Certificate</span>
+                    </div>
+                    <a href="./enrollmentpage.html" class="btn btn-primary">
+                        <i class="fa-solid fa-paper-plane"></i> Apply Now
+                    </a>
                 </div>
             </div>
 
             <!-- 7. BS Business Administration -->
             <div class="dept-detail-card" id="bsba">
                 <div class="dept-header">
-                    <h2><i class="fa-solid fa-briefcase"></i> Bachelor of Science in Business Administration</h2>
-                    <span class="badge"><i class="fa-solid fa-chart-line"></i> College of Business & Management</span>
+                    <div class="dept-header-left">
+                        <div class="dept-header-icon"><i class="fa-solid fa-briefcase"></i></div>
+                        <div class="dept-title-wrap">
+                            <span class="dept-dept">College of Business &amp; Management</span>
+                            <h2>Bachelor of Science in Business Administration</h2>
+                        </div>
+                    </div>
+                    <span class="dept-badge-wrap"><i class="fa-solid fa-clock"></i> 4-Year Program</span>
                 </div>
+
                 <div class="dept-image-container">
                     <img src="../BackGroundimage/ProfilePic/BSBA.jpg" alt="Bachelor of Science in Business Administration">
+                    <div class="dept-image-tag"><i class="fa-solid fa-chart-line"></i> BSBA</div>
                 </div>
+
                 <div class="dept-content-grid">
-                    <div class="detail-block">
-                        <h4><i class="fa-solid fa-align-left"></i> Program Overview & Detailed Description</h4>
-                        <p style="color: var(--text-muted-teal);">The Bachelor of Science in Business Administration (BSBA) program provides a broad, comprehensive foundation in core corporate operations, marketing strategy, modern human resource management, financial planning, and startup entrepreneurial leadership in a competitive global market.</p>
+                    <div class="detail-block full-width">
+                        <h4><i class="fa-solid fa-align-left"></i> Program Overview</h4>
+                        <p>The Bachelor of Science in Business Administration (BSBA) program provides a broad, comprehensive foundation in core corporate operations, marketing strategy, modern human resource management, financial planning, and startup entrepreneurial leadership in a competitive global market.</p>
                     </div>
+
                     <div class="detail-block">
-                        <h4><i class="fa-solid fa-bullseye"></i> Program Objectives & Competencies</h4>
+                        <h4><i class="fa-solid fa-bullseye"></i> Program Objectives</h4>
                         <ul>
                             <li>Formulate innovative, strategic solutions to contemporary corporate and organizational challenges.</li>
                             <li>Demonstrate high proficiency in digital marketing, corporate finance, and business data analysis.</li>
@@ -1552,89 +2410,125 @@
                             <li>Draft comprehensive business plans and feasibility studies for new market ventures.</li>
                         </ul>
                     </div>
+
                     <div class="detail-block">
-                        <h4><i class="fa-solid fa-book-open"></i> Full Curriculum Structure & Milestone Timeline</h4>
+                        <h4><i class="fa-solid fa-book-open"></i> Curriculum Timeline</h4>
                         <ul>
                             <li><strong>Year 1:</strong> Principles of Management, Microeconomics, Business Mathematics, Accounting Fundamentals</li>
-                            <li><strong>Year 2:</strong> Marketing Management, Financial Accounting, Business Law & Obligations, Macroeconomics</li>
+                            <li><strong>Year 2:</strong> Marketing Management, Financial Accounting, Business Law, Macroeconomics</li>
                             <li><strong>Year 3:</strong> Human Resource Management, Operations Management, Strategic Management, Corporate Finance</li>
-                            <li><strong>Year 4:</strong> Corporate Business Practicum / Internship & Comprehensive Business Feasibility Study Defense</li>
+                            <li><strong>Year 4:</strong> Corporate Business Practicum &amp; Business Feasibility Study Defense</li>
                         </ul>
                     </div>
-                    <div class="detail-block">
-                        <h4><i class="fa-solid fa-user-tie"></i> Career Opportunities & Industry Pathways</h4>
+
+                    <div class="detail-block full-width">
+                        <h4><i class="fa-solid fa-user-tie"></i> Career Opportunities</h4>
                         <ul>
                             <li>Marketing Manager, Entrepreneur, Business Operations Analyst, Human Resource Officer, Corporate Account Executive, Management Consultant</li>
                         </ul>
                     </div>
                 </div>
+
                 <div class="dept-footer-action">
-                    <span style="color: var(--text-muted-teal); font-size: 0.9rem;"><i class="fa-solid fa-clipboard-check"></i> Requirements: Form 138, Good Moral Certificate, PSA Birth Certificate</span>
-                    <a href="./enrollmentpage.html" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Apply Now</a>
+                    <div class="dept-req">
+                        <i class="fa-solid fa-clipboard-check"></i>
+                        <span><strong>Requirements:</strong> Form 138, Good Moral Certificate, PSA Birth Certificate</span>
+                    </div>
+                    <a href="./enrollmentpage.html" class="btn btn-primary">
+                        <i class="fa-solid fa-paper-plane"></i> Apply Now
+                    </a>
                 </div>
             </div>
 
             <!-- 8. BS Accountancy -->
             <div class="dept-detail-card" id="bsa">
                 <div class="dept-header">
-                    <h2><i class="fa-solid fa-calculator"></i> Bachelor of Science in Accountancy</h2>
-                    <span class="badge"><i class="fa-solid fa-file-invoice-dollar"></i> College of Accountancy</span>
+                    <div class="dept-header-left">
+                        <div class="dept-header-icon"><i class="fa-solid fa-calculator"></i></div>
+                        <div class="dept-title-wrap">
+                            <span class="dept-dept">College of Accountancy</span>
+                            <h2>Bachelor of Science in Accountancy</h2>
+                        </div>
+                    </div>
+                    <span class="dept-badge-wrap"><i class="fa-solid fa-clock"></i> 4-Year Program</span>
                 </div>
+
                 <div class="dept-image-container">
                     <img src="../BackGroundimage/ProfilePic/BSA.jpg" alt="Bachelor of Science in Accountancy">
+                    <div class="dept-image-tag"><i class="fa-solid fa-file-invoice-dollar"></i> BSA</div>
                 </div>
+
                 <div class="dept-content-grid">
-                    <div class="detail-block">
-                        <h4><i class="fa-solid fa-align-left"></i> Program Overview & Detailed Description</h4>
-                        <p style="color: var(--text-muted-teal);">The Bachelor of Science in Accountancy (BSA) program is a rigorous, highly specialized academic course designed to prepare students for corporate financial practice, managerial accounting, taxation compliance, and successful completion of the Certified Public Accountant (CPA) licensure examination.</p>
+                    <div class="detail-block full-width">
+                        <h4><i class="fa-solid fa-align-left"></i> Program Overview</h4>
+                        <p>The Bachelor of Science in Accountancy (BSA) program is a rigorous, highly specialized academic course designed to prepare students for corporate financial practice, managerial accounting, taxation compliance, and successful completion of the Certified Public Accountant (CPA) licensure examination.</p>
                     </div>
+
                     <div class="detail-block">
-                        <h4><i class="fa-solid fa-bullseye"></i> Program Objectives & Competencies</h4>
+                        <h4><i class="fa-solid fa-bullseye"></i> Program Objectives</h4>
                         <ul>
-                            <li>Demonstrate exceptional expertise in International Financial Reporting Standards (IFRS) and financial statements preparation.</li>
+                            <li>Demonstrate exceptional expertise in International Financial Reporting Standards (IFRS) and financial statement preparation.</li>
                             <li>Execute detailed auditing procedures, forensic checks, and tax compliance strategies accurately.</li>
-                            <li>Uphold the highest standards of professional ethics, integrity, and accountability in financial management.</li>
+                            <li>Uphold the highest standards of professional ethics, integrity, and accountability.</li>
                             <li>Analyze complex financial statements to guide executive business decision-making.</li>
                         </ul>
                     </div>
+
                     <div class="detail-block">
-                        <h4><i class="fa-solid fa-book-open"></i> Full Curriculum Structure & Milestone Timeline</h4>
+                        <h4><i class="fa-solid fa-book-open"></i> Curriculum Timeline</h4>
                         <ul>
-                            <li><strong>Year 1:</strong> Financial Accounting & Reporting, Intermediate Accounting 1 & 2, Regulatory Framework & Business Law</li>
-                            <li><strong>Year 2:</strong> Advanced Accounting, Cost Accounting & Control, Income Taxation, Business Taxation & Regulations</li>
+                            <li><strong>Year 1:</strong> Financial Accounting &amp; Reporting, Intermediate Accounting, Business Law</li>
+                            <li><strong>Year 2:</strong> Advanced Accounting, Cost Accounting, Income Taxation, Business Taxation</li>
                             <li><strong>Year 3:</strong> Auditing Theory, Auditing Problems, Accounting Information Systems, Strategic Cost Management</li>
-                            <li><strong>Year 4:</strong> Comprehensive CPA Review Integration, Advanced Auditing, Professional Accountancy Apprenticeship</li>
+                            <li><strong>Year 4:</strong> CPA Review Integration, Advanced Auditing, Professional Accountancy Apprenticeship</li>
                         </ul>
                     </div>
-                    <div class="detail-block">
-                        <h4><i class="fa-solid fa-user-tie"></i> Career Opportunities & Industry Pathways</h4>
+
+                    <div class="detail-block full-width">
+                        <h4><i class="fa-solid fa-user-tie"></i> Career Opportunities</h4>
                         <ul>
-                            <li>Certified Public Accountant (CPA), External Auditor, Internal Auditor, Tax Consultant, Chief Financial Officer (CFO), Financial Controller, Budget Analyst</li>
+                            <li>Certified Public Accountant (CPA), External Auditor, Internal Auditor, Tax Consultant, Chief Financial Officer, Financial Controller, Budget Analyst</li>
                         </ul>
                     </div>
                 </div>
+
                 <div class="dept-footer-action">
-                    <span style="color: var(--text-muted-teal); font-size: 0.9rem;"><i class="fa-solid fa-clipboard-check"></i> Requirements: Form 138 (High Math/English Grades), Entrance Exam, Screening Interview, Good Moral</span>
-                    <a href="./enrollmentpage.html" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Apply Now</a>
+                    <div class="dept-req">
+                        <i class="fa-solid fa-clipboard-check"></i>
+                        <span><strong>Requirements:</strong> Form 138 (High Math/English Grades), Entrance Exam, Screening Interview, Good Moral</span>
+                    </div>
+                    <a href="./enrollmentpage.html" class="btn btn-primary">
+                        <i class="fa-solid fa-paper-plane"></i> Apply Now
+                    </a>
                 </div>
             </div>
 
             <!-- 9. Associate in Computer Technology -->
             <div class="dept-detail-card" id="act">
                 <div class="dept-header">
-                    <h2><i class="fa-solid fa-microchip"></i> Associate in Computer Technology</h2>
-                    <span class="badge"><i class="fa-solid fa-code"></i> College of Computer Studies</span>
+                    <div class="dept-header-left">
+                        <div class="dept-header-icon"><i class="fa-solid fa-microchip"></i></div>
+                        <div class="dept-title-wrap">
+                            <span class="dept-dept">College of Computer Studies</span>
+                            <h2>Associate in Computer Technology</h2>
+                        </div>
+                    </div>
+                    <span class="dept-badge-wrap"><i class="fa-solid fa-clock"></i> 2-Year Program</span>
                 </div>
+
                 <div class="dept-image-container">
                     <img src="../BackGroundimage/ProfilePic/ACT.jpg" alt="Associate in Computer Technology">
+                    <div class="dept-image-tag"><i class="fa-solid fa-code"></i> ACT</div>
                 </div>
+
                 <div class="dept-content-grid">
-                    <div class="detail-block">
-                        <h4><i class="fa-solid fa-align-left"></i> Program Overview & Detailed Description</h4>
-                        <p style="color: var(--text-muted-teal);">The Associate in Computer Technology (ACT) is a intensive 2-year diploma undergraduate course focusing on practical computing, computer hardware servicing, basic software programming, network troubleshooting, and day-to-day IT systems operations for rapid entry into the tech workforce.</p>
+                    <div class="detail-block full-width">
+                        <h4><i class="fa-solid fa-align-left"></i> Program Overview</h4>
+                        <p>The Associate in Computer Technology (ACT) is an intensive 2-year diploma undergraduate course focusing on practical computing, computer hardware servicing, basic software programming, network troubleshooting, and day-to-day IT systems operations for rapid entry into the tech workforce.</p>
                     </div>
+
                     <div class="detail-block">
-                        <h4><i class="fa-solid fa-bullseye"></i> Program Objectives & Competencies</h4>
+                        <h4><i class="fa-solid fa-bullseye"></i> Program Objectives</h4>
                         <ul>
                             <li>Master PC hardware assembly, diagnosis, repair, and network configuration basics.</li>
                             <li>Develop fundamental web pages, scripts, and relational database queries.</li>
@@ -1642,73 +2536,88 @@
                             <li>Execute basic IT helpdesk support and user assistance protocols.</li>
                         </ul>
                     </div>
+
                     <div class="detail-block">
-                        <h4><i class="fa-solid fa-book-open"></i> Full Curriculum Structure & Milestone Timeline</h4>
+                        <h4><i class="fa-solid fa-book-open"></i> Curriculum Timeline</h4>
                         <ul>
-                            <li><strong>Year 1:</strong> Fundamentals of IT, Computer Hardware Servicing & Diagnostics, Web Design Basics, Computer Programming 1</li>
-                            <li><strong>Year 2:</strong> Database Management Systems, Local Area Network Essentials, Technical Troubleshooting, Practical IT Internship</li>
+                            <li><strong>Year 1:</strong> Fundamentals of IT, Computer Hardware Servicing, Web Design Basics, Computer Programming 1</li>
+                            <li><strong>Year 2:</strong> Database Management, LAN Essentials, Technical Troubleshooting, Practical IT Internship</li>
                         </ul>
                     </div>
-                    <div class="detail-block">
-                        <h4><i class="fa-solid fa-user-tie"></i> Career Opportunities & Industry Pathways</h4>
+
+                    <div class="detail-block full-width">
+                        <h4><i class="fa-solid fa-user-tie"></i> Career Opportunities</h4>
                         <ul>
                             <li>IT Support Technician, Computer Maintenance Specialist, Web Developer Assistant, Network Assistant, Technical Helpdesk Agent</li>
                         </ul>
                     </div>
                 </div>
+
                 <div class="dept-footer-action">
-                    <span style="color: var(--text-muted-teal); font-size: 0.9rem;"><i class="fa-solid fa-clipboard-check"></i> Requirements: Form 138 / SHS Card, Good Moral Certificate, PSA Birth Certificate</span>
-                    <a href="./enrollmentpage.html" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Apply Now</a>
+                    <div class="dept-req">
+                        <i class="fa-solid fa-clipboard-check"></i>
+                        <span><strong>Requirements:</strong> Form 138 / SHS Card, Good Moral Certificate, PSA Birth Certificate</span>
+                    </div>
+                    <a href="./enrollmentpage.html" class="btn btn-primary">
+                        <i class="fa-solid fa-paper-plane"></i> Apply Now
+                    </a>
                 </div>
             </div>
 
         </div>
     </section>
 
-    <!-- Footer -->
+    <!-- ============================================
+         CTA BANNER
+         ============================================ -->
+    <section class="cta-banner">
+        <div class="container">
+            <h2>Ready to Begin Your <span class="accent">Journey?</span></h2>
+            <p>Join a community of learners committed to academic excellence, character development, and career readiness. Enrollment is now open.</p>
+            <div class="cta-actions">
+                <a href="./enrollmentpage.html" class="btn btn-primary">
+                    <i class="fa-solid fa-paper-plane"></i> Enroll Now
+                </a>
+                <a href="department.html" class="btn btn-outline">
+                    <i class="fa-solid fa-building-columns"></i> Back to Departments
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+         FOOTER
+         ============================================ -->
     <footer>
         <div class="footer-info">
             <div class="contact">
-                <h4>CONTACT DETAILS</h4>
-                <ul>
-                    <p><img src="../BackGroundimage/Icon/placeholder.png" alt="Address Icon">Burgos Street, Paniqui, Tarlac, Philippines</p>
-                    <p><img src="../BackGroundimage/Icon/telephone.png" alt="Phone Icon">+63 930 536 3258</p>
-                    <p><img src="../BackGroundimage/Icon/Untitled30_20260715135601.png" alt="Email Icon">admin@icfpaniqui.edu.ph</p>
-                </ul>
+                <h4><i class="fa-solid fa-address-book"></i> Contact Details</h4>
+                <p><img src="../BackGroundimage/Icon/placeholder.png" alt="Address Icon"> Burgos Street, Paniqui, Tarlac, Philippines</p>
+                <p><img src="../BackGroundimage/Icon/telephone.png" alt="Phone Icon"> +63 930 536 3258</p>
+                <p><img src="../BackGroundimage/Icon/Untitled30_20260715135601.png" alt="Email Icon"> admin@icfpaniqui.edu.ph</p>
             </div>
             <div class="office-hours">
-                <h4>OFFICE HOURS</h4>
+                <h4><i class="fa-solid fa-clock"></i> Office Hours</h4>
                 <p>Sunday <span>Closed</span></p>
-                <p>Monday <span>8:00am - 4:00pm</span></p>
-                <p>Tuesday <span>8:00am - 4:00pm</span></p>
-                <p>Wednesday <span>8:00am - 4:00pm</span></p>
-                <p>Thursday <span>8:00am - 4:00pm</span></p>
-                <p>Friday <span>8:00am - 4:00pm</span></p>
-                <p>Saturday <span>8:00am - 12:00pm</span></p>
+                <p>Monday <span>8:00am – 4:00pm</span></p>
+                <p>Tuesday <span>8:00am – 4:00pm</span></p>
+                <p>Wednesday <span>8:00am – 4:00pm</span></p>
+                <p>Thursday <span>8:00am – 4:00pm</span></p>
+                <p>Friday <span>8:00am – 4:00pm</span></p>
+                <p>Saturday <span>8:00am – 12:00pm</span></p>
             </div>
-        </div> 
+        </div>
+
         <div class="school-name">
             <img class="icflogo" src="../BackGroundimage/ICFLogo.png" alt="ICF Logo">
-            <h1>ICF <span>INTERWORLD</span> <span>COLLEGES</span> <span>INC.</span></h1>
+            <h1>ICF <span>Interworld</span> <span>Colleges</span> <span>Foundation</span> <span>Inc.</span></h1>
 
+            <!-- Social icons: Font Awesome, only Facebook -->
             <div class="social-icon">
                 <div class="icon">
-                    <a href="https://web.facebook.com/ICFPaniquiOfficial"><img src="../BackGroundimage/Icon/FacebookLogo.png" alt="Facebook"></a>
-                </div>
-                <div class="icon">
-                    <a href="#"><img src="../BackGroundimage/Icon/YoutubeLogo.jpg" alt="YouTube"></a>
-                </div>
-                <div class="icon">
-                    <a href="#"><img src="../BackGroundimage/Icon/TwitterLogo.jpg" alt="Twitter"></a>
-                </div>
-                <div class="icon">
-                    <a href="#"><img src="../BackGroundimage/Icon/tiktokLogo.jpg" alt="TikTok"></a>
-                </div>
-                <div class="icon">
-                    <a href="#"><img src="../BackGroundimage/Icon/Pinterestlogo.jpg" alt="Pinterest"></a>
-                </div>
-                <div class="icon">
-                    <a href="#"><img src="../BackGroundimage/Icon/InstagramLogo.png" alt="Instagram"></a>
+                    <a href="https://web.facebook.com/ICFPaniquiOfficial"
+                       target="_blank" rel="noopener noreferrer"
+                       aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
                 </div>
             </div>
         </div>
@@ -1718,10 +2627,19 @@
         </div>
     </footer>
 
-    <!-- Interactive Scripts -->
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            /* Off-Canvas Sidebar Drawer Controls */
+            /* Sticky header shadow on scroll */
+            const header = document.getElementById("mainHeader");
+            window.addEventListener("scroll", () => {
+                if (window.scrollY > 20) {
+                    header.classList.add("scrolled");
+                } else {
+                    header.classList.remove("scrolled");
+                }
+            });
+
+            /* Mobile Sidebar Controls */
             const menuToggle = document.getElementById("menuToggle");
             const mobileSidebar = document.getElementById("mobileSidebar");
             const sidebarOverlay = document.getElementById("sidebarOverlay");
@@ -1730,11 +2648,13 @@
             const openSidebar = () => {
                 mobileSidebar.classList.add("active");
                 sidebarOverlay.classList.add("active");
+                document.body.style.overflow = "hidden";
             };
 
             const closeSidebar = () => {
                 mobileSidebar.classList.remove("active");
                 sidebarOverlay.classList.remove("active");
+                document.body.style.overflow = "";
             };
 
             if (menuToggle && mobileSidebar && sidebarOverlay && sidebarCloseBtn) {
@@ -1743,7 +2663,7 @@
                 sidebarOverlay.addEventListener("click", closeSidebar);
             }
 
-            /* Portal Dropdown Menu Handlers (Desktop & Mobile) */
+            /* Portal Dropdowns */
             const setupPortalDropdown = (btnId, menuId) => {
                 const btn = document.getElementById(btnId);
                 const menu = document.getElementById(menuId);
@@ -1768,7 +2688,7 @@
             setupPortalDropdown("portalLoginBtn", "portalMenu");
             setupPortalDropdown("mobilePortalBtn", "mobilePortalMenu");
 
-            /* Profile Modal Controls */
+            /* Profile Modal */
             const openProfileModalBtn = document.getElementById("openProfileModal");
             const closeProfileModalBtn = document.getElementById("closeProfileModal");
             const profileModalOverlay = document.getElementById("profileModalOverlay");
@@ -1776,18 +2696,32 @@
             if (openProfileModalBtn && closeProfileModalBtn && profileModalOverlay) {
                 openProfileModalBtn.addEventListener("click", () => {
                     profileModalOverlay.classList.add("active");
+                    document.body.style.overflow = "hidden";
                 });
 
-                closeProfileModalBtn.addEventListener("click", () => {
+                const closeProfileModal = () => {
                     profileModalOverlay.classList.remove("active");
-                });
+                    document.body.style.overflow = "";
+                };
 
+                closeProfileModalBtn.addEventListener("click", closeProfileModal);
                 profileModalOverlay.addEventListener("click", (e) => {
-                    if (e.target === profileModalOverlay) {
-                        profileModalOverlay.classList.remove("active");
-                    }
+                    if (e.target === profileModalOverlay) closeProfileModal();
                 });
             }
+
+            /* Smooth-scroll for quick jump pills with offset for sticky header */
+            document.querySelectorAll('.quick-jump a').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    const target = document.querySelector(link.getAttribute('href'));
+                    if (target) {
+                        e.preventDefault();
+                        const offset = 100;
+                        const top = target.getBoundingClientRect().top + window.pageYOffset - offset;
+                        window.scrollTo({ top, behavior: 'smooth' });
+                    }
+                });
+            });
         });
     </script>
 </body>

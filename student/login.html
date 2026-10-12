@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Log In</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <title>Student Log In | ICF Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
     <style>
         :root {
             --bg-deep-abyss: #020c1b;
@@ -17,7 +16,6 @@
             --text-high-contrast: #e2e8f0;
             --text-muted-teal: #8892b0;
             --border-teal: #172a45;
-            --success-green: #10b981;
             --border-radius: 12px;
             --transition-smooth: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             --neon-glow: 0 0 15px rgba(13, 245, 227, 0.3);
@@ -27,135 +25,403 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: radial-gradient(circle at center, #071f30, var(--bg-deep-abyss));
+            background:
+                radial-gradient(circle at 20% 15%, rgba(13, 245, 227, 0.08) 0%, transparent 45%),
+                radial-gradient(circle at 80% 85%, rgba(139, 92, 246, 0.06) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.04) 0%, transparent 60%),
+                linear-gradient(135deg, #071f30 0%, #020c1b 100%);
             color: var(--text-high-contrast);
-            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            overflow-x: hidden;
+            position: relative;
         }
 
+        body::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(13, 245, 227, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(13, 245, 227, 0.03) 1px, transparent 1px);
+            background-size: 42px 42px;
+            pointer-events: none;
+            mask-image: radial-gradient(circle at center, black 20%, transparent 75%);
+            -webkit-mask-image: radial-gradient(circle at center, black 20%, transparent 75%);
+        }
+
+        /* ============================================
+           BACK TO HOMEPAGE BUTTON
+           ============================================ */
+        .back-home-btn {
+            position: fixed;
+            top: 24px;
+            left: 24px;
+            z-index: 10;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 20px;
+            height: 44px;
+            border-radius: 50px;
+            background: rgba(10, 25, 47, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(13, 245, 227, 0.3);
+            color: var(--primary-neon);
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-decoration: none;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4), 0 0 10px rgba(13, 245, 227, 0.1);
+        }
+
+        .back-home-btn i {
+            font-size: 0.85rem;
+            transition: var(--transition-smooth);
+        }
+
+        .back-home-btn:hover {
+            background: rgba(13, 245, 227, 0.12);
+            border-color: var(--primary-neon);
+            color: var(--text-high-contrast);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5), 0 0 20px rgba(13, 245, 227, 0.35);
+        }
+
+        .back-home-btn:hover i {
+            transform: translateX(-4px);
+        }
+
+        /* ============================================
+           MAIN CONTAINER
+           ============================================ */
         .container {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            box-shadow: 0 0px 30px rgba(13, 245, 227, 0.2);
-            border-radius: 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            align-items: stretch;
             background-color: var(--bg-card);
             border: 1px solid var(--border-teal);
-            width: 480px;
-            height: auto;
-            padding: 40px;
-            transition: var(--transition-smooth);
-        } 
-
-        .container:hover {
-            box-shadow: 0 0px 35px rgba(13, 245, 227, 0.3);
-            border-color: rgba(13, 245, 227, 0.4);
+            border-radius: 24px;
+            box-shadow:
+                0 20px 60px rgba(0, 0, 0, 0.6),
+                0 0 40px rgba(13, 245, 227, 0.08);
+            max-width: 1000px;
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+            animation: containerFadeIn 0.7s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .header { text-align: center; }
-
-        .header h1 {
-            font-size: 32px;
-            font-weight: 800;
-            color: var(--primary-neon);
-            margin-top: 10px;
+        @keyframes containerFadeIn {
+            from { opacity: 0; transform: translateY(20px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        .header h4 {
-            color: var(--text-muted-teal);
-            font-weight: 400;
-            font-size: 14px;
-            margin-top: 4px;
-        }
-
-        .header img {
-            height: 100px;
-            object-fit: contain;
-            filter: drop-shadow(0 0 10px rgba(13, 245, 227, 0.2));
-        }
-
-        form {
-            padding-top: 25px;
-            border-top: 1px solid var(--border-teal);
-            margin-top: 30px;
+        /* ============================================
+           LEFT PANEL — Branding
+           ============================================ */
+        .brand-panel {
+            background:
+                radial-gradient(circle at top right, rgba(13, 245, 227, 0.12), transparent 65%),
+                linear-gradient(160deg, #0d1f3a 0%, #06152b 100%);
+            padding: 48px 44px;
             display: flex;
             flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            border-right: 1px solid var(--border-teal);
+        }
+
+        .brand-panel::after {
+            content: '\f19c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            right: -40px;
+            bottom: -60px;
+            font-size: 16rem;
+            color: rgba(13, 245, 227, 0.03);
+            pointer-events: none;
+            line-height: 1;
+        }
+
+        .brand-top {
+            display: flex;
             align-items: center;
-            text-align: center;
+            gap: 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .brand-logo {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            background: rgba(13, 245, 227, 0.06);
+            border: 1px solid rgba(13, 245, 227, 0.2);
+            border-radius: 14px;
+            padding: 8px;
+            filter: drop-shadow(0 0 12px rgba(13, 245, 227, 0.25));
+        }
+
+        .brand-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        .brand-titles h1 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary-neon);
+            letter-spacing: 0.5px;
+            line-height: 1;
+        }
+
+        .brand-titles span {
+            display: block;
+            font-size: 0.68rem;
+            font-weight: 600;
+            color: var(--text-muted-teal);
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+            margin-top: 5px;
+        }
+
+        .brand-hero {
+            position: relative;
+            z-index: 1;
+            margin: 40px 0;
+        }
+
+        .brand-hero h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            line-height: 1.15;
+            color: var(--text-high-contrast);
+            letter-spacing: -0.5px;
+        }
+
+        .brand-hero h2 .accent {
+            background: linear-gradient(135deg, #0df5e3 30%, #00a89d 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .brand-hero p {
+            font-size: 0.88rem;
+            color: var(--text-muted-teal);
+            margin-top: 14px;
+            line-height: 1.6;
+            max-width: 340px;
+        }
+
+        .brand-features {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .brand-feature {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.82rem;
+            color: var(--text-muted-teal);
+            font-weight: 500;
+        }
+
+        .brand-feature i {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            background: rgba(13, 245, 227, 0.08);
+            border: 1px solid rgba(13, 245, 227, 0.15);
+            color: var(--primary-neon);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        /* ============================================
+           RIGHT PANEL — Login Form
+           ============================================ */
+        .form-panel {
+            padding: 48px 44px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: var(--bg-card);
+            position: relative;
+        }
+
+        .form-header {
+            margin-bottom: 28px;
+        }
+
+        .form-header .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--primary-neon);
+            background: rgba(13, 245, 227, 0.08);
+            border: 1px solid rgba(13, 245, 227, 0.2);
+            padding: 5px 12px;
+            border-radius: 20px;
+            margin-bottom: 14px;
+        }
+
+        .form-header .eyebrow i {
+            font-size: 0.6rem;
         }
 
         .form-header h1 {
-            font-size: 24px;
-            font-weight: 700;
+            font-size: 1.85rem;
+            font-weight: 800;
             color: var(--text-high-contrast);
+            letter-spacing: -0.5px;
+            line-height: 1.1;
+        }
+
+        .form-header h1 .accent {
+            background: linear-gradient(135deg, #0df5e3 30%, #00a89d 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .form-header p {
-            font-size: 14px;
             color: var(--text-muted-teal);
-            margin-top: 5px;
-            margin-bottom: 20px;
+            font-size: 0.85rem;
+            margin-top: 8px;
         }
 
-        .login-card {
+        .input-group {
+            position: relative;
             width: 100%;
-            display: flex;
-            justify-content: center;
-            flex-direction: column;
-            align-items: center;
+            max-width: 380px;
+            margin-bottom: 14px;
+        }
+
+        .input-group .input-icon {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted-teal);
+            font-size: 0.85rem;
+            pointer-events: none;
+            transition: var(--transition-smooth);
+            z-index: 1;
+        }
+
+        .input-group .toggle-password {
+            position: absolute;
+            right: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted-teal);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            background: transparent;
+            border: none;
+            padding: 4px;
+            z-index: 1;
+        }
+
+        .input-group .toggle-password:hover {
+            color: var(--primary-neon);
         }
 
         .login-card input {
             color: var(--text-high-contrast);
             border-radius: 50px;
-            margin: 10px 0;
-            padding: 0 20px;
-            height: 48px;
+            padding: 0 48px 0 46px;
+            height: 50px;
             width: 100%;
-            max-width: 340px;
             border: 1px solid var(--border-teal);
             background-color: var(--bg-deep-abyss);
             font-family: inherit;
-            font-size: 14px;
+            font-size: 0.88rem;
             outline: none;
             transition: var(--transition-smooth);
         }
 
+        .login-card input::placeholder {
+            color: #4a5568;
+        }
+
         .login-card input:focus {
             border-color: var(--primary-neon);
-            box-shadow: 0 0 12px rgba(13, 245, 227, 0.25);
+            box-shadow: 0 0 0 4px rgba(13, 245, 227, 0.08), 0 0 12px rgba(13, 245, 227, 0.2);
+            background-color: rgba(2, 12, 27, 0.6);
         }
 
+        .login-card input:focus ~ .input-icon {
+            color: var(--primary-neon);
+        }
+
+        /* Error state */
         .login-card input.input-error {
-            border-color: #ff6b6b;
-            box-shadow: 0 0 12px rgba(255, 107, 107, 0.3);
-            color: #ff6b6b;
+            border-color: #ef4444 !important;
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.08), 0 0 12px rgba(239, 68, 68, 0.2) !important;
         }
 
-        .login-card input.input-error::placeholder {
-            color: #ff6b6b;
+        .login-card input.input-error:focus {
+            border-color: #ef4444 !important;
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.12), 0 0 15px rgba(239, 68, 68, 0.35) !important;
         }
 
-        .error-msg {
-            color: #ff6b6b;
-            font-size: 13px;
-            margin-bottom: 10px;
-            background: rgba(255, 107, 107, 0.1);
-            padding: 8px 16px;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 107, 107, 0.3);
+        .login-card input.input-error ~ .input-icon {
+            color: #ef4444;
+        }
+
+        #loginErrorMsg {
+            color: #f87171;
+            font-size: 0.8rem;
+            margin: 4px 0 10px;
             display: none;
+            text-align: left;
             width: 100%;
-            max-width: 340px;
-            text-align: center;
+            max-width: 380px;
+            padding: 10px 14px;
+            background: rgba(239, 68, 68, 0.08);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            border-radius: 8px;
+            align-items: center;
+            gap: 8px;
         }
 
-        .error-msg.show {
-            display: block;
+        #loginErrorMsg.show {
+            display: flex;
             animation: shake 0.4s ease-in-out;
+        }
+
+        #loginErrorMsg i {
+            font-size: 0.85rem;
+            flex-shrink: 0;
         }
 
         @keyframes shake {
@@ -167,161 +433,277 @@
         .action-group {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: center;
             width: 100%;
-            max-width: 340px;
-            margin-top: 20px;
+            max-width: 380px;
+            margin-top: 8px;
         }
 
         .login-button {
             font-weight: 700;
-            font-size: 15px;
+            font-size: 0.92rem;
             color: var(--bg-deep-abyss);
             border: 1px solid var(--primary-neon);
-            background-color: var(--primary-neon);
-            border-radius: 25px;
-            height: 44px;
-            padding: 0 25px;
+            background: linear-gradient(135deg, var(--primary-neon) 0%, #00b4a4 100%);
+            border-radius: 50px;
+            height: 48px;
+            padding: 0 32px;
             cursor: pointer;
             transition: var(--transition-smooth);
             box-shadow: var(--neon-glow);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            max-width: 380px;
+            letter-spacing: 0.3px;
         }
 
-        .login-button:hover { 
+        .login-button:hover:not(:disabled) {
             transform: translateY(-2px);
-            background-color: var(--primary-neon-hover);
-            box-shadow: 0 0 20px rgba(13, 245, 227, 0.5);
+            box-shadow: 0 0 25px rgba(13, 245, 227, 0.55), 0 8px 20px rgba(0, 0, 0, 0.4);
         }
 
-        .register {
-            font-weight: 600;
-            font-size: 14px;
+        .login-button:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+
+        .form-note {
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-teal);
+            max-width: 380px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.72rem;
+            color: var(--text-muted-teal);
+        }
+
+        .form-note i {
             color: var(--primary-neon);
-            border: 1px solid var(--border-teal);
-            background-color: transparent;
-            border-radius: 25px;
-            height: 44px;
-            line-height: 42px;
-            padding: 0 20px;
-            cursor: pointer;
-            text-decoration: none;
-            transition: var(--transition-smooth);
-            display: inline-block;
+            font-size: 0.85rem;
+            flex-shrink: 0;
         }
 
-        .register:hover { 
-            border-color: var(--primary-neon);
-            background-color: rgba(13, 245, 227, 0.1);
-            color: var(--text-high-contrast);
-        }
-
-        form a { text-decoration: none; }
-
-        @media (max-width: 768px) {
-            body {
-                align-items: center;
-                min-height: 100vh;
-                padding: 20px 10px;
-            }
+        /* ============================================
+           RESPONSIVE
+           ============================================ */
+        @media (max-width: 900px) {
             .container {
-                width: 90%;
-                max-width: 450px;
-                height: auto;
-                padding: 40px 25px;
-                margin-top: 0;
+                grid-template-columns: 1fr;
+                max-width: 520px;
             }
-            .header h1 { font-size: 28px; }
-            form { margin-top: 25px; padding-top: 20px; }
-            .login-card input { width: 100%; max-width: 320px; }
-            .error-msg { max-width: 320px; }
+
+            .brand-panel {
+                border-right: none;
+                border-bottom: 1px solid var(--border-teal);
+                padding: 32px 32px 28px;
+            }
+
+            .brand-panel::after {
+                font-size: 12rem;
+                right: -30px;
+                bottom: -50px;
+            }
+
+            .brand-hero { margin: 24px 0; }
+            .brand-hero h2 { font-size: 1.55rem; }
+            .brand-hero p { font-size: 0.82rem; }
+
+            .brand-features {
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .brand-feature { font-size: 0.75rem; }
+
+            .form-panel { padding: 32px; }
+            .form-header h1 { font-size: 1.55rem; }
+
+            .input-group,
+            #loginErrorMsg,
+            .action-group,
+            .form-note {
+                max-width: 100%;
+            }
         }
 
         @media (max-width: 480px) {
-            .container {
-                width: 95%;
-                padding: 30px 20px;
-                border-radius: 20px;
-                box-shadow: 0 0px 20px rgba(13, 245, 227, 0.2);
+            body { padding: 16px; }
+            .container { border-radius: 20px; }
+
+            .back-home-btn {
+                top: 14px;
+                left: 14px;
+                height: 40px;
+                padding: 0;
+                width: 40px;
+                justify-content: center;
+                font-size: 0.78rem;
             }
-            .header img { height: 80px; }
-            .header h1 { font-size: 24px; }
-            .header h4 { font-size: 12px; }
-            .form-header h1 { font-size: 20px; }
-            .form-header p { font-size: 13px; }
-            .action-group {
-                flex-direction: column;
-                gap: 12px;
-            }
-            .login-button, .register {
-                display: block;
-                width: 100%;
-                max-width: 280px;
-                height: 45px;
-                text-align: center;
-            }
-            .register { line-height: 43px; }
-            .error-msg { max-width: 280px; }
+
+            .back-home-btn span { display: none; }
+
+            .brand-panel { padding: 26px 22px 22px; }
+            .brand-logo { width: 52px; height: 52px; }
+            .brand-titles h1 { font-size: 1.25rem; }
+            .brand-titles span { font-size: 0.6rem; }
+            .brand-hero h2 { font-size: 1.35rem; }
+            .brand-features { display: none; }
+
+            .form-panel { padding: 26px 22px 30px; }
+            .form-header h1 { font-size: 1.4rem; }
+            .form-header p { font-size: 0.8rem; }
+            .login-card input { height: 46px; font-size: 0.85rem; }
         }
     </style>
 </head>
 <body>
 
+    <!-- Back to Homepage Button -->
+    <a href="../index.html" class="back-home-btn" aria-label="Back to Homepage">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span>Back to Homepage</span>
+    </a>
+
     <div class="container">
-        <div class="header">
-            <img src="../BackGroundimage/ICFLogo.png" alt="ICF Logo">
-            <h1>ICF Portal</h1>
-            <h4>Interworld Colleges Foundation Inc.</h4>
+
+        <!-- LEFT — Branding Panel -->
+        <div class="brand-panel">
+            <div class="brand-top">
+                <div class="brand-logo">
+                    <img src="../BackGroundimage/ICFLogo.png" alt="ICF Logo">
+                </div>
+                <div class="brand-titles">
+                    <h1>ICF</h1>
+                    <span>Interworld Colleges Foundation Inc.</span>
+                </div>
+            </div>
+
+            <div class="brand-hero">
+                <h2>Welcome back, <span class="accent">ICF'ian!</span></h2>
+                <p>Access your student portal to view your grades, enrollment status, schedules, and academic records — all in one place.</p>
+            </div>
+
+            <div class="brand-features">
+                <div class="brand-feature">
+                    <i class="fa-solid fa-book-open"></i>
+                    <span>View grades &amp; academic records</span>
+                </div>
+                <div class="brand-feature">
+                    <i class="fa-solid fa-calendar-check"></i>
+                    <span>Track class schedules</span>
+                </div>
+                <div class="brand-feature">
+                    <i class="fa-solid fa-file-pen"></i>
+                    <span>Manage enrollment online</span>
+                </div>
+            </div>
         </div>
 
-        <form action="../backend/UsersDB/login.php" method="POST" autocomplete="off"> 
+        <!-- RIGHT — Login Form Panel -->
+        <div class="form-panel">
             <div class="form-header">
-                <h1>Welcome ICF'ians</h1>
-                <p>You can now Log in to your Account</p>
+                <div class="eyebrow">
+                    <i class="fa-solid fa-user-graduate"></i>
+                    Student Access
+                </div>
+                <h1>Sign in to <span class="accent">your account</span></h1>
+                <p>Please enter your username and password to continue.</p>
             </div>
 
-            <div class="login-card">
-                <div class="error-msg" id="errorMsg">Incorrect password and user name</div>
-                <input type="text" id="username" name="username" autocomplete="off" required placeholder="Enter Your Username">
-            </div>
+            <!-- Traditional form submit: PHP redirects to profile.php on success -->
+            <form action="../backend/UsersDB/login.php" method="POST" autocomplete="off" id="loginForm">
+                <div class="input-group login-card">
+                    <i class="fa-solid fa-user input-icon"></i>
+                    <input type="text" name="username" id="username" autocomplete="off" required placeholder="Enter Your Username">
+                </div>
 
-            <div class="login-card">
-                <input type="password" id="password" name="password" autocomplete="off" required placeholder="Password">
-            </div>
+                <div class="input-group login-card">
+                    <i class="fa-solid fa-lock input-icon"></i>
+                    <input type="password" name="password" id="password" autocomplete="off" required placeholder="Password">
+                    <button type="button" class="toggle-password" id="togglePassword" aria-label="Show password">
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+                </div>
 
-            <div class="action-group">
-                <button type="submit" name="submit" class="login-button">Log In</button>
-                <a href="registerstudent.html"><div class="register">Register</div></a>
+                <div id="loginErrorMsg">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <span id="loginErrorText">Incorrect password and username.</span>
+                </div>
+
+                <div class="action-group">
+                    <button type="submit" name="submit" class="login-button" id="loginBtn">
+                        <i class="fa-solid fa-right-to-bracket"></i>
+                        <span class="btn-label">Log In</span>
+                    </button>
+                </div>
+            </form>
+
+            <div class="form-note">
+                <i class="fa-solid fa-circle-info"></i>
+                <span>Students only. For faculty &amp; staff access, use the Admin Portal.</span>
             </div>
-        </form>
+        </div>
     </div>
 
     <script>
-        const urlParams = new URLSearchParams(window.location.search);
+        (function() {
+            const user      = document.getElementById('username');
+            const pass      = document.getElementById('password');
+            const errBox    = document.getElementById('loginErrorMsg');
+            const errText   = document.getElementById('loginErrorText');
+            const togglePw  = document.getElementById('togglePassword');
 
-        if (urlParams.get('error') === '1') {
-            const usernameInput = document.getElementById('username');
-            const passwordInput = document.getElementById('password');
-            const errorMsg = document.getElementById('errorMsg');
+            /* ---------- Show / hide password ---------- */
+            togglePw.addEventListener('click', function() {
+                const isPassword = pass.type === 'password';
+                pass.type = isPassword ? 'text' : 'password';
+                togglePw.innerHTML = isPassword
+                    ? '<i class="fa-solid fa-eye-slash"></i>'
+                    : '<i class="fa-solid fa-eye"></i>';
+                togglePw.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+            });
 
-            usernameInput.classList.add('input-error');
-            passwordInput.classList.add('input-error');
-            errorMsg.classList.add('show');
-
-            const savedUser = urlParams.get('user');
-            if (savedUser) {
-                usernameInput.value = decodeURIComponent(savedUser);
+            /* ---------- Error helpers ---------- */
+            function showError(msg) {
+                errText.textContent = msg || 'Incorrect password and username.';
+                errBox.classList.remove('show');
+                void errBox.offsetWidth; // re-trigger shake
+                errBox.classList.add('show');
+                user.classList.add('input-error');
+                pass.classList.add('input-error');
             }
 
-            [usernameInput, passwordInput].forEach(input => {
+            function clearError() {
+                errBox.classList.remove('show');
+                user.classList.remove('input-error');
+                pass.classList.remove('input-error');
+            }
+
+            /* ---------- Non-JS fallback: ?error=1&user=… ---------- */
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('error') === '1') {
+                showError('Incorrect password and username. Please try again.');
+                const savedUser = params.get('user');
+                if (savedUser) {
+                    user.value = decodeURIComponent(savedUser);
+                }
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+
+            /* ---------- Clear error on input ---------- */
+            [user, pass].forEach(function(input) {
                 input.addEventListener('input', function() {
-                    this.classList.remove('input-error');
-                    if (usernameInput.value && passwordInput.value) {
-                        errorMsg.classList.remove('show');
-                    }
+                    if (errBox.classList.contains('show')) clearError();
                 });
             });
-        }
+        })();
     </script>
-
 </body>
 </html>

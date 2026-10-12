@@ -2,6 +2,6 @@
 session_start();
 session_unset();
 session_destroy();
-header("Location: ../../admin/login.html");
+header("Location: /WebDev_for_ProgLang/index.html");
 exit();
 ?>

@@ -4,32 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ICF Online Registration | Online Enrollment</title>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"> 
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="icon" type="image/png" href="/WebDev_for_ProgLang/BackGroundimage/ICFLogo.png">
     
-    <style>  
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
-            --bg-deep-abyss: #020c1b;      /* Deep dark oceanic background */
-            --bg-card: #0a192f;            /* Dark teal-tinted card background */
-            --bg-card-hover: #112240;      /* Elevated glass depth background */
-            --primary-neon: #0df5e3;       /* Bioluminescent vibrant teal */
-            --primary-neon-hover: #00cbb9; /* Slightly darker neon active */
-            --text-high-contrast: #e2e8f0; /* Crisp white-silver */
-            --text-muted-teal: #8892b0;    /* Soft teal gray */
-            --border-teal: #172a45;        /* Subdued border color */
-            --success-green: #10b981;      
+            --bg-deep-abyss: #020c1b;
+            --bg-card: #0a192f;
+            --bg-card-hover: #112240;
+            --primary-neon: #0df5e3;
+            --primary-neon-hover: #00cbb9;
+            --text-high-contrast: #e2e8f0;
+            --text-muted-teal: #8892b0;
+            --border-teal: #172a45;
+            --success-green: #10b981;
+            --purple-accent: #8b5cf6;
+            --blue-accent: #3b82f6;
             --border-radius: 12px;
             --transition-smooth: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --transition-slow: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
             --neon-glow: 0 0 15px rgba(13, 245, 227, 0.3);
+            --card-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
         }
+
+        html { scroll-behavior: smooth; }
 
         body {
             font-family: 'Inter', sans-serif;
@@ -42,64 +43,125 @@
             min-height: 100vh;
         }
 
-        .container { 
-            width: 90%;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+        .container { width: 90%; max-width: 1280px; margin: 0 auto; }
 
-        /* --- Header / Navigation --- */
+        /* ============================================
+           HEADER / NAVIGATION
+           ============================================ */
         header {
             background-color: rgba(2, 12, 27, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border-bottom: 1px solid var(--border-teal);
             position: sticky;
             top: 0;
             z-index: 100;
+            transition: var(--transition-smooth);
+        }
+
+        header.scrolled {
+            background-color: rgba(2, 12, 27, 0.95);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
         }
 
         .nav-container {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1.2rem 0;
+            padding: 1rem 0;
         }
 
         .logo {
             display: flex;
             align-items: center;
             gap: 12px;
+            text-decoration: none;
+            color: inherit;
         }
 
         .logo img {
-            height: 40px;
+            height: 44px;
+            transition: var(--transition-smooth);
+            filter: drop-shadow(0 0 10px rgba(13, 245, 227, 0.2));
         }
+
+        .logo:hover img {
+            transform: scale(1.05);
+            filter: drop-shadow(0 0 15px rgba(13, 245, 227, 0.5));
+        }
+
+        .logo-text { display: flex; flex-direction: column; }
 
         .logo h2 {
             font-size: 1.3rem;
-            font-weight: 700;
+            font-weight: 800;
             letter-spacing: 0.5px;
             color: var(--text-high-contrast);
+            line-height: 1;
         }
 
         .logo span {
             display: block;
-            font-size: 0.75rem;
-            font-weight: 400;
+            font-size: 0.68rem;
+            font-weight: 500;
             color: var(--primary-neon);
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
+            margin-top: 4px;
         }
 
-        /* --- Menu Toggle Button for Mobile --- */
+        .desktop-nav-links {
+            display: flex;
+            list-style: none;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .desktop-nav-links a {
+            position: relative;
+            text-decoration: none;
+            color: var(--text-muted-teal);
+            font-weight: 500;
+            font-size: 0.95rem;
+            padding: 0.6rem 1rem;
+            border-radius: 8px;
+            transition: var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .desktop-nav-links a i { font-size: 0.85rem; transition: var(--transition-smooth); }
+
+        .desktop-nav-links a:hover {
+            color: var(--primary-neon);
+            background: rgba(13, 245, 227, 0.06);
+        }
+
+        .desktop-nav-links a:hover i { transform: translateY(-2px); }
+
+        .desktop-nav-links a.active { color: var(--primary-neon); }
+
+        .desktop-nav-links a.active::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 2px;
+            background: var(--primary-neon);
+            border-radius: 2px;
+            box-shadow: 0 0 10px var(--primary-neon);
+        }
+
         .mobile-menu-btn {
             display: none;
             background: transparent;
             border: 1px solid var(--border-teal);
             color: var(--primary-neon);
-            font-size: 1.3rem;
-            padding: 0.5rem 0.8rem;
+            font-size: 1.15rem;
+            padding: 0.55rem 0.8rem;
             border-radius: 8px;
             cursor: pointer;
             transition: var(--transition-smooth);
@@ -108,86 +170,43 @@
         .mobile-menu-btn:hover {
             background-color: rgba(13, 245, 227, 0.1);
             border-color: var(--primary-neon);
+            box-shadow: var(--neon-glow);
         }
 
-        .desktop-nav-links {
-            display: flex;
-            list-style: none;
-            gap: 2rem;
-        }
-
-        .desktop-nav-links a {
-            text-decoration: none;
-            color: var(--text-muted-teal);
-            font-weight: 500;
-            font-size: 1.1rem;
-            transition: var(--transition-smooth);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .desktop-nav-links a:hover, .desktop-nav-links a.active {
-            color: var(--primary-neon);
-            text-shadow: 0 0 40px var(--primary-neon);
-        }
-
-        /* --- Mobile Off-Canvas Sidebar Drawer --- */
+        /* ============================================
+           MOBILE SIDEBAR
+           ============================================ */
         .sidebar-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(2, 12, 27, 0.7);
-            backdrop-filter: blur(4px);
-            z-index: 998;
-            opacity: 0;
-            visibility: hidden;
+            position: fixed; inset: 0;
+            background: rgba(2, 12, 27, 0.75);
+            backdrop-filter: blur(6px);
+            z-index: 998; opacity: 0; visibility: hidden;
             transition: all 0.3s ease;
         }
 
-        .sidebar-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
+        .sidebar-overlay.active { opacity: 1; visibility: visible; }
 
         .mobile-sidebar {
-            position: fixed;
-            top: 0;
-            right: -320px;
-            width: 300px;
-            height: 100vh;
-            background: rgba(10, 25, 47, 0.98);
+            position: fixed; top: 0; right: -340px;
+            width: 320px; height: 100vh;
+            background: linear-gradient(180deg, #0a192f 0%, #020c1b 100%);
             border-left: 1px solid var(--border-teal);
-            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.8);
-            z-index: 999;
-            display: flex;
-            flex-direction: column;
+            box-shadow: -10px 0 40px rgba(0, 0, 0, 0.8);
+            z-index: 999; display: flex; flex-direction: column;
             padding: 2rem 1.5rem;
-            transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             overflow-y: auto;
         }
 
-        .mobile-sidebar.active {
-            right: 0;
-        }
+        .mobile-sidebar.active { right: 0; }
 
         .sidebar-close-btn {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: transparent;
-            border: none;
+            position: absolute; top: 1rem; right: 1rem;
+            background: transparent; border: none;
             color: var(--text-muted-teal);
-            font-size: 1.5rem;
-            cursor: pointer;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            font-size: 1.3rem; cursor: pointer;
+            width: 38px; height: 38px;
+            display: flex; align-items: center; justify-content: center;
             border-radius: 50%;
             transition: var(--transition-smooth);
         }
@@ -195,182 +214,270 @@
         .sidebar-close-btn:hover {
             color: var(--primary-neon);
             background: rgba(13, 245, 227, 0.1);
+            transform: rotate(90deg);
         }
 
         .sidebar-brand {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-top: 1rem;
-            margin-bottom: 2rem;
-            text-align: center;
+            display: flex; flex-direction: column;
+            align-items: center; margin-top: 1rem;
+            margin-bottom: 2rem; text-align: center;
         }
 
         .sidebar-brand img {
-            height: 75px;
-            margin-bottom: 10px;
+            height: 80px; margin-bottom: 12px;
+            filter: drop-shadow(0 0 15px rgba(13, 245, 227, 0.3));
+        }
+
+        .sidebar-brand h3 {
+            font-size: 1.1rem;
+            color: var(--primary-neon);
+            letter-spacing: 0.5px;
         }
 
         .sidebar-nav-links {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 1.2rem;
-            width: 100%;
-            text-align: left;
-            margin-bottom: 2rem;
+            list-style: none; display: flex;
+            flex-direction: column; gap: 0.4rem;
+            width: 100%; margin-bottom: 2rem;
         }
 
         .sidebar-nav-links a {
             text-decoration: none;
             color: var(--text-high-contrast);
-            font-size: 1.1rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 0.6rem;
+            font-size: 1rem; font-weight: 500;
+            display: flex; align-items: center; gap: 12px;
+            padding: 0.8rem 1rem; border-radius: 10px;
+            transition: var(--transition-smooth);
+            border: 1px solid transparent;
+        }
+
+        .sidebar-nav-links a i {
+            width: 24px; text-align: center;
+            color: var(--primary-neon); font-size: 1rem;
+        }
+
+        .sidebar-nav-links a:hover,
+        .sidebar-nav-links a.active {
+            color: var(--primary-neon);
+            background: rgba(13, 245, 227, 0.08);
+            border-color: rgba(13, 245, 227, 0.2);
+            transform: translateX(6px);
+        }
+
+        .sidebar-footer-portal {
+            width: 100%; display: flex; flex-direction: column;
+            align-items: center; gap: 10px;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-teal);
+            margin-top: auto;
+        }
+
+        /* ============================================
+           PORTAL DROPDOWN
+           ============================================ */
+        .portal-dropdown-wrapper { position: relative; display: inline-block; }
+
+        .portal-box {
+            position: absolute; top: calc(100% + 12px); right: 0;
+            width: 280px;
+            background: rgba(10, 25, 47, 0.98);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-teal);
+            border-radius: 14px; padding: 10px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7), 0 0 30px rgba(13, 245, 227, 0.1);
+            display: flex; flex-direction: column; gap: 6px;
+            z-index: 1000; opacity: 0; visibility: hidden;
+            transform: translateY(-15px) scale(0.96);
+            transform-origin: top right;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .portal-box.show { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
+
+        .portal-box-title {
+            font-size: 0.7rem; font-weight: 700;
+            color: var(--primary-neon);
+            text-transform: uppercase; letter-spacing: 1.2px;
+            padding: 6px 10px 4px;
+        }
+
+        .portal-option {
+            display: flex; align-items: center; gap: 14px;
+            padding: 12px 14px; text-decoration: none;
+            color: var(--text-high-contrast);
+            border-radius: 10px;
+            background: rgba(2, 12, 27, 0.5);
+            border: 1px solid transparent;
+            transition: all 0.25s ease;
+        }
+
+        .portal-option i {
+            font-size: 1.3rem; color: var(--primary-neon);
+            width: 32px; height: 32px;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(13, 245, 227, 0.08);
             border-radius: 8px;
             transition: var(--transition-smooth);
         }
 
-        .sidebar-nav-links a:hover, .sidebar-nav-links a.active {
-            color: var(--primary-neon);
-            background: rgba(13, 245, 227, 0.08);
-        }
-
-        .sidebar-footer-portal {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            padding-top: 1rem;
-            border-top: 1px solid var(--border-teal);
-        }
-
-        .sidebar-footer-portal .btn-secondary {
-            width: 100%;
-            font-size: 0.85rem;
-            height: 42px;
-        }
-
-        /* --- Portal Dropdown --- */
-        .portal-dropdown-wrapper {
-            position: relative;
-            display: inline-block;
-        }
-
-        .portal-box {
-            position: absolute;
-            top: calc(100% + 12px);
-            right: 0;
-            width: 260px;
-            background: rgba(10, 25, 47, 0.95);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--border-teal);
-            border-radius: 12px;
-            padding: 12px;
-            box-shadow: 
-                0 20px 40px rgba(0, 0, 0, 0.7),
-                0 0 25px rgba(13, 245, 227, 0.15);
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            z-index: 1000;
-            
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-15px) scaleY(0.9);
-            transform-origin: top center;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .portal-box.show {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0) scaleY(1);
-        }
-
-        .portal-box-title {
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: var(--primary-neon);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            padding: 4px 8px;
-        }
-
-        .portal-option {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 12px;
-            text-decoration: none;
-            color: var(--text-high-contrast);
-            border-radius: 8px;
-            background: rgba(2, 12, 27, 0.5);
-            border: 1px solid transparent;
-            transition: all 0.2s ease;
-        }
-
-        .portal-option i {
-            font-size: 1.2rem;
-            color: var(--primary-neon);
-        }
-
-        .portal-option .option-text {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .portal-option strong {
-            font-size: 0.9rem;
-        }
-
-        .portal-option small {
-            font-size: 0.75rem;
-            color: var(--text-muted-teal);
-        }
+        .portal-option .option-text { display: flex; flex-direction: column; }
+        .portal-option strong { font-size: 0.88rem; letter-spacing: 0.3px; }
+        .portal-option small { font-size: 0.72rem; color: var(--text-muted-teal); }
 
         .portal-option:hover {
-            background: rgba(13, 245, 227, 0.1);
+            background: rgba(13, 245, 227, 0.08);
             border-color: var(--primary-neon);
             transform: translateX(4px);
         }
 
-        .portal-option:hover strong {
-            color: var(--primary-neon);
+        .portal-option:hover i {
+            background: var(--primary-neon);
+            color: var(--bg-deep-abyss);
+            box-shadow: var(--neon-glow);
         }
 
-        /* --- Buttons --- */
-        .btn {
-            display: inline-flex;
+        .portal-option:hover strong { color: var(--primary-neon); }
+
+        /* ============================================
+           LEFT FLOATING WIDGET BUTTONS
+           ============================================ */
+        .widget-stack {
+            position: fixed;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 95;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .widget-btn {
+            position: relative;
+            display: flex;
+            align-items: center;
+            height: 52px;
+            padding: 0 22px 0 16px;
+            min-width: 52px;
+            max-width: 52px;
+            overflow: hidden;
+            white-space: nowrap;
+            background: linear-gradient(135deg, rgba(10, 25, 47, 0.95), rgba(17, 34, 64, 0.95));
+            border: 1px solid var(--border-teal);
+            border-left: none;
+            border-radius: 0 50px 50px 0;
+            color: var(--text-high-contrast);
+            text-decoration: none;
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            cursor: pointer;
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            box-shadow: 4px 4px 20px rgba(0, 0, 0, 0.5);
+            transition:
+                max-width 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 0.3s ease,
+                background 0.3s ease,
+                box-shadow 0.3s ease,
+                transform 0.3s ease;
+        }
+
+        .widget-btn .widget-icon {
+            width: 20px;
+            height: 20px;
+            display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            padding: 0.75rem 1.6rem;
-            border-radius: var(--border-radius);
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: none;
+            font-size: 1rem;
+            color: var(--primary-neon);
+            flex-shrink: 0;
             transition: var(--transition-smooth);
-            border: none;
-            font-size: 0.95rem;
-            height: 48px;
         }
 
+        .widget-btn .widget-label {
+            margin-left: 12px;
+            opacity: 0;
+            transform: translateX(-8px);
+            transition: opacity 0.3s ease 0.1s, transform 0.3s ease 0.1s;
+            pointer-events: none;
+        }
+
+        .widget-btn:hover,
+        .widget-btn:focus-visible {
+            max-width: 240px;
+            border-color: var(--primary-neon);
+            background: linear-gradient(135deg, rgba(13, 245, 227, 0.12), rgba(10, 25, 47, 0.98));
+            box-shadow: 6px 0 25px rgba(13, 245, 227, 0.3), 4px 4px 20px rgba(0, 0, 0, 0.5);
+            transform: translateX(4px);
+            outline: none;
+        }
+
+        .widget-btn:hover .widget-icon,
+        .widget-btn:focus-visible .widget-icon {
+            color: var(--primary-neon);
+            transform: scale(1.15) rotate(-4deg);
+        }
+
+        .widget-btn:hover .widget-label,
+        .widget-btn:focus-visible .widget-label {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* Per-widget accent colors */
+        .widget-btn.widget-facebook .widget-icon { color: #1877f2; }
+        .widget-btn.widget-facebook:hover { border-color: #1877f2; background: linear-gradient(135deg, rgba(24, 119, 242, 0.15), rgba(10, 25, 47, 0.98)); box-shadow: 6px 0 25px rgba(24, 119, 242, 0.35), 4px 4px 20px rgba(0, 0, 0, 0.5); }
+        .widget-btn.widget-facebook:hover .widget-icon { color: #1877f2; }
+
+        .widget-btn.widget-inquiry .widget-icon { color: var(--purple-accent); }
+        .widget-btn.widget-inquiry:hover { border-color: var(--purple-accent); background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(10, 25, 47, 0.98)); box-shadow: 6px 0 25px rgba(139, 92, 246, 0.35), 4px 4px 20px rgba(0, 0, 0, 0.5); }
+        .widget-btn.widget-inquiry:hover .widget-icon { color: var(--purple-accent); }
+
+        .widget-btn.widget-news .widget-icon { color: #f59e0b; }
+        .widget-btn.widget-news:hover { border-color: #f59e0b; background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(10, 25, 47, 0.98)); box-shadow: 6px 0 25px rgba(245, 158, 11, 0.35), 4px 4px 20px rgba(0, 0, 0, 0.5); }
+        .widget-btn.widget-news:hover .widget-icon { color: #f59e0b; }
+
+        .widget-btn.widget-announcement .widget-icon { color: #ec4899; }
+        .widget-btn.widget-announcement:hover { border-color: #ec4899; background: linear-gradient(135deg, rgba(236, 72, 153, 0.15), rgba(10, 25, 47, 0.98)); box-shadow: 6px 0 25px rgba(236, 72, 153, 0.35), 4px 4px 20px rgba(0, 0, 0, 0.5); }
+        .widget-btn.widget-announcement:hover .widget-icon { color: #ec4899; }
+
+        .widget-btn.widget-download .widget-icon { color: var(--success-green); }
+        .widget-btn.widget-download:hover { border-color: var(--success-green); background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(10, 25, 47, 0.98)); box-shadow: 6px 0 25px rgba(16, 185, 129, 0.35), 4px 4px 20px rgba(0, 0, 0, 0.5); }
+        .widget-btn.widget-download:hover .widget-icon { color: var(--success-green); }
+
+        @media (max-width: 900px) {
+            .widget-stack { display: none; }
+        }
+
+        /* ============================================
+           BUTTONS
+           ============================================ */
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            gap: 10px; padding: 0.85rem 1.8rem;
+            border-radius: 12px; font-weight: 600;
+            cursor: pointer; text-decoration: none;
+            transition: var(--transition-smooth);
+            border: none; font-size: 0.95rem;
+            height: 52px; position: relative;
+            overflow: hidden; font-family: inherit;
+        }
+
+        .btn i { font-size: 0.95rem; transition: var(--transition-smooth); }
+
         .btn-primary {
-            background-color: var(--primary-neon);
+            background: linear-gradient(135deg, var(--primary-neon) 0%, #00b4a4 100%);
             color: var(--bg-deep-abyss);
             box-shadow: var(--neon-glow);
         }
 
         .btn-primary:hover {
-            background-color: var(--primary-neon-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 0 20px rgba(13, 245, 227, 0.5);
+            transform: translateY(-3px);
+            box-shadow: 0 0 25px rgba(13, 245, 227, 0.5), 0 10px 25px rgba(0, 0, 0, 0.4);
         }
+
+        .btn-primary:hover i { transform: translateX(4px); }
 
         .btn-secondary {
             background-color: var(--bg-card-hover);
@@ -382,98 +489,264 @@
             background-color: var(--primary-neon);
             color: var(--bg-deep-abyss);
             box-shadow: var(--neon-glow);
+            transform: translateY(-3px);
         }
 
-        /* --- Hero Banner Section --- */
+        .btn-outline {
+            border: 1px solid var(--border-teal);
+            color: var(--text-high-contrast);
+            background-color: transparent;
+        }
+
+        .btn-outline:hover {
+            background-color: rgba(13, 245, 227, 0.05);
+            border-color: var(--primary-neon);
+            color: var(--primary-neon);
+            box-shadow: var(--neon-glow);
+            transform: translateY(-3px);
+        }
+
+        .btn-block { width: 100%; }
+
+        /* ============================================
+           HERO SECTION
+           ============================================ */
         .hero {
             position: relative;
-            padding: 5rem 1rem 3rem;
-            background: 
-                radial-gradient(circle at top, rgba(13, 245, 227, 0.12) 0%, rgba(10, 25, 47, 0.85) 60%, var(--bg-deep-abyss) 100%),
-                linear-gradient(180deg, rgba(2, 12, 27, 0.7) 0%, var(--bg-deep-abyss) 100%),
+            padding: 6rem 0 8rem;
+            background:
+                radial-gradient(circle at 20% 20%, rgba(13, 245, 227, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                linear-gradient(180deg, rgba(2, 12, 27, 0.85) 0%, var(--bg-deep-abyss) 100%),
                 url('../BackGroundimage/ICFcoverphoto.jpg') center/cover no-repeat;
             border-bottom: 1px solid var(--border-teal);
+            overflow: hidden;
             text-align: center;
         }
 
+        .hero::before {
+            content: ''; position: absolute; inset: 0;
+            background-image:
+                linear-gradient(rgba(13, 245, 227, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(13, 245, 227, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            mask-image: radial-gradient(circle at center, black 30%, transparent 80%);
+            -webkit-mask-image: radial-gradient(circle at center, black 30%, transparent 80%);
+        }
+
+        .hero .container {
+            position: relative; z-index: 1;
+            animation: heroFadeIn 1s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes heroFadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
+            display: inline-flex; align-items: center; gap: 8px;
             background: rgba(13, 245, 227, 0.1);
             color: var(--primary-neon);
             border: 1px solid rgba(13, 245, 227, 0.3);
-            padding: 0.4rem 1.2rem;
-            border-radius: 50px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            box-shadow: 0 0 10px rgba(13, 245, 227, 0.1);
+            padding: 0.5rem 1.2rem; border-radius: 50px;
+            font-size: 0.82rem; font-weight: 600;
+            margin-bottom: 1.8rem;
+            box-shadow: 0 0 15px rgba(13, 245, 227, 0.15);
+            backdrop-filter: blur(8px);
+        }
+
+        .badge i { animation: pulse 2s ease-in-out infinite; }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
         }
 
         .hero h1 {
-            font-size: 3rem;
-            font-weight: 800;
+            font-size: 3.6rem;
+            font-weight: 900;
             color: var(--text-high-contrast);
-            margin-bottom: 0.8rem;
+            line-height: 1.08;
+            margin-bottom: 1.2rem;
+            letter-spacing: -1.5px;
+        }
+
+        .hero h1 .accent {
+            background: linear-gradient(135deg, #0df5e3 30%, #00a89d 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .hero p {
+            font-size: 1.15rem;
             color: var(--text-muted-teal);
-            font-size: 1.1rem;
-            max-width: 600px;
-            margin: 0 auto;
+            margin: 0 auto 2rem;
+            max-width: 750px;
+            line-height: 1.7;
         }
 
-        /* --- Registration Form Styling --- */
+        /* Step Progress Indicator */
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 0;
+            max-width: 820px;
+            margin: 2.5rem auto 0;
+            padding: 0 1rem;
+            position: relative;
+        }
+
+        .step-item {
+            display: flex; flex-direction: column;
+            align-items: center; gap: 10px;
+            flex: 1; position: relative;
+        }
+
+        .step-item::after {
+            content: '';
+            position: absolute;
+            top: 22px; left: calc(50% + 26px);
+            right: calc(-50% + 26px);
+            height: 2px;
+            background: var(--border-teal);
+            z-index: 0;
+        }
+
+        .step-item:last-child::after { display: none; }
+
+        .step-circle {
+            width: 44px; height: 44px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: 2px solid var(--border-teal);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--text-muted-teal);
+            font-weight: 700; font-size: 0.9rem;
+            transition: var(--transition-smooth);
+            position: relative; z-index: 2;
+        }
+
+        .step-item.active .step-circle {
+            border-color: var(--primary-neon);
+            background: linear-gradient(135deg, rgba(13, 245, 227, 0.2), rgba(13, 245, 227, 0.05));
+            color: var(--primary-neon);
+            box-shadow: 0 0 15px rgba(13, 245, 227, 0.4);
+        }
+
+        .step-label {
+            font-size: 0.75rem;
+            color: var(--text-muted-teal);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            text-align: center;
+        }
+
+        .step-item.active .step-label { color: var(--primary-neon); }
+
+        /* ============================================
+           ENROLLMENT SECTION
+           ============================================ */
         .enrollment-section {
-            padding: 4rem 0;
+            padding: 5rem 0;
+            background: linear-gradient(180deg, var(--bg-deep-abyss) 0%, #041020 100%);
+            position: relative;
         }
 
         .form-container {
-            max-width: 900px;
+            max-width: 960px;
             margin: 0 auto;
         }
 
         .form-card {
-            background-color: var(--bg-card);
+            position: relative;
+            background: linear-gradient(160deg, var(--bg-card) 0%, #06152b 100%);
             border: 1px solid var(--border-teal);
-            border-radius: var(--border-radius);
+            border-radius: 16px;
             padding: 2.5rem;
             margin-bottom: 2.5rem;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
             transition: var(--transition-smooth);
         }
 
+        .form-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-neon), #00b4d8, var(--purple-accent));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .form-card:hover::before { transform: scaleX(1); }
+
+        .form-card::after {
+            content: '\f0e0';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            right: -20px; bottom: -30px;
+            font-size: 8rem;
+            color: rgba(13, 245, 227, 0.03);
+            pointer-events: none;
+            transition: var(--transition-slow);
+        }
+
+        .form-card:hover::after {
+            color: rgba(13, 245, 227, 0.06);
+            transform: rotate(-10deg) scale(1.1);
+        }
+
         .form-card:hover {
-            border-color: rgba(13, 245, 227, 0.4);
-            box-shadow: 0 10px 30px rgba(13, 245, 227, 0.05);
+            border-color: var(--primary-neon);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 30px rgba(13, 245, 227, 0.15);
         }
 
         .form-card-header {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
             border-bottom: 1px solid var(--border-teal);
-            padding-bottom: 1rem;
-            margin-bottom: 1.8rem;
+            padding-bottom: 1.2rem;
+            margin-bottom: 2rem;
+            position: relative; z-index: 1;
         }
 
-        .form-card-header i {
-            font-size: 1.5rem;
-            color: var(--primary-neon);
+        .form-card-header .icon-box {
+            width: 48px; height: 48px;
+            background: linear-gradient(135deg, rgba(13, 245, 227, 0.15), rgba(13, 245, 227, 0.05));
+            border: 1px solid rgba(13, 245, 227, 0.25);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--primary-neon); font-size: 1.2rem;
+            transition: var(--transition-smooth);
+        }
+
+        .form-card:hover .form-card-header .icon-box {
+            background: var(--primary-neon);
+            color: var(--bg-deep-abyss);
+            box-shadow: var(--neon-glow);
+            transform: scale(1.05) rotate(-4deg);
         }
 
         .form-card-header h2 {
             font-size: 1.5rem;
             color: var(--text-high-contrast);
-            font-weight: 700;
+            font-weight: 800;
+            letter-spacing: -0.5px;
         }
 
         .form-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
             gap: 1.5rem;
+            position: relative; z-index: 1;
         }
 
         .form-group {
@@ -482,37 +755,37 @@
             gap: 0.5rem;
         }
 
-        .form-group.full-width {
-            grid-column: 1 / -1;
-        }
+        .form-group.full-width { grid-column: 1 / -1; }
 
         .form-group label {
-            font-weight: 600;
-            font-size: 0.9rem;
-            color: var(--text-high-contrast);
-            display: flex;
-            align-items: center;
-            gap: 6px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            color: var(--text-muted-teal);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex; align-items: center; gap: 6px;
         }
 
         .form-control {
             width: 100%;
-            height: 48px;
-            background-color: rgba(2, 12, 27, 0.6);
+            height: 52px;
+            background-color: rgba(2, 12, 27, 0.8);
             border: 1px solid var(--border-teal);
-            border-radius: 8px;
+            border-radius: 10px;
             padding: 0 1rem;
             color: var(--text-high-contrast);
             font-family: inherit;
             font-size: 0.95rem;
+            outline: none;
             transition: var(--transition-smooth);
         }
 
+        .form-control::placeholder { color: #4a5568; }
+
         .form-control:focus {
-            outline: none;
             border-color: var(--primary-neon);
-            box-shadow: 0 0 10px rgba(13, 245, 227, 0.2);
-            background-color: var(--bg-deep-abyss);
+            box-shadow: 0 0 0 3px rgba(13, 245, 227, 0.1), 0 0 15px rgba(13, 245, 227, 0.15);
+            background: rgba(2, 12, 27, 0.95);
         }
 
         .form-control option {
@@ -520,38 +793,47 @@
             color: var(--text-high-contrast);
         }
 
-        /* Custom Radio & Checkbox Groups */
-        .radio-group, .checkbox-group {
+        /* Custom Radio Groups */
+        .radio-group {
             display: flex;
             flex-wrap: wrap;
-            gap: 1rem;
+            gap: 0.75rem;
             margin-top: 0.25rem;
         }
 
-        .custom-radio, .custom-checkbox {
+        .custom-radio {
             display: flex;
             align-items: center;
             gap: 8px;
             cursor: pointer;
-            background: rgba(2, 12, 27, 0.4);
+            background: rgba(2, 12, 27, 0.5);
             border: 1px solid var(--border-teal);
             padding: 0.6rem 1rem;
             border-radius: 8px;
             transition: var(--transition-smooth);
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             color: var(--text-muted-teal);
+            font-weight: 500;
         }
 
-        .custom-radio:hover, .custom-checkbox:hover {
+        .custom-radio:hover {
             border-color: var(--primary-neon);
             color: var(--text-high-contrast);
+            background: rgba(13, 245, 227, 0.05);
         }
 
-        .custom-radio input, .custom-checkbox input {
+        .custom-radio input {
             accent-color: var(--primary-neon);
-            width: 16px;
-            height: 16px;
+            width: 16px; height: 16px;
             cursor: pointer;
+        }
+
+        .custom-radio:has(input:checked) {
+            border-color: var(--primary-neon);
+            background: rgba(13, 245, 227, 0.08);
+            color: var(--primary-neon);
+            font-weight: 600;
+            box-shadow: 0 0 10px rgba(13, 245, 227, 0.15);
         }
 
         /* Date Picker Group */
@@ -561,21 +843,21 @@
             gap: 0.75rem;
         }
 
-        /* Payment Methods Styles */
+        /* Payment Method Cards */
         .payment-methods {
             display: flex;
-            gap: 10px;
-            margin-top: 5px;
+            gap: 12px;
+            margin-top: 8px;
             flex-wrap: wrap;
         }
 
         .method-card {
             flex: 1;
-            min-width: 110px;
+            min-width: 120px;
             background-color: rgba(2, 12, 27, 0.5);
             border: 1px solid var(--border-teal);
-            border-radius: 8px;
-            padding: 12px 6px;
+            border-radius: 12px;
+            padding: 1rem 0.75rem;
             text-align: center;
             cursor: pointer;
             font-size: 0.8rem;
@@ -584,65 +866,67 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
+            font-weight: 600;
         }
 
-        .method-card input {
-            display: none;
-        }
+        .method-card input { display: none; }
 
         .method-card i {
-            font-size: 1.3rem;
+            font-size: 1.5rem;
             color: var(--text-muted-teal);
+            transition: var(--transition-smooth);
         }
+
+        .method-card:hover {
+            border-color: var(--primary-neon);
+            color: var(--text-high-contrast);
+            transform: translateY(-3px);
+        }
+
+        .method-card:hover i { color: var(--primary-neon); }
 
         .method-card.active {
             border-color: var(--primary-neon);
             background: rgba(13, 245, 227, 0.08);
             color: var(--primary-neon);
-            font-weight: 600;
-            box-shadow: 0 0 10px rgba(13, 245, 227, 0.1);
+            box-shadow: 0 0 15px rgba(13, 245, 227, 0.2);
         }
 
         .method-card.active i {
             color: var(--primary-neon);
+            transform: scale(1.1);
         }
 
-        .payment-fields {
-            margin-top: 1rem;
-        }
+        .payment-fields { margin-top: 1.2rem; }
 
-        .form-row {
-            display: flex;
-            gap: 10px;
-        }
-
+        /* Info Text */
         .info-text {
-            font-size: 0.8rem;
+            font-size: 0.82rem;
             color: var(--text-muted-teal);
-            background: rgba(2, 12, 27, 0.5);
-            border: 1px solid var(--border-teal);
-            padding: 10px;
-            border-radius: 8px;
-            margin-top: 8px;
+            background: rgba(13, 245, 227, 0.06);
+            border: 1px solid rgba(13, 245, 227, 0.2);
+            padding: 12px 14px;
+            border-radius: 10px;
+            margin-top: 10px;
             display: flex;
-            align-items: center;
-            gap: 8px;
+            align-items: flex-start;
+            gap: 10px;
+            line-height: 1.6;
         }
 
-        .info-text i {
-            color: var(--primary-neon);
-        }
+        .info-text i { color: var(--primary-neon); flex-shrink: 0; margin-top: 2px; }
 
         /* Statement Box */
         .statement-box {
-            background-color: rgba(2, 12, 27, 0.5);
+            background-color: rgba(2, 12, 27, 0.6);
             border-left: 4px solid var(--primary-neon);
             padding: 1.5rem;
-            border-radius: 0 8px 8px 0;
+            border-radius: 0 10px 10px 0;
             margin-bottom: 1.5rem;
             font-size: 0.9rem;
             color: var(--text-muted-teal);
+            position: relative; z-index: 1;
         }
 
         .statement-box ol {
@@ -653,240 +937,38 @@
             gap: 0.6rem;
         }
 
+        .statement-box li { line-height: 1.7; }
+
         .consent-box {
-            background: rgba(13, 245, 227, 0.05);
-            border: 1px solid rgba(13, 245, 227, 0.2);
-            padding: 1.2rem;
-            border-radius: 8px;
+            background: rgba(13, 245, 227, 0.06);
+            border: 1px solid rgba(13, 245, 227, 0.25);
+            padding: 1.2rem 1.4rem;
+            border-radius: 12px;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
+            transition: var(--transition-smooth);
+            position: relative; z-index: 1;
+        }
+
+        .consent-box:hover {
+            background: rgba(13, 245, 227, 0.1);
+            box-shadow: 0 0 15px rgba(13, 245, 227, 0.15);
         }
 
         .consent-box input {
             accent-color: var(--primary-neon);
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-            flex-shrink: 0;
+            width: 20px; height: 20px;
+            cursor: pointer; flex-shrink: 0;
         }
 
         .consent-box label {
             font-size: 0.9rem;
             color: var(--text-high-contrast);
             cursor: pointer;
+            line-height: 1.6;
         }
 
-        /* --- Footer Styles --- */
-        footer {
-            background-color: #01060f;
-            border-top: 1px solid var(--border-teal);
-            color: var(--text-muted-teal);
-            padding: 3rem 0 2rem;
-            font-size: 0.9rem;
-            margin-top: auto;
-        }
-
-        footer .footer-info {
-            display: flex;
-            justify-content: space-between;
-            max-width: 1200px;
-            margin: 0 auto 30px;
-            padding: 0 5%;
-        }
-
-        .footer-info img {
-            height: 16px;
-            margin-right: 12px;
-            vertical-align: middle;
-        }
-
-        .footer-info h4 {
-            width: 100%;
-            border-bottom: 1px solid var(--primary-neon);
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            color: var(--text-high-contrast);
-            font-size: 1.1rem;
-        }
-
-        .contact p {
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-        }
-
-        .office-hours p {
-            display: flex;
-            justify-content: space-between;
-            gap: 40px;
-            margin-bottom: 6px;
-        }
-
-        .school-name {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 5%;
-        }
-
-        .school-name img.icflogo {
-            height: 100px;
-        }
-
-        .school-name h1 {
-            text-align: left;
-            margin-left: 20px;
-            font-size: 2.2rem;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            color: var(--text-high-contrast);
-            line-height: 1.2;
-        }
-
-        .school-name span {
-            display: inline-block;
-            font-size: 1rem;
-            font-weight: 400;
-            color: var(--primary-neon);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        footer .social-icon {
-            display: flex;
-            align-items: center;
-            border-left: 1px solid var(--primary-neon);
-            margin-left: 50px;
-            padding-left: 20px;
-            gap: 12px;
-        }
-
-        footer .icon img {
-            object-fit: cover;
-            border-radius: 50%;
-            border: 1px solid var(--primary-neon);
-            height: 42px;
-            width: 42px;
-            transition: var(--transition-smooth);
-        }
-
-        footer .icon img:hover {
-            transform: scale(1.1);
-            box-shadow: var(--neon-glow);
-        }
-
-        footer .footer-container {
-            align-items: center;
-            margin-top: 30px;
-            text-align: center;
-        }
-
-        footer .footer-container p {
-            padding-top: 20px;
-            border-top: 1px solid var(--border-teal);
-        }
-
-        /* --- Media Queries (Referencing department.html layout patterns)[cite: 17] --- */
-        @media screen and (max-width: 1024px) {
-            .nav-container {
-                flex-wrap: wrap;
-                gap: 1.5rem;
-            }
-
-            .school-name {
-                flex-direction: column;
-                text-align: center;
-                gap: 1.5rem;
-            }
-
-            .school-name h1 {
-                text-align: center;
-                margin-left: 0;
-                font-size: 1.8rem;
-            }
-
-            footer .social-icon {
-                border-left: none;
-                margin-left: 0;
-                padding-left: 0;
-                justify-content: center;
-                flex-wrap: wrap;
-            }
-        }
-
-        @media screen and (max-width: 768px) {
-            nav.desktop-nav, 
-            .desktop-portal-wrapper {
-                display: none !important;
-            }
-
-            .mobile-menu-btn {
-                display: block;
-            }
-
-            .hero {
-                padding: 4.5rem 1rem 2.5rem;
-            }
-
-            .hero h1 {
-                font-size: 2.2rem;
-            }
-
-            .hero p {
-                font-size: 1rem;
-            }
-
-            .form-card {
-                padding: 1.5rem;
-            }
-
-            .date-select-group {
-                grid-template-columns: 1fr;
-            }
-
-            .form-row {
-                flex-direction: column;
-            }
-
-            footer .footer-info {
-                flex-direction: column;
-                gap: 2rem;
-            }
-
-            .office-hours p {
-                gap: 20px;
-            }
-
-            .portal-box {
-                right: 0;
-            }
-        }
-
-        @media screen and (max-width: 480px) {
-            .logo h2 {
-                font-size: 1.1rem;
-            }
-
-            .logo span {
-                font-size: 0.5rem;
-            }
-
-            .hero h1 {
-                font-size: 1.8rem;
-            }
-
-            .school-name h1 {
-                font-size: 1.4rem;
-            }
-
-            footer .icon img {
-                height: 36px;
-                width: 36px;
-            }
-        }
         /* Success / Error Banners */
         .success-banner, .error-banner {
             display: flex;
@@ -898,61 +980,274 @@
             animation: slideDown 0.4s ease;
             position: relative;
         }
+
         .success-banner {
             background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #6ee7b7;
         }
+
         .error-banner {
             background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #fca5a5;
         }
+
         .success-banner i:first-child, .error-banner i:first-child {
             font-size: 1.4rem;
             margin-top: 2px;
         }
+
         .success-banner strong, .error-banner strong {
             display: block;
             font-size: 1rem;
             margin-bottom: 4px;
         }
+
         .success-banner p, .error-banner p {
             font-size: 0.85rem;
             margin: 0;
             opacity: 0.9;
         }
+
         .success-close, .error-close {
             position: absolute;
-            top: 10px;
-            right: 12px;
-            background: transparent;
-            border: none;
-            color: inherit;
-            font-size: 1rem;
-            cursor: pointer;
-            opacity: 0.7;
+            top: 10px; right: 12px;
+            background: transparent; border: none;
+            color: inherit; font-size: 1rem;
+            cursor: pointer; opacity: 0.7;
             transition: opacity 0.2s;
         }
+
         .success-close:hover, .error-close:hover { opacity: 1; }
+
         @keyframes slideDown {
             from { opacity: 0; transform: translateY(-20px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        /* ============================================
+           FOOTER
+           ============================================ */
+        footer {
+            background: linear-gradient(180deg, #01060f 0%, #000308 100%);
+            border-top: 1px solid var(--border-teal);
+            color: var(--text-muted-teal);
+            padding: 4rem 0 2rem;
+            font-size: 0.9rem;
+            position: relative;
+            margin-top: auto;
+        }
+
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary-neon), transparent);
+            opacity: 0.5;
+        }
+
+        .footer-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            max-width: 1200px;
+            margin: 0 auto 3rem;
+            padding: 0 5%;
+        }
+
+        .footer-info h4 {
+            width: 100%;
+            border-bottom: 1px solid rgba(13, 245, 227, 0.3);
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            color: var(--text-high-contrast);
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .footer-info h4 i { color: var(--primary-neon); font-size: 0.9rem; }
+
+        .contact p {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.85rem;
+        }
+
+        .contact p img {
+            height: 16px; width: 16px;
+            object-fit: contain; opacity: 0.9;
+        }
+
+        .office-hours p {
+            display: flex;
+            justify-content: space-between;
+            gap: 40px;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            padding-bottom: 6px;
+            border-bottom: 1px dashed rgba(23, 42, 69, 0.5);
+        }
+
+        .office-hours p:last-child { border-bottom: none; }
+
+        .office-hours p span { color: var(--primary-neon); font-weight: 600; }
+
+        .school-name {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2.5rem 5% 0;
+            gap: 1.5rem;
+            text-align: center;
+            border-top: 1px solid var(--border-teal);
+        }
+
+        .school-name img.icflogo {
+            height: 100px;
+            filter: drop-shadow(0 0 20px rgba(13, 245, 227, 0.25));
+            transition: var(--transition-smooth);
+        }
+
+        .school-name img.icflogo:hover {
+            transform: scale(1.05);
+            filter: drop-shadow(0 0 30px rgba(13, 245, 227, 0.4));
+        }
+
+        .school-name h1 {
+            font-size: 1.7rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            color: var(--text-high-contrast);
+            line-height: 1.3;
+        }
+
+        .school-name h1 span {
+            display: inline;
+            font-size: 1.7rem;
+            font-weight: 800;
+            color: var(--primary-neon);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* ============================================
+           SOCIAL ICONS (Font Awesome version)
+           ============================================ */
+        .social-icon {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .social-icon .icon a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: rgba(10, 25, 47, 0.8);
+            border: 1px solid var(--border-teal);
+            color: var(--text-muted-teal);
+            font-size: 1.05rem;
+            text-decoration: none;
+            transition: var(--transition-smooth);
+        }
+
+        .social-icon .icon a:hover {
+            transform: translateY(-4px) scale(1.1);
+            border-color: var(--primary-neon);
+            color: var(--primary-neon);
+            background: rgba(13, 245, 227, 0.08);
+            box-shadow: var(--neon-glow);
+        }
+
+        .social-icon .icon a[aria-label="Facebook"]:hover   { color: #1877f2; border-color: #1877f2; background: rgba(24, 119, 242, 0.1); box-shadow: 0 0 15px rgba(24, 119, 242, 0.4); }
+        .social-icon .icon a[aria-label="YouTube"]:hover    { color: #ff0000; border-color: #ff0000; background: rgba(255, 0, 0, 0.1); box-shadow: 0 0 15px rgba(255, 0, 0, 0.4); }
+        .social-icon .icon a[aria-label="Twitter/X"]:hover  { color: #ffffff; border-color: #ffffff; background: rgba(255, 255, 255, 0.1); box-shadow: 0 0 15px rgba(255, 255, 255, 0.35); }
+        .social-icon .icon a[aria-label="TikTok"]:hover     { color: #ff0050; border-color: #ff0050; background: rgba(255, 0, 80, 0.1); box-shadow: 0 0 15px rgba(255, 0, 80, 0.4); }
+        .social-icon .icon a[aria-label="Pinterest"]:hover  { color: #e60023; border-color: #e60023; background: rgba(230, 0, 35, 0.1); box-shadow: 0 0 15px rgba(230, 0, 35, 0.4); }
+        .social-icon .icon a[aria-label="Instagram"]:hover  { color: #e1306c; border-color: #e1306c; background: rgba(225, 48, 108, 0.1); box-shadow: 0 0 15px rgba(225, 48, 108, 0.4); }
+
+        .footer-container {
+            margin-top: 2.5rem;
+            text-align: center;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-teal);
+        }
+
+        .footer-container p { font-size: 0.8rem; color: var(--text-muted-teal); letter-spacing: 0.5px; }
+
+        /* ============================================
+           RESPONSIVE
+           ============================================ */
+        @media screen and (max-width: 1024px) {
+            .hero h1 { font-size: 2.8rem; }
+            .step-indicator { max-width: 100%; }
+        }
+
+        @media screen and (max-width: 900px) {
+            .footer-info { grid-template-columns: 1fr; gap: 2.5rem; }
+            .widget-stack { display: none; }
+        }
+
+        @media screen and (max-width: 768px) {
+            nav.desktop-nav, .desktop-portal-wrapper { display: none !important; }
+            .mobile-menu-btn { display: block; }
+            .hero { padding: 4rem 0 5rem; }
+            .hero h1 { font-size: 2.3rem; letter-spacing: -0.8px; }
+            .hero p { font-size: 1rem; }
+            .form-card { padding: 1.75rem; }
+            .date-select-group { grid-template-columns: 1fr; }
+            .step-label { font-size: 0.65rem; }
+            .step-circle { width: 38px; height: 38px; font-size: 0.8rem; }
+            .step-item::after { top: 19px; }
+            .school-name h1, .school-name h1 span { font-size: 1.3rem; }
+            .portal-box { right: 0; }
+        }
+
+        @media screen and (max-width: 480px) {
+            .logo h2 { font-size: 1.05rem; }
+            .logo span { font-size: 0.55rem; letter-spacing: 1px; }
+            .logo img { height: 36px; }
+            .hero h1 { font-size: 1.85rem; }
+            .form-card { padding: 1.25rem; }
+            .form-card-header h2 { font-size: 1.2rem; }
+            .form-card-header .icon-box { width: 42px; height: 42px; font-size: 1rem; }
+            .school-name img.icflogo { height: 75px; }
+            .school-name h1, .school-name h1 span { font-size: 1rem; letter-spacing: 1px; }
+            .step-circle { width: 32px; height: 32px; font-size: 0.7rem; }
+            .step-item::after { top: 16px; }
+            .step-label { display: none; }
+        }
     </style>
-<base target="_blank">
-<base target="_blank">
 </head>
 <body>
 
     <!-- Header Navigation -->
-    <header>
+    <header id="mainHeader">
         <div class="container nav-container">
-            <div class="logo">
-                <a href="../index.html"><img src="../BackGroundimage/ICFLogo.png" alt="ICF Logo"></a>
-                <h2>ICF <span>Interworld Colleges Foundation Inc.</span></h2>
-            </div>
-            
+            <a href="../index.html" class="logo">
+                <img src="../BackGroundimage/ICFLogo.png" alt="ICF Logo">
+                <div class="logo-text">
+                    <h2>ICF</h2>
+                    <span>Interworld Colleges Foundation Inc.</span>
+                </div>
+            </a>
+
             <button class="mobile-menu-btn" id="menuToggle" aria-label="Toggle Navigation">
                 <i class="fa-solid fa-bars"></i>
             </button>
@@ -977,7 +1272,7 @@
                         <i class="fa-solid fa-user-shield"></i>
                         <div class="option-text">
                             <strong>ADMIN</strong>
-                            <small>Faculty & Staff Access</small>
+                            <small>Faculty &amp; Staff Access</small>
                         </div>
                     </a>
                     <a href="../student/login.html" class="portal-option">
@@ -992,9 +1287,45 @@
         </div>
     </header>
 
-    <!-- Mobile Sidebar Drawer & Overlay -->
+    <!-- ============================================
+         LEFT FLOATING WIDGET BUTTONS
+         ============================================ -->
+    <div class="widget-stack" aria-label="Quick action widgets">
+        <a href="https://web.facebook.com/ICFPaniquiOfficial"
+           target="_blank" rel="noopener noreferrer"
+           class="widget-btn widget-facebook" aria-label="Visit Facebook Page">
+            <span class="widget-icon"><i class="fa-brands fa-facebook-f"></i></span>
+            <span class="widget-label">Facebook Page</span>
+        </a>
+
+        <a href="contact.html"
+           class="widget-btn widget-inquiry" aria-label="Send Inquiry">
+            <span class="widget-icon"><i class="fa-solid fa-envelope-open-text"></i></span>
+            <span class="widget-label">Send Inquiry</span>
+        </a>
+
+        <a href="../index.html#news"
+           class="widget-btn widget-news" aria-label="Latest News">
+            <span class="widget-icon"><i class="fa-solid fa-newspaper"></i></span>
+            <span class="widget-label">Latest News</span>
+        </a>
+
+        <a href="../index.html#announcements"
+           class="widget-btn widget-announcement" aria-label="Announcements">
+            <span class="widget-icon"><i class="fa-solid fa-bullhorn"></i></span>
+            <span class="widget-label">Announcements</span>
+        </a>
+
+        <a href="../BackGroundimage/ICF-Prospectus-2026.pdf"
+           download class="widget-btn widget-download" aria-label="Download Prospectus">
+            <span class="widget-icon"><i class="fa-solid fa-file-pdf"></i></span>
+            <span class="widget-label">Download Prospectus</span>
+        </a>
+    </div>
+
+    <!-- Mobile Sidebar -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
-    
+
     <aside class="mobile-sidebar" id="mobileSidebar">
         <button class="sidebar-close-btn" id="sidebarCloseBtn" aria-label="Close Menu">
             <i class="fa-solid fa-xmark"></i>
@@ -1002,6 +1333,7 @@
 
         <div class="sidebar-brand">
             <img src="../BackGroundimage/ICFLogo.png" alt="ICF Logo">
+            <h3>ICF Portal</h3>
         </div>
 
         <ul class="sidebar-nav-links">
@@ -1012,7 +1344,7 @@
         </ul>
 
         <div class="sidebar-footer-portal portal-dropdown-wrapper">
-            <button id="mobilePortalBtn" class="btn btn-secondary">
+            <button id="mobilePortalBtn" class="btn btn-secondary btn-block">
                 <i class="fa-solid fa-right-to-bracket"></i> Portal Login
             </button>
 
@@ -1022,7 +1354,7 @@
                     <i class="fa-solid fa-user-shield"></i>
                     <div class="option-text">
                         <strong>ADMIN</strong>
-                        <small>Faculty & Staff Access</small>
+                        <small>Faculty &amp; Staff Access</small>
                     </div>
                 </a>
                 <a href="../student/login.html" class="portal-option">
@@ -1036,19 +1368,43 @@
         </div>
     </aside>
 
-    <!-- Hero Banner Section -->
+    <!-- Hero Section -->
     <section class="hero">
         <div class="container">
             <div class="badge"><i class="fa-solid fa-file-pen"></i> Online Enrollment Form</div>
-            <h1>Student Registration</h1>
-            <p>Please complete all required details carefully to proceed with your enrollment application.</p>
+            <h1>Student <span class="accent">Registration</span></h1>
+            <p>Please complete all required details carefully to proceed with your enrollment application for Academic Year 2026-2027.</p>
+
+            <!-- Step Progress Indicator -->
+            <div class="step-indicator">
+                <div class="step-item active">
+                    <div class="step-circle"><i class="fa-solid fa-user"></i></div>
+                    <span class="step-label">Personal</span>
+                </div>
+                <div class="step-item active">
+                    <div class="step-circle"><i class="fa-solid fa-graduation-cap"></i></div>
+                    <span class="step-label">Academic</span>
+                </div>
+                <div class="step-item active">
+                    <div class="step-circle"><i class="fa-solid fa-award"></i></div>
+                    <span class="step-label">Scholarship</span>
+                </div>
+                <div class="step-item active">
+                    <div class="step-circle"><i class="fa-solid fa-credit-card"></i></div>
+                    <span class="step-label">Payment</span>
+                </div>
+                <div class="step-item active">
+                    <div class="step-circle"><i class="fa-solid fa-file-contract"></i></div>
+                    <span class="step-label">Submit</span>
+                </div>
+            </div>
         </div>
     </section>
 
-    <!-- Registration Form Section -->
+    <!-- Enrollment Form Section -->
     <section class="enrollment-section">
         <div class="container form-container">
-            <!-- Success Message Banner -->
+            <!-- Success Banner -->
             <div id="successBanner" class="success-banner" style="display:none;">
                 <i class="fa-solid fa-circle-check"></i>
                 <div>
@@ -1059,7 +1415,8 @@
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
-            <!-- Error Message Banner -->
+
+            <!-- Error Banner -->
             <div id="errorBanner" class="error-banner" style="display:none;">
                 <i class="fa-solid fa-circle-exclamation"></i>
                 <div>
@@ -1070,15 +1427,16 @@
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
+
             <form id="enrollmentForm" action="../backend/EnrollmentDB/enrollmentprocess.php" method="POST" autocomplete="off" enctype="multipart/form-data">
-                
+
                 <!-- 1. Personal Information -->
                 <div class="form-card">
                     <div class="form-card-header">
-                        <i class="fa-solid fa-user-gear"></i>
+                        <div class="icon-box"><i class="fa-solid fa-user-gear"></i></div>
                         <h2>Personal Information</h2>
                     </div>
-                    
+
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="firstName">First Name</label>
@@ -1100,12 +1458,8 @@
                         <div class="form-group full-width">
                             <label>Gender</label>
                             <div class="radio-group">
-                                <label class="custom-radio">
-                                    <input type="radio" name="gender" value="male" required> Male
-                                </label>
-                                <label class="custom-radio">
-                                    <input type="radio" name="gender" value="female" required> Female
-                                </label>
+                                <label class="custom-radio"><input type="radio" name="gender" value="male" required> Male</label>
+                                <label class="custom-radio"><input type="radio" name="gender" value="female" required> Female</label>
                             </div>
                         </div>
 
@@ -1181,21 +1535,10 @@
                         </div>
                         <div class="form-group">
                             <label for="motherMobile">Mother's Mobile No.</label>
-                            <input 
-                                type="tel" 
-                                id="motherMobile" 
-                                name="mphone_number"
-                                value="+63 9"
-                                class="form-control" 
-                                pattern="^\+63 9\d{2} \d{3} \d{4}$"
-                                oninput="formatPhoneNumber(this)"
-                                onkeydown="preventPrefixDelete(event, this)"
-                                onfocus="moveCursorToEnd(this)"
-                                onclick="moveCursorToEnd(this)"
-                                maxlength="16"
-                                autocomplete="off" 
-                                required>
+                            <input type="tel" id="motherMobile" name="mphone_number" value="+63 9" class="form-control" pattern="^\+63 9\d{2} \d{3} \d{4}$" oninput="formatPhoneNumber(this)" onkeydown="preventPrefixDelete(event, this)" onfocus="moveCursorToEnd(this)" onclick="moveCursorToEnd(this)" maxlength="16" autocomplete="off" required>
                         </div>
+
+                        <br>
 
                         <div class="form-group">
                             <label for="fathername">Name of Father</label>
@@ -1203,42 +1546,18 @@
                         </div>
                         <div class="form-group">
                             <label for="fatherMobile">Father's Mobile No.</label>
-                            <input 
-                                type="tel" 
-                                id="fatherMobile" 
-                                name="fphone_number"
-                                value="+63 9"
-                                class="form-control" 
-                                pattern="^\+63 9\d{2} \d{3} \d{4}$"
-                                oninput="formatPhoneNumber(this)"
-                                onkeydown="preventPrefixDelete(event, this)"
-                                onfocus="moveCursorToEnd(this)"
-                                onclick="moveCursorToEnd(this)"
-                                maxlength="16"
-                                autocomplete="off" 
-                                required>
+                            <input type="tel" id="fatherMobile" name="fphone_number" value="+63 9" class="form-control" pattern="^\+63 9\d{2} \d{3} \d{4}$" oninput="formatPhoneNumber(this)" onkeydown="preventPrefixDelete(event, this)" onfocus="moveCursorToEnd(this)" onclick="moveCursorToEnd(this)" maxlength="16" autocomplete="off" required>
                         </div>
 
+                        <br>
+                        
                         <div class="form-group">
                             <label for="guardianname">Name of Guardian</label>
                             <input type="text" id="guardianname" name="guardian_name" class="form-control" autocomplete="off" required>
                         </div>
                         <div class="form-group">
                             <label for="guardianMobile">Guardian's Mobile No.</label>
-                            <input 
-                                type="tel" 
-                                id="guardianMobile" 
-                                name="gphone_number"
-                                value="+63 9"
-                                class="form-control" 
-                                pattern="^\+63 9\d{2} \d{3} \d{4}$"
-                                oninput="formatPhoneNumber(this)"
-                                onkeydown="preventPrefixDelete(event, this)"
-                                onfocus="moveCursorToEnd(this)"
-                                onclick="moveCursorToEnd(this)"
-                                maxlength="16"
-                                autocomplete="off" 
-                                required>
+                            <input type="tel" id="guardianMobile" name="gphone_number" value="+63 9" class="form-control" pattern="^\+63 9\d{2} \d{3} \d{4}$" oninput="formatPhoneNumber(this)" onkeydown="preventPrefixDelete(event, this)" onfocus="moveCursorToEnd(this)" onclick="moveCursorToEnd(this)" maxlength="16" autocomplete="off" required>
                         </div>
                     </div>
                 </div>
@@ -1246,7 +1565,7 @@
                 <!-- 2. Academic Information -->
                 <div class="form-card">
                     <div class="form-card-header">
-                        <i class="fa-solid fa-graduation-cap"></i>
+                        <div class="icon-box"><i class="fa-solid fa-graduation-cap"></i></div>
                         <h2>Academic Information</h2>
                     </div>
 
@@ -1299,7 +1618,7 @@
                 <!-- 3. Scholarship -->
                 <div class="form-card">
                     <div class="form-card-header">
-                        <i class="fa-solid fa-award"></i>
+                        <div class="icon-box"><i class="fa-solid fa-award"></i></div>
                         <h2>Scholarship / Financial Assistance</h2>
                     </div>
 
@@ -1321,10 +1640,10 @@
                     </div>
                 </div>
 
-                <!-- 4. Personal Contact Information -->
+                <!-- 4. Contact Information -->
                 <div class="form-card">
                     <div class="form-card-header">
-                        <i class="fa-solid fa-address-book"></i>
+                        <div class="icon-box"><i class="fa-solid fa-address-book"></i></div>
                         <h2>Personal Contact Information</h2>
                     </div>
 
@@ -1336,20 +1655,7 @@
 
                         <div class="form-group">
                             <label for="mobileNo">Mobile Number</label>
-                            <input 
-                                type="tel" 
-                                id="mobileNo" 
-                                name="mobile_number"
-                                value="+63 9"
-                                class="form-control" 
-                                pattern="^\+63 9\d{2} \d{3} \d{4}$"
-                                oninput="formatPhoneNumber(this)"
-                                onkeydown="preventPrefixDelete(event, this)"
-                                onfocus="moveCursorToEnd(this)"
-                                onclick="moveCursorToEnd(this)"
-                                maxlength="16"
-                                autocomplete="off" 
-                                required>
+                            <input type="tel" id="mobileNo" name="mobile_number" value="+63 9" class="form-control" pattern="^\+63 9\d{2} \d{3} \d{4}$" oninput="formatPhoneNumber(this)" onkeydown="preventPrefixDelete(event, this)" onfocus="moveCursorToEnd(this)" onclick="moveCursorToEnd(this)" maxlength="16" autocomplete="off" required>
                         </div>
 
                         <div class="form-group">
@@ -1362,64 +1668,53 @@
                 <!-- 5. Payment Method -->
                 <div class="form-card">
                     <div class="form-card-header">
-                        <i class="fa-solid fa-credit-card"></i>
+                        <div class="icon-box"><i class="fa-solid fa-credit-card"></i></div>
                         <h2>Payment Method</h2>
                     </div>
 
-                    <!-- Partial Amount Field & Description -->
                     <div class="form-group" style="margin-bottom: 1.5rem;">
                         <label for="partialAmount">Partial Amount to Pay (PHP)</label>
                         <input type="number" id="partialAmount" class="form-control" placeholder="Enter amount e.g. 1500" min="0">
                         <p class="info-text">
                             <i class="fa-solid fa-circle-info"></i>
-                            Enter a partial downpayment amount if you choose not to pay the full tuition right now.
+                            <span>Enter a partial downpayment amount if you choose not to pay the full tuition right now.</span>
                         </p>
                     </div>
 
                     <div class="form-group">
-                        <label style="text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px; color: var(--text-muted-teal);">Select Payment Method</label>
+                        <label>Select Payment Method</label>
                         <div class="payment-methods">
-                            <label class="method-card active">
-                                <input type="radio" name="paymentMethod" value="card" checked>
-                                <i class="fa-solid fa-credit-card"></i>
-                                <span>Credit Card</span>
-                            </label>
                             <label class="method-card">
                                 <input type="radio" name="paymentMethod" value="ewallet">
                                 <i class="fa-solid fa-wallet"></i>
                                 <span>E-Wallet</span>
                             </label>
-                            <label class="method-card">
-                                <input type="radio" name="paymentMethod" value="bank">
-                                <i class="fa-solid fa-building-columns"></i>
-                                <span>Bank Transfer</span>
-                            </label>
                         </div>
                     </div>
-                    <!-- E-Wallet Fields -->
+
                     <div id="ewalletDetails" class="payment-fields" style="display: none;">
                         <div class="form-group" style="margin-bottom: 1.2rem;">
                             <label for="ewalletNumber">E-Wallet Account Number (GCash/Maya)</label>
                             <input type="text" id="ewalletNumber" class="form-control" placeholder="e.g. 09123456789">
                         </div>
-                        <p class="info-text"><i class="fa-solid fa-circle-info"></i> You will be securely redirected to authorize the e-wallet transaction.</p>
+                        <p class="info-text"><i class="fa-solid fa-circle-info"></i> <span>You will be securely redirected to authorize the e-wallet transaction.</span></p>
                     </div>
                 </div>
 
-                <!-- File Upload Requirements Section -->
+                <!-- 6. Requirements -->
                 <div class="form-card">
                     <div class="form-card-header">
-                        <i class="fa-solid fa-file-arrow-up"></i>
+                        <div class="icon-box"><i class="fa-solid fa-file-arrow-up"></i></div>
                         <h2>Requirements</h2>
                     </div>
-                    
+
                     <div class="form-group full-width">
                         <label for="requirementFiles">Upload Admission / Enrollment Requirements</label>
-                        <input type="file" id="requirementFiles" name="requirementFiles[]" class="form-control" accept=".docx, .pdf, .jpg, .jpeg, .png" multiple style="padding: 10px; height: auto;">
-                        
-                        <div class="info-text" style="margin-top: 12px; display: block;">
-                            <p style="margin-bottom: 6px;"><i class="fa-solid fa-circle-info"></i> <strong>Guidelines for Uploading:</strong></p>
-                            <ul style="margin-left: 1.2rem; font-size: 0.85rem; display: flex; flex-direction: column; gap: 4px;">
+                        <input type="file" id="requirementFiles" name="requirementFiles[]" class="form-control" accept=".docx, .pdf, .jpg, .jpeg, .png" multiple style="padding: 12px 1rem; height: auto;">
+
+                        <div class="info-text" style="display: block;">
+                            <p style="margin-bottom: 8px;"><i class="fa-solid fa-circle-info"></i> <strong>Guidelines for Uploading:</strong></p>
+                            <ul style="margin-left: 1.2rem; display: flex; flex-direction: column; gap: 6px; line-height: 1.6;">
                                 <li><strong>For New Students / Freshmen:</strong> Please upload your Form 137, Certificate of Good Moral Character, and PSA Birth Certificate. You can select multiple files at once.</li>
                                 <li><strong>For Old Students / Enrolling for a New Semester:</strong> Please upload your Semester Clearance.</li>
                                 <li><strong>Accepted File Formats:</strong> .docx, .pdf, .jpg, .jpeg, .png</li>
@@ -1428,10 +1723,10 @@
                     </div>
                 </div>
 
-                <!-- 6. Statement of Undertaking & Submission -->
+                <!-- 7. Statement of Undertaking -->
                 <div class="form-card">
                     <div class="form-card-header">
-                        <i class="fa-solid fa-file-contract"></i>
+                        <div class="icon-box"><i class="fa-solid fa-file-contract"></i></div>
                         <h2>Statement of Undertaking</h2>
                     </div>
 
@@ -1450,8 +1745,8 @@
                         <label for="consentCheck">I acknowledge that the information provided in this Registration Form is true, complete, and accurate to the best of my knowledge.</label>
                     </div>
 
-                    <div style="margin-top: 2rem; text-align: center;">
-                        <button type="submit" class="btn btn-primary" style="padding: 0.8rem 3rem; font-size: 1.1rem; width: 100%; max-width: 320px;">
+                    <div style="margin-top: 2rem; text-align: center; position: relative; z-index: 1;">
+                        <button type="submit" class="btn btn-primary" style="padding: 0.8rem 3rem; font-size: 1.05rem; width: 100%; max-width: 360px;">
                             <i class="fa-solid fa-paper-plane"></i> Submit Enrollment
                         </button>
                     </div>
@@ -1465,47 +1760,33 @@
     <footer>
         <div class="footer-info">
             <div class="contact">
-                <h4>CONTACT DETAILS</h4>
-                <ul>
-                    <p><img src="../BackGroundimage/Icon/placeholder.png" alt="Address Icon">Burgos Street, Paniqui, Tarlac, Philippines</p>
-                    <p><img src="../BackGroundimage/Icon/telephone.png" alt="Phone Icon">+63 930 536 3258</p>
-                    <p><img src="../BackGroundimage/Icon/Untitled30_20260715135601.png" alt="Email Icon">admin@icfpaniqui.edu.ph</p>
-                </ul>
+                <h4><i class="fa-solid fa-address-book"></i> Contact Details</h4>
+                <p><img src="../BackGroundimage/Icon/placeholder.png" alt="Address Icon"> Burgos Street, Paniqui, Tarlac, Philippines 2307</p>
+                <p><img src="../BackGroundimage/Icon/telephone.png" alt="Phone Icon"> +63 930 536 3258</p>
+                <p><img src="../BackGroundimage/Icon/Untitled30_20260715135601.png" alt="Email Icon"> admin@icfpaniqui.edu.ph</p>
             </div>
             <div class="office-hours">
-                <h4>OFFICE HOURS</h4>
+                <h4><i class="fa-solid fa-clock"></i> Office Hours</h4>
                 <p>Sunday <span>Closed</span></p>
-                <p>Monday <span>8:00am - 4:00pm</span></p>
-                <p>Tuesday <span>8:00am - 4:00pm</span></p>
-                <p>Wednesday <span>8:00am - 4:00pm</span></p>
-                <p>Thursday <span>8:00am - 4:00pm</span></p>
-                <p>Friday <span>8:00am - 4:00pm</span></p>
-                <p>Saturday <span>8:00am - 12:00pm</span></p>
+                <p>Monday <span>8:00am – 4:00pm</span></p>
+                <p>Tuesday <span>8:00am – 4:00pm</span></p>
+                <p>Wednesday <span>8:00am – 4:00pm</span></p>
+                <p>Thursday <span>8:00am – 4:00pm</span></p>
+                <p>Friday <span>8:00am – 4:00pm</span></p>
+                <p>Saturday <span>8:00am – 12:00pm</span></p>
             </div>
-        </div> 
+        </div>
 
         <div class="school-name">
             <img class="icflogo" src="../BackGroundimage/ICFLogo.png" alt="ICF Logo">
-            <h1>ICF <span>INTERWORLD</span> <span>COLLEGES</span> <span>INC.</span></h1>
+            <h1>ICF <span>Interworld</span> <span>Colleges</span> <span>Foundation</span> <span>Inc.</span></h1>
 
+            <!-- Social icons: Font Awesome, only Facebook -->
             <div class="social-icon">
                 <div class="icon">
-                    <a href="https://web.facebook.com/ICFPaniquiOfficial"><img src="../BackGroundimage/Icon/FacebookLogo.png" alt="Facebook"></a>
-                </div>
-                <div class="icon">
-                    <a href="#"><img src="../BackGroundimage/Icon/YoutubeLogo.jpg" alt="YouTube"></a>
-                </div>
-                <div class="icon">
-                    <a href="#"><img src="../BackGroundimage/Icon/TwitterLogo.jpg" alt="Twitter"></a>
-                </div>
-                <div class="icon">
-                    <a href="#"><img src="../BackGroundimage/Icon/tiktokLogo.jpg" alt="TikTok"></a>
-                </div>
-                <div class="icon">
-                    <a href="#"><img src="../BackGroundimage/Icon/Pinterestlogo.jpg" alt="Pinterest"></a>
-                </div>
-                <div class="icon">
-                    <a href="#"><img src="../BackGroundimage/Icon/InstagramLogo.png" alt="Instagram"></a>
+                    <a href="https://web.facebook.com/ICFPaniquiOfficial"
+                       target="_blank" rel="noopener noreferrer"
+                       aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
                 </div>
             </div>
         </div>
@@ -1515,67 +1796,49 @@
         </div>
     </footer>
 
-    <!-- Interactive Scripts -->
     <script>
         const PREFIX = "+63 9";
 
         function formatPhoneNumber(input) {
-        // 1. Strip everything except numbers
-        // We extract just the typed digits by removing the "+63 " prefix completely
-        let currentVal = input.value;
-        
-        // Ensure the user didn't somehow delete the core prefix structure
-        if (!currentVal.startsWith("+63")) {
-            input.value = PREFIX;
-            return;
+            let currentVal = input.value;
+            if (!currentVal.startsWith("+63")) {
+                input.value = PREFIX;
+                return;
+            }
+            let digits = currentVal.substring(4).replace(/[^0-9]/g, '');
+            let formatted = "+63 ";
+            if (digits.length > 0) formatted += digits.substring(0, 3);
+            if (digits.length > 3) formatted += " " + digits.substring(3, 6);
+            if (digits.length > 6) formatted += " " + digits.substring(6, 10);
+            input.value = formatted;
         }
 
-        // Extract only the raw digits after "+63 "
-        let digits = currentVal.substring(4).replace(/[^0-9]/g, '');
-
-        // 2. Rebuild the string with the custom spacing: 9XX XXX XXXX
-        let formatted = "+63 ";
-        
-        if (digits.length > 0) {
-            // First block: up to 3 digits (e.g., 930)
-            formatted += digits.substring(0, 3);
-        }
-        if (digits.length > 3) {
-            // Second block: next 3 digits (e.g., 889)
-            formatted += " " + digits.substring(3, 6);
-        }
-        if (digits.length > 6) {
-            // Third block: last 4 digits (e.g., 5963)
-            formatted += " " + digits.substring(6, 10);
-        }
-
-        // Update the input field value
-        input.value = formatted;
-        }
-
-        // Stops backspace from breaking the "+63 9" prefix
         function preventPrefixDelete(event, input) {
-        const selectionStart = input.selectionStart;
-        if (selectionStart <= PREFIX.length) {
-            if (event.keyCode === 8 || event.keyCode === 46) {
-            event.preventDefault();
+            const selectionStart = input.selectionStart;
+            if (selectionStart <= PREFIX.length) {
+                if (event.keyCode === 8 || event.keyCode === 46) {
+                    event.preventDefault();
+                }
             }
         }
-        }
 
-        // Keeps the blinking typing cursor at the very end of the numbers
         function moveCursorToEnd(input) {
-        setTimeout(() => {
-            if (input.selectionStart < PREFIX.length) {
-            input.setSelectionRange(input.value.length, input.value.length);
-            }
-        }, 0);
+            setTimeout(() => {
+                if (input.selectionStart < PREFIX.length) {
+                    input.setSelectionRange(input.value.length, input.value.length);
+                }
+            }, 0);
         }
-
-
 
         document.addEventListener("DOMContentLoaded", () => {
-            /* Off-Canvas Sidebar Drawer Controls */
+            /* Sticky header shadow on scroll */
+            const header = document.getElementById("mainHeader");
+            window.addEventListener("scroll", () => {
+                if (window.scrollY > 20) header.classList.add("scrolled");
+                else header.classList.remove("scrolled");
+            });
+
+            /* Mobile Sidebar Controls */
             const menuToggle = document.getElementById("menuToggle");
             const mobileSidebar = document.getElementById("mobileSidebar");
             const sidebarOverlay = document.getElementById("sidebarOverlay");
@@ -1584,11 +1847,13 @@
             const openSidebar = () => {
                 mobileSidebar.classList.add("active");
                 sidebarOverlay.classList.add("active");
+                document.body.style.overflow = "hidden";
             };
 
             const closeSidebar = () => {
                 mobileSidebar.classList.remove("active");
                 sidebarOverlay.classList.remove("active");
+                document.body.style.overflow = "";
             };
 
             if (menuToggle && mobileSidebar && sidebarOverlay && sidebarCloseBtn) {
@@ -1597,11 +1862,10 @@
                 sidebarOverlay.addEventListener("click", closeSidebar);
             }
 
-            /* Portal Dropdown Menu Handlers */
+            /* Portal Dropdowns */
             const setupPortalDropdown = (btnId, menuId) => {
                 const btn = document.getElementById(btnId);
                 const menu = document.getElementById(menuId);
-
                 if (btn && menu) {
                     btn.addEventListener("click", (e) => {
                         e.preventDefault();
@@ -1609,7 +1873,6 @@
                         menu.classList.toggle("show");
                         menu.classList.toggle("hidden");
                     });
-
                     document.addEventListener("click", (e) => {
                         if (!menu.contains(e.target) && e.target !== btn) {
                             menu.classList.remove("show");
@@ -1622,7 +1885,7 @@
             setupPortalDropdown("portalLoginBtn", "portalMenu");
             setupPortalDropdown("mobilePortalBtn", "mobilePortalMenu");
 
-            /* Payment Method Selection Toggle Logic */
+            /* Payment Method Selection Toggle */
             const methodCards = document.querySelectorAll('.method-card');
             const paymentFields = document.querySelectorAll('.payment-fields');
 
@@ -1630,27 +1893,22 @@
                 card.addEventListener('click', () => {
                     methodCards.forEach(c => c.classList.remove('active'));
                     card.classList.add('active');
-                    
+
                     const radioInput = card.querySelector('input[type="radio"]');
                     radioInput.checked = true;
 
                     const selectedMethod = radioInput.value;
                     paymentFields.forEach(field => field.style.display = 'none');
 
-                    if (selectedMethod === 'card') {
-                        document.getElementById('cardDetails').style.display = 'block';
-                    } else if (selectedMethod === 'ewallet') {
+                    if (selectedMethod === 'ewallet') {
                         document.getElementById('ewalletDetails').style.display = 'block';
-                    } else if (selectedMethod === 'bank') {
-                        document.getElementById('bankDetails').style.display = 'block';
                     }
                 });
             });
 
-            /* Form Submission Event */
+            /* Form Submission */
             const form = document.getElementById("enrollmentForm");
             form.addEventListener("submit", (e) => {
-                // Basic validation: ensure consent is checked
                 const consent = document.getElementById("consentCheck");
                 if (!consent.checked) {
                     e.preventDefault();
@@ -1658,7 +1916,6 @@
                     consent.focus();
                     return;
                 }
-                // Disable submit button to prevent double submission
                 const submitBtn = form.querySelector('button[type="submit"]');
                 if (submitBtn) {
                     submitBtn.disabled = true;
@@ -1666,12 +1923,11 @@
                 }
             });
 
-            /* Show success/error banners based on URL parameters */
+            /* URL Params for Success/Error */
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('success') === '1') {
                 const banner = document.getElementById('successBanner');
                 if (banner) banner.style.display = 'flex';
-                // Clear the URL param without reloading
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
             if (urlParams.get('error') === '1') {

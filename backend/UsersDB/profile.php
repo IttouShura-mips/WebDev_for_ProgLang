@@ -42,7 +42,9 @@ try {
 }
 
 // =====================================================
-// FETCH MATCHING ENROLLED RECORD (via student_code)
+// FETCH MATCHING ENROLLED RECORD
+// Priority: match by student_code == username first,
+// then fall back to full name match.
 // =====================================================
 $enrolled = null;
 try {
@@ -50,6 +52,11 @@ try {
     $conn->exec("ALTER TABLE enrolled ADD COLUMN IF NOT EXISTS student_code VARCHAR(20) DEFAULT NULL AFTER student_id");
     $conn->exec("ALTER TABLE enrolled ADD COLUMN IF NOT EXISTS subjects_json LONGTEXT DEFAULT NULL");
     $conn->exec("ALTER TABLE enrolled ADD COLUMN IF NOT EXISTS assessment_json LONGTEXT DEFAULT NULL");
+    $conn->exec("ALTER TABLE enrolled ADD COLUMN IF NOT EXISTS initial_payment_amount DECIMAL(12,2) NOT NULL DEFAULT 0");
+    $conn->exec("ALTER TABLE enrolled ADD COLUMN IF NOT EXISTS initial_payment_method VARCHAR(50) DEFAULT ''");
+    $conn->exec("ALTER TABLE enrolled ADD COLUMN IF NOT EXISTS initial_payment_date   DATE DEFAULT NULL");
+    $conn->exec("ALTER TABLE enrolled ADD COLUMN IF NOT EXISTS initial_payment_or     VARCHAR(30) DEFAULT ''");
+    $conn->exec("ALTER TABLE enrolled ADD COLUMN IF NOT EXISTS initial_payment_gcash  VARCHAR(30) DEFAULT ''");
 
     // student_payments table (auto-create)
     $conn->exec("CREATE TABLE IF NOT EXISTS student_payments (
@@ -64,18 +71,30 @@ try {
         INDEX (student_code)
     )");
 
+    // First attempt: username happens to equal student_code
     $stmt = $conn->prepare("SELECT * FROM enrolled WHERE student_code = :code LIMIT 1");
     $stmt->execute([':code' => $username]);
     $enrolled = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // Fallback: match by email using student_name (some records may not have student_code yet)
+    // Second attempt: match by full name (this is what most students hit)
     if (!$enrolled && !empty($_SESSION['student_name'])) {
         $stmt = $conn->prepare("SELECT * FROM enrolled WHERE CONCAT(firstname,' ',lastname) = :nm ORDER BY student_id DESC LIMIT 1");
         $stmt->execute([':nm' => $_SESSION['student_name']]);
         $enrolled = $stmt->fetch(PDO::FETCH_ASSOC);
     }
+
+    // Third attempt: match by first + last name from users table
+    if (!$enrolled && !empty($student['first_name']) && !empty($student['last_name'])) {
+        $stmt = $conn->prepare("SELECT * FROM enrolled
+                                WHERE firstname = :fn AND lastname = :ln
+                                ORDER BY student_id DESC LIMIT 1");
+        $stmt->execute([
+            ':fn' => $student['first_name'],
+            ':ln' => $student['last_name']
+        ]);
+        $enrolled = $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 } catch (PDOException $e) {
-    // Non-fatal, continue with empty data
     $enrolled = null;
 }
 
@@ -106,17 +125,55 @@ if ($enrolled) {
 }
 
 // =====================================================
-// PAYMENTS (real + defaults)
+// PAYMENTS
+// CRITICAL: student_payments is keyed by enrolled.student_code,
+// which is DIFFERENT from the login username.
 // =====================================================
-$payments = [];
+$paymentCode = '';
+if ($enrolled && !empty($enrolled['student_code'])) {
+    $paymentCode = trim($enrolled['student_code']);
+} else {
+    // Fallback: try username, then the display name
+    $paymentCode = $username;
+}
+
+$payments  = [];
 $totalPaid = 0.0;
-try {
-    $stmt = $conn->prepare("SELECT payment_date, or_number, purpose, amount, gcash_number FROM student_payments WHERE student_code = :code ORDER BY payment_date ASC, id ASC");
-    $stmt->execute([':code' => $username]);
-    $payments = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    foreach ($payments as $p) $totalPaid += (float)$p['amount'];
-} catch (PDOException $e) {
-    $payments = [];
+
+if ($paymentCode !== '') {
+    try {
+        $stmt = $conn->prepare("SELECT payment_date, or_number, purpose, amount, gcash_number
+                                FROM student_payments
+                                WHERE student_code = :code
+                                ORDER BY payment_date ASC, id ASC");
+        $stmt->execute([':code' => $paymentCode]);
+        $payments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($payments as $p) {
+            $totalPaid += (float)$p['amount'];
+        }
+    } catch (PDOException $e) {
+        $payments = [];
+    }
+}
+
+// -----------------------------------------------------
+// Fallback: if nothing is in student_payments yet, and the
+// enrolled row still has an untransferred downpayment in
+// its initial_payment_* columns, surface that instead.
+// -----------------------------------------------------
+if (count($payments) === 0
+    && $enrolled
+    && isset($enrolled['initial_payment_amount'])
+    && (float)$enrolled['initial_payment_amount'] > 0) {
+
+    $payments[] = [
+        'payment_date' => $enrolled['initial_payment_date'] ?: null,
+        'or_number'    => $enrolled['initial_payment_or']   ?? '',
+        'purpose'      => 'Initial Downpayment',
+        'amount'       => $enrolled['initial_payment_amount'],
+        'gcash_number' => $enrolled['initial_payment_gcash'] ?? '',
+    ];
+    $totalPaid += (float)$enrolled['initial_payment_amount'];
 }
 
 // =====================================================
@@ -159,16 +216,19 @@ $initial       = strtoupper(substr($student['first_name'], 0, 1));
 $course       = htmlspecialchars($enrolled['course'] ?? 'N/A');
 $major        = htmlspecialchars($enrolled['major'] ?? '');
 $academicYear = htmlspecialchars($enrolled['academic_year'] ?? '2026-2027');
-$yearLevel    = '3rd Year'; // adjust if you add a year_level column later
+$yearLevel    = '3rd Year';
 $datePrinted  = date('F j, Y');
 
-// Money formatter
+// The displayed ID on the COR should be the student_code when available
+$studentIdDisplay = !empty($enrolled['student_code'])
+    ? htmlspecialchars($enrolled['student_code'])
+    : htmlspecialchars($student['username']);
+
 function money($n)
 {
     return '₱ ' . number_format((float)$n, 2);
 }
 
-// Course acronym for greeting
 $courseAcronym = '';
 if (!empty($enrolled['course'])) {
     $courseAcronym = implode('', array_map(fn($w) => $w[0] ?? '', preg_split('/\s+/', $enrolled['course'])));
@@ -232,9 +292,6 @@ if (!empty($enrolled['course'])) {
             z-index: 0;
         }
 
-        /* ============================================
-           NAVBAR
-           ============================================ */
         .navbar {
             position: sticky;
             top: 0;
@@ -382,9 +439,6 @@ if (!empty($enrolled['course'])) {
             transform: translateY(-2px);
         }
 
-        /* ============================================
-           HERO BANNER
-           ============================================ */
         .hero-banner {
             padding: 3.5rem 5% 3rem;
             text-align: center;
@@ -435,9 +489,6 @@ if (!empty($enrolled['course'])) {
             line-height: 1.6;
         }
 
-        /* ============================================
-           MAIN CONTENT
-           ============================================ */
         .main-content {
             flex: 1;
             padding: 2.5rem 5% 3rem;
@@ -450,9 +501,6 @@ if (!empty($enrolled['course'])) {
             margin: 0 auto;
         }
 
-        /* ============================================
-           COR CARD
-           ============================================ */
         .cor-card {
             background: linear-gradient(160deg, var(--bg-card) 0%, #06152b 100%);
             border: 1px solid var(--border-teal);
@@ -482,9 +530,6 @@ if (!empty($enrolled['course'])) {
             box-shadow: 0 25px 70px rgba(0, 0, 0, 0.6), 0 0 40px rgba(13, 245, 227, 0.12);
         }
 
-        /* ============================================
-           COR HEADER
-           ============================================ */
         .cor-header {
             display: flex;
             flex-direction: column;
@@ -568,9 +613,6 @@ if (!empty($enrolled['course'])) {
             font-style: italic;
         }
 
-        /* ============================================
-           STUDENT INFO
-           ============================================ */
         .student-info-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -633,9 +675,6 @@ if (!empty($enrolled['course'])) {
             font-size: 0.82rem;
         }
 
-        /* ============================================
-           SECTION TITLE
-           ============================================ */
         .section-title {
             display: flex;
             align-items: center;
@@ -673,9 +712,6 @@ if (!empty($enrolled['course'])) {
             letter-spacing: -0.2px;
         }
 
-        /* ============================================
-           COURSE TABLE
-           ============================================ */
         .course-table-wrap {
             background: rgba(2, 12, 27, 0.6);
             border: 1px solid var(--border-teal);
@@ -741,9 +777,6 @@ if (!empty($enrolled['course'])) {
             padding: 30px 14px;
         }
 
-        /* ============================================
-           PAYMENT & ASSESSMENT
-           ============================================ */
         .payment-assessment-wrap {
             display: grid;
             grid-template-columns: 1.2fr 0.8fr;
@@ -878,9 +911,6 @@ if (!empty($enrolled['course'])) {
             padding: 24px;
         }
 
-        /* ============================================
-           PAY BUTTON
-           ============================================ */
         .pay-btn-wrap {
             padding: 15px 18px;
         }
@@ -917,9 +947,6 @@ if (!empty($enrolled['course'])) {
             transform: none;
         }
 
-        /* ============================================
-           SIGNATURES
-           ============================================ */
         .signature-box {
             margin-top: 1.5rem;
             padding: 1.75rem;
@@ -967,9 +994,6 @@ if (!empty($enrolled['course'])) {
             font-style: italic;
         }
 
-        /* ============================================
-           CONTACT SECTION
-           ============================================ */
         .contact-section {
             margin-top: 2.5rem;
             background: rgba(2, 12, 27, 0.6);
@@ -1132,9 +1156,6 @@ if (!empty($enrolled['course'])) {
 
         .btn-contact i { font-size: 0.72rem; }
 
-        /* ============================================
-           MODALS (Payment / Inquiry / Alert)
-           ============================================ */
         .modal-overlay,
         .inquiry-modal-overlay,
         .alert-overlay {
@@ -1341,7 +1362,6 @@ if (!empty($enrolled['course'])) {
             cursor: not-allowed;
         }
 
-        /* Alert specific */
         .alert-icon {
             font-size: 3.2rem;
             margin-bottom: 1rem;
@@ -1390,9 +1410,6 @@ if (!empty($enrolled['course'])) {
 
         .alert-close-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); }
 
-        /* ============================================
-           RESPONSIVE
-           ============================================ */
         @media (max-width: 900px) {
             .cor-school-name { font-size: 1.3rem; }
             .hero-banner h1 { font-size: 1.7rem; }
@@ -1436,9 +1453,6 @@ if (!empty($enrolled['course'])) {
 
 <body>
 
-    <!-- ============================================
-         NAVBAR
-         ============================================ -->
     <nav class="navbar">
         <a href="profile.php" class="navbar-brand">
             <div class="logo-box">
@@ -1461,23 +1475,16 @@ if (!empty($enrolled['course'])) {
         </div>
     </nav>
 
-    <!-- ============================================
-         HERO BANNER
-         ============================================ -->
     <section class="hero-banner">
         <div class="eyebrow"><i class="fas fa-file-invoice"></i> Official Document</div>
         <h1>Certificate of <span class="accent">Registration</span></h1>
         <p>Welcome back, <?php echo $full_name; ?>! Here's your official enrollment record for this semester.</p>
     </section>
 
-    <!-- ============================================
-         MAIN CONTENT
-         ============================================ -->
     <main class="main-content">
         <div class="cor-wrapper">
             <div class="cor-card">
 
-                <!-- ===== COR HEADER ===== -->
                 <div class="cor-header">
                     <div class="cor-header-top">
                         <img src="../../BackGroundimage/ICFLogo.png" alt="ICF Logo" class="cor-logo">
@@ -1493,10 +1500,9 @@ if (!empty($enrolled['course'])) {
                     <div class="cor-session"><?php echo $academicYear; ?> &mdash; 1st Semester</div>
                 </div>
 
-                <!-- ===== STUDENT INFO ===== -->
                 <div class="student-info-grid">
                     <div class="student-info-left">
-                        <div class="info-line"><strong><i class="fas fa-id-card"></i> Student ID:</strong> <span class="highlight"><?php echo $username_disp; ?></span></div>
+                        <div class="info-line"><strong><i class="fas fa-id-card"></i> Student ID:</strong> <span class="highlight"><?php echo $studentIdDisplay; ?></span></div>
                         <div class="info-line"><strong><i class="fas fa-user"></i> Name:</strong> <?php echo $lastFirst; ?></div>
                         <div class="info-line"><strong><i class="fas fa-book-open"></i> Course:</strong> <?php echo strtoupper($course . ($major ? ' — ' . $major : '')); ?></div>
                     </div>
@@ -1506,7 +1512,6 @@ if (!empty($enrolled['course'])) {
                     </div>
                 </div>
 
-                <!-- ===== ENROLLED COURSES ===== -->
                 <div class="section-title">
                     <div class="icon-box"><i class="fas fa-list-check"></i></div>
                     <h2>Enrolled Subjects</h2>
@@ -1528,7 +1533,6 @@ if (!empty($enrolled['course'])) {
                         <tbody>
                             <?php if (count($subjects) > 0): ?>
                                 <?php foreach ($subjects as $s):
-                                    // Prefer separate date/time; fall back to legacy day_time
                                     $sDate = trim($s['date'] ?? '');
                                     $sTime = trim($s['time'] ?? '');
                                     if ($sDate === '' && $sTime === '' && !empty($s['day_time'])) {
@@ -1565,10 +1569,8 @@ if (!empty($enrolled['course'])) {
                     </table>
                 </div>
 
-                <!-- ===== PAYMENT & ASSESSMENT ===== -->
                 <div class="payment-assessment-wrap">
 
-                    <!-- LEFT: Payment Details -->
                     <div class="payment-assess-card">
                         <div class="card-header"><i class="fas fa-receipt"></i> Payment Details</div>
                         <div class="table-container">
@@ -1586,8 +1588,8 @@ if (!empty($enrolled['course'])) {
                                         <?php foreach ($payments as $i => $p): ?>
                                             <tr>
                                                 <td><?php echo $i + 1; ?></td>
-                                                <td><?php echo date('M d, Y', strtotime($p['payment_date'])); ?></td>
-                                                <td><?php echo htmlspecialchars($p['or_number']); ?></td>
+                                                <td><?php echo !empty($p['payment_date']) ? date('M d, Y', strtotime($p['payment_date'])) : '—'; ?></td>
+                                                <td><?php echo htmlspecialchars($p['or_number'] ?? ''); ?></td>
                                                 <td style="text-align: right;"><?php echo money($p['amount']); ?></td>
                                             </tr>
                                         <?php endforeach; ?>
@@ -1605,7 +1607,6 @@ if (!empty($enrolled['course'])) {
                         </div>
                     </div>
 
-                    <!-- RIGHT: Assessment -->
                     <div class="payment-assess-card">
                         <div class="card-header"><i class="fas fa-calculator"></i> Assessment</div>
                         <div class="table-container">
@@ -1655,7 +1656,6 @@ if (!empty($enrolled['course'])) {
                     </div>
                 </div>
 
-                <!-- ===== SIGNATURES ===== -->
                 <div class="signature-box">
                     <div class="sig-item">
                         <div class="sig-line"></div>
@@ -1676,7 +1676,6 @@ if (!empty($enrolled['course'])) {
 
                 <div class="student-copy">( Student's Copy )</div>
 
-                <!-- ===== CONTACT SECTION ===== -->
                 <div class="contact-section">
                     <div class="contact-header">
                         <div class="icon-circle"><i class="fas fa-headset"></i></div>
@@ -1709,7 +1708,6 @@ if (!empty($enrolled['course'])) {
         </div>
     </main>
 
-    <!-- ===== INQUIRY MODAL ===== -->
     <div class="inquiry-modal-overlay" id="inquiryModal">
         <div class="inquiry-modal-box">
             <button class="inquiry-close-btn" onclick="closeInquiryModal()">&times;</button>
@@ -1743,7 +1741,6 @@ if (!empty($enrolled['course'])) {
         </div>
     </div>
 
-    <!-- ===== PAYMENT MODAL ===== -->
     <div class="modal-overlay" id="paymentModal">
         <div class="modal-box">
             <button class="modal-close" onclick="closePaymentModal()">&times;</button>
@@ -1773,7 +1770,6 @@ if (!empty($enrolled['course'])) {
         </div>
     </div>
 
-    <!-- ===== CUSTOM ALERT ===== -->
     <div class="alert-overlay" id="alertModal">
         <div class="alert-box" id="alertBox">
             <div class="alert-icon" id="alertIcon"></div>
@@ -1784,22 +1780,16 @@ if (!empty($enrolled['course'])) {
     </div>
 
     <script>
-        /* ============================================================
-           STATE (mirrors PHP values)
-           ============================================================ */
         let totalPaid = <?php echo json_encode(round($totalPaid, 2)); ?>;
         let remainingBalance = <?php echo json_encode(round($remainingBalance, 2)); ?>;
         let paymentCounter = <?php echo json_encode(count($payments) + 1); ?>;
-        const studentCode = <?php echo json_encode($username); ?>;
+        const studentCode = <?php echo json_encode($paymentCode); ?>;
         const currentDate = new Date().toLocaleDateString('en-US', {
             month: 'short',
             day: '2-digit',
             year: 'numeric'
         });
 
-        /* ============================================================
-           ALERT MODAL
-           ============================================================ */
         function showAlert(type, title, message) {
             const alertModal = document.getElementById('alertModal');
             const alertBox = document.getElementById('alertBox');
@@ -1825,9 +1815,6 @@ if (!empty($enrolled['course'])) {
             document.getElementById('alertModal').classList.remove('active');
         }
 
-        /* ============================================================
-           GCASH INPUT FORMATTER
-           ============================================================ */
         function formatGCashNumber(input) {
             let value = input.value.replace(/\D/g, '');
             if (value.length > 11) value = value.substring(0, 11);
@@ -1838,9 +1825,6 @@ if (!empty($enrolled['course'])) {
             input.value = f;
         }
 
-        /* ============================================================
-           PAYMENT MODAL
-           ============================================================ */
         function openPaymentModal() {
             if (remainingBalance <= 0) {
                 showAlert('success', 'Fully Paid', 'You have no remaining balance.');
@@ -1858,9 +1842,6 @@ if (!empty($enrolled['course'])) {
             document.getElementById('paymentModal').classList.remove('active');
         }
 
-        /* ============================================================
-           PROCESS PAYMENT — saves to DB via AJAX
-           ============================================================ */
         async function processPayment() {
             const purpose = document.getElementById('paymentPurpose').value;
             const amountInput = document.getElementById('paymentAmount').value;
@@ -1909,7 +1890,6 @@ if (!empty($enrolled['course'])) {
                     return;
                 }
 
-                // Update local state
                 totalPaid += amount;
                 remainingBalance -= amount;
 
@@ -1917,4 +1897,19 @@ if (!empty($enrolled['course'])) {
                     minimumFractionDigits: 2
                 });
                 document.getElementById('remainingBalance').textContent = '₱ ' + remainingBalance.toLocaleString('en-US', {
-                    minimumFraction
+                    minimumFractionDigits: 2
+                });
+
+                closePaymentModal();
+                showAlert('success', 'Payment Successful', 'Your payment of ₱ ' + amount.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' has been recorded successfully.');
+            } catch (err) {
+                console.error(err);
+                showAlert('warning', 'Network Error', 'Something went wrong while processing your payment.');
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            }
+        }
+    </script>
+</body>
+
+</html>

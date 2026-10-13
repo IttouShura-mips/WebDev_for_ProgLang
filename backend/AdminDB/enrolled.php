@@ -158,10 +158,26 @@ function parseMoney($v) {
 }
 
 /* =====================================================
-   FETCH ALL ENROLLED STUDENTS + DERIVED DATA
+   FETCH ALL APPROVED STUDENTS + DERIVED DATA
+   -----------------------------------------------------
+   IMPORTANT: Only students whose `enrollment_status`
+   has been set to 'approved' by the admin (via
+   enrollments.php) are shown here. Pending applicants
+   remain on the enrollments.php page until approved.
    ===================================================== */
 $students = [];
-$res = safeQuery($conn, "SELECT * FROM enrolled ORDER BY student_id DESC");
+
+$hasStatusCol = false;
+$statusCheck = safeQuery($conn, "SHOW COLUMNS FROM enrolled LIKE 'enrollment_status'");
+if ($statusCheck && $statusCheck->num_rows > 0) {
+    $hasStatusCol = true;
+}
+
+$studentQuery = $hasStatusCol
+    ? "SELECT * FROM enrolled WHERE enrollment_status = 'approved' ORDER BY student_id DESC"
+    : "SELECT * FROM enrolled ORDER BY student_id DESC";  // fallback for legacy DBs
+
+$res = safeQuery($conn, $studentQuery);
 
 if ($res) {
     while ($row = $res->fetch_assoc()) {
@@ -640,7 +656,10 @@ if ($res) {
             </tr>
             <?php endforeach; ?>
             <?php if (count($students) === 0): ?>
-              <tr><td colspan="8" style="text-align:center; color:var(--text-muted-teal); padding:40px;">No enrolled students found.</td></tr>
+              <tr><td colspan="8" style="text-align:center; color:var(--text-muted-teal); padding:40px;">
+                <i class="fa-solid fa-user-clock" style="font-size:2rem; display:block; margin-bottom:12px; opacity:0.4;"></i>
+                No approved/enrolled students yet. Approve applicants on the <a href="enrollments.php" style="color:var(--primary-neon);">Enrollments</a> page.
+              </td></tr>
             <?php endif; ?>
           </tbody>
         </table>
@@ -862,7 +881,6 @@ if ($res) {
       let courseHtml = '';
       if (subjects.length > 0) {
         subjects.forEach(s => {
-          // Prefer separate date/time; fall back to legacy day_time
           let dateVal = s.date || '';
           let timeVal = s.time || '';
           if (!dateVal && !timeVal && s.day_time) {

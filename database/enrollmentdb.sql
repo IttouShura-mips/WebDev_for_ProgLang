@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 23, 2026 at 07:10 AM
+-- Generation Time: Oct 13, 2026 at 02:04 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -89,13 +89,6 @@ CREATE TABLE `curriculums` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `curriculums`
---
-
-INSERT INTO `curriculums` (`id`, `code`, `title`, `year_level`, `academic_year`, `total_units`, `created_at`) VALUES
-(1, '1232132', 'BSCS', '4', '324', 32, '2026-09-23 05:00:02');
-
 -- --------------------------------------------------------
 
 --
@@ -108,13 +101,6 @@ CREATE TABLE `curriculum_semesters` (
   `name` varchar(150) NOT NULL,
   `sort_order` int(11) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `curriculum_semesters`
---
-
-INSERT INTO `curriculum_semesters` (`id`, `curriculum_id`, `name`, `sort_order`) VALUES
-(1, 1, '1st Year - 1st Semester', 0);
 
 -- --------------------------------------------------------
 
@@ -133,13 +119,6 @@ CREATE TABLE `curriculum_subjects` (
   `units` decimal(4,1) DEFAULT 0.0,
   `sort_order` int(11) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `curriculum_subjects`
---
-
-INSERT INTO `curriculum_subjects` (`id`, `semester_id`, `prereq`, `code`, `title`, `lec`, `lab`, `units`, `sort_order`) VALUES
-(1, 1, 'None', 'CICS', '3', 3.0, 0.0, 3.0, 0);
 
 -- --------------------------------------------------------
 
@@ -182,35 +161,47 @@ CREATE TABLE `enrolled` (
   `requirements_files` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `subjects_json` text DEFAULT NULL,
-  `assessment_json` text DEFAULT NULL
+  `assessment_json` text DEFAULT NULL,
+  `year_level` varchar(50) DEFAULT '',
+  `block` varchar(50) DEFAULT '',
+  `initial_payment_amount` decimal(12,2) NOT NULL DEFAULT 0.00,
+  `initial_payment_method` varchar(50) DEFAULT '',
+  `initial_payment_date` date DEFAULT NULL,
+  `initial_payment_or` varchar(30) DEFAULT '',
+  `initial_payment_gcash` varchar(30) DEFAULT ''
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `enrolled`
 --
 
-INSERT INTO `enrolled` (`student_id`, `student_code`, `firstname`, `middlename`, `lastname`, `suffix`, `gender`, `birthday`, `birthplace`, `citizenship`, `civilstatus`, `employment`, `mother`, `mphone_number`, `father`, `fphone_number`, `guardian`, `gphone_number`, `course`, `major`, `school_address`, `academic_year`, `scholarship`, `full_address`, `mobile_number`, `email`, `ip_address`, `last_login`, `status`, `enrollment_status`, `payment_proof`, `requirements_files`, `created_at`, `subjects_json`, `assessment_json`) VALUES
-(1, NULL, 'Shan Raye', 'Rosello', 'Guzman', '', 'Male', '2006-06-01', 'Paniqui, Tarlac', 'Filipino', 'Single', 'Unemployed', 'Maria ozawa', '09123456789', 'Mang Kanor', '09157955411', 'Mang kanor', '09157955411', 'BSCS', 'English', 'burgos', '2025-2026', 'ICF', 'Mang juan', '09123456789', 'Mangjuan@gmail.com', NULL, NULL, 'offline', 'pending', NULL, NULL, '2026-08-12 04:21:04', NULL, NULL),
-(2, NULL, 'ALMADIN', 'NOR', 'MIPANGA', '', 'Male', '2004-06-25', 'Paniqui, Tarlac', 'Filipino', 'Single', 'Employed', 'CINDERELLA MAGANGCONG', '09389987162', 'BILAL MIPANGA', '0926716622', 'KENJJIE', '009737832', 'ACT', 'None', 'burgos', '2026 - 2027', 'NONE', 'Mang juan', '09123456789', 'gshanraye@yahoo.com', NULL, NULL, 'offline', 'pending', NULL, NULL, '2026-08-12 04:21:04', NULL, NULL),
-(3, NULL, 'jairus', 'guirao', 'alfonso', 'jr', 'Male', '1998-07-07', 'Paniqui, Tarlac', 'Filipino', 'Married', 'Unemployed', 'teresa', '', 'johnny sins', '', 'mami oni', '', 'BSCS', 'English', 'burgos', '2026 - 2027', 'NONE', 'Mang juan', '09123456789', 'gshanraye@yahoo.com', NULL, NULL, 'offline', 'declined', NULL, NULL, '2026-08-12 04:21:04', NULL, NULL),
-(5, NULL, 'l', 'l', 'l', '', 'Male', '2006-09-16', 'l', 'k', 'Single', 'Employed', 'll', 'l', 'l', 'lll', 'l', 'l', 'Bachelor of Technical Vocational Teacher Education', 'N/A', 'l', 'l', 'ICF', 'l2', 'l', 'e@gnail.com', NULL, NULL, 'offline', 'pending', NULL, NULL, '2026-08-12 04:21:04', NULL, NULL),
-(9, NULL, 'shan', 'rosello', 'raye', '', 'male', '2014-06-13', 'mhgjfhgd', 'njhgfbfcv', '', '', '8cvbcvnbm', '09157955411', 'sdfgfdchtfw34', '09157955411', 'qr3w4ts5dht', '09157955411', 'Bachelor of Science in Computer Science', 'na', 'wq5e243tey5hr6ftcg', '2026-2027', 'academic', '123qrsgrfcxf', '09157955411', 'j@gmail.com', NULL, NULL, 'offline', 'pending', NULL, NULL, '2026-08-12 04:21:04', NULL, NULL),
-(10, '2026-0015', 'shan', 'rosello', 'guzman', '', 'male', '2016-06-04', 'gjyf', 'jkbgui', '', '', 'hkjfghfxv', '09157955411', 'jlikugjyh', '09157955411', 'okjihugythg', '09157955411', 'Bachelor of Science in Computer Science', 'na', 'jiuyhfctfyui', '2026-2027', 'jihuyg', 'khkjg', '09157955411', 'k@gmail.com', NULL, NULL, 'offline', 'approved', NULL, NULL, '2026-08-12 05:49:15', NULL, NULL),
-(11, '2026-0014', 'asd', '', 'asd', '', 'male', '2024-10-04', 'asd', 'Szdxc', '', '', 'zsadfg', '', 'dfdcv', '', 'Xzcxv', '', 'Bachelor of Science in Tourism Management', 'english', 'jhb', '2027-2028', 'jionjkh', 'jkhjjkjbnjiokklnjk', '', 'zj@gmail.com', NULL, NULL, 'offline', 'approved', NULL, NULL, '2026-08-15 14:01:23', NULL, NULL),
-(12, '2026-0007', 'Shan Raye', 'Rosello', 'Guzman', '', 'male', '2006-06-01', 'Tarlac', 'Filipino', '', '', 'abdjbjldbalbdasd', '', 'sbofabjfbsbda', '', 'aslkndlkahslidhlijsd', '', 'Bachelor of Science in Computer Science', 'na', 'pob norte, paniqui tarlac', '2026-2027', 'none', 'Abogado dos, paniqui, tarlac', '', 's@gmail.com', NULL, NULL, 'offline', 'approved', NULL, NULL, '2026-08-17 02:37:12', NULL, NULL),
-(13, '2026-0011', 'WDAESRDTFGHWDEFRETR', 'ADSFD', 'SDFDGD', 'SD', 'male', '2010-07-18', 'WQDEFREG', 'DEFSR', '', '', 'ADWEFSRDGF', '', 'WDD', '', 'WDEWRE', '', 'Bachelor of Science in Computer Science', 'na', 'lknAIURGVBIQEWU', '2026-2027', 'none', 'lkdnlwndnwlkdnlqwndkqw', '', 'e@gmail.com', NULL, NULL, 'offline', 'approved', NULL, NULL, '2026-08-17 03:16:34', NULL, NULL),
-(14, '2026-0010', 'ligfdxfghdyftuiyugfgfxcv', 'vccgjkghhvbcvcn', 'lkjgghfyuktg', 'j', 'male', '2011-06-17', 'mkjgfxcv', 'klhikugjyfgchbfxv', 'Single', 'Employed', ',nkjghfgfxvc', '09207497149', ',jkguyjfthcfb', '09639207491', 'jrstdtrtujghnb', '09639207491', 'Bachelor of Science in Computer Science', 'na', 'lkhutiytsreastyurtig', '2026-2027', 'none', 'mljhjycgbfc', '09639207491', 'j22@gmail.com', '::1', NULL, 'offline', 'approved', NULL, '[\"uploads\\/requirements\\/6a82893b7c5a2_images.jpg\"]', '2026-08-17 04:08:27', NULL, NULL),
-(15, '2026-0006', 'Shan', 'bdakjsbdjk', 'raye', 'sjfbabjf', 'male', '2009-06-01', 'dWAESRGDTHFYG', 'wezq23kbln', 'Single', 'Employed', 'dewz,', '09203901930', 'dexwkrdefsw', '09203901930', 'qWAZSESdk', '09203901930', 'Bachelor of Science in Computer Science', 'na', 'aswderftfyhgfjbuk', '2026-2027', 'none', 'aswedzjkbhgcftdr', '09203901930', 'jkk@gmail.com', '::1', NULL, 'offline', 'approved', NULL, '[\"uploads\\/requirements\\/6a828ab70844e_images.jpg\"]', '2026-08-17 04:14:47', NULL, NULL),
-(16, '2026-0009', 'qw', 'few', 'eq3tr5yfujkbwerwefrg', '', 'male', '2026-08-23', '2', 'qa3resg', 'Single', 'Employed', 'qweargstrdyhg', '09203901930', 'qewregrtrewaresrgdtfgh', '09203901930', 'werewsrgdtf', '09203901930', 'Bachelor of Technical Vocational Teacher Education', 'mathematics', 'AFWAEGSRDHTYGUHKJ', '2026-2027', 'academic', 'WDQEFRGDTFHGJ', '09203901930', 'k@gmail.com', '::1', NULL, 'offline', 'approved', NULL, NULL, '2026-08-17 04:17:34', NULL, NULL),
-(17, '2026-0008', 'wakjefuihrghrfhweuif', 'dsajkhdsakhdsa', 'asohadwjkhdsajkdsajbkdsa', 'qwe', 'male', '2022-03-02', 'dasjkasdjkbsad', 'dajbsadkbhsad', 'Single', 'Unemployed', 'saclnkdscnljdcs', '09157955411', 'efnkleadnljdwa', '09157955411', 'alnkadelnjldwa', '09157955411', 'Bachelor of Science in Computer Science', 'na', 'dwalnjadwlnjdwaljbadw', '2026-2027', 'none', 'ajbsaljbdsasa', '09157955411', 'j@gmail.com', '::1', NULL, 'offline', 'approved', NULL, '[\"uploads\\/requirements\\/6a828c98dea38_images.jpg\"]', '2026-08-17 04:22:48', NULL, NULL),
-(18, '2026-0005', 'qkwfekauhoie', 'awodhioawh', 'awdwhowhadoiwsh', 'aldhoiwhdoi', 'male', '2009-09-16', 'ajkbdfoueahd', 'ousgzdoicgd', 'Single', 'Employed', 'opqwjhepiweepoiw', '09157955411', 'selkfheidhwahwa', '09157955411', 'oj', '09157955411', 'Bachelor of Science in Public Administration', 'na', 'alkhoidhwiod', '2026-2027', 'academic', 'ahdoiqhawdi', '09157955411', 'k@gmail.com', '::1', NULL, 'offline', 'approved', NULL, '[\"uploads\\/requirements\\/6a828e9045e89_images.jpg\"]', '2026-08-17 04:31:12', NULL, NULL),
-(19, '2026-0003', 'ss', '', 's', '', 'male', '2023-09-04', '091092', 'slhakhj', 'Single', 'Employed', 'asefsrgdthfvwaefsr', '09333333333', 'aesrdfg', '09333333333', 'aesrfdg', '09333333333', 'Bachelor of Science in Computer Science', 'na', '3333333333333333', '2026-2027', 'academic', '33333333333333', '09333333333', '1@gmail.com', '::1', NULL, 'offline', 'approved', NULL, '[\"uploads\\/requirements\\/6a828eed45a1b_images.jpg\"]', '2026-08-17 04:32:45', NULL, NULL),
-(20, '2026-0002', 'Almadin', 'Nor', 'Mipanga', '', 'male', '2004-06-27', 'samlkle', 'Filipino', 'Single', 'Unemployed', 'sample', '09343243242', 'SAMPLE', '09343243243', 'SADM', '09324242324', 'Bachelor of Science in Computer Science', 'na', 'SAMPLE TET', '2026-2027', 'none', 'SDSAFFDSG', '09234234234', 'DMIPANGA@GMAIL.COM', '::1', NULL, 'offline', 'approved', NULL, '[\"uploads\\/requirements\\/6a8e87fca6b52_IMG_6020.jpg\"]', '2026-08-26 06:30:20', NULL, NULL),
-(21, '2026-0001', 'sdfdgb', '', 'sdfgbv', '', 'male', '1999-04-21', 'sdfesfefef', 'sefsefesf', 'Single', 'Employed', 'ehfuiwehf', '09157955411', 'esfesfe', '09993094033', 'efsfefsef', '09432432423', 'Bachelor of Science in Public Administration', 'english', 'nlknlknlkn', '2028-2029', 'academic', '34324324324324', '09324342343', 'k@gmail.com', '::1', NULL, 'offline', 'approved', NULL, '[\"uploads\\/requirements\\/6a9558a759e47_Canva_link.docx\"]', '2026-08-31 10:34:15', NULL, NULL),
-(22, '2026-0004', 'Shan Raye', 'Rosello', 'Guzman', '', 'male', '2006-06-01', 'Tarlac, Paniqui', 'Filo', 'Single', 'Unemployed', 'ljbgyufuyfyfuyf', '09132121323', 'bjguigiugiugipu', '09231232131', 'jhfyufgyguihgouygu', '09213123123', 'Bachelor of Science in Computer Science', 'na', 'hiuweghfuigewaifdsgfiug', '2026-2027', 'none', 'bqwdglsajkdbLCDdgidlseikbfy', '09123123123', 'Sweetkendl081@gmail.com', '::1', NULL, 'offline', 'approved', NULL, '[\"uploads\\/requirements\\/6a961f81488df_Student_Handbook.docx\"]', '2026-09-01 00:42:41', NULL, NULL),
-(23, '2026-0012', 'kennjie', 'jeremias', 'hiyao', '', 'male', '2001-07-14', 'paniqui', 'filipino', 'Single', 'Unemployed', 'angie', '09444646643', 'joseph', '09544464787', 'amy', '09478789798', 'Bachelor of Science in Computer Science', 'na', 'gffhfhgugjgjhghghghg', '2026-2027', 'tyryryryryr', 'ryghjgjhfhfh', '09454545343', 'sweetkendl081@gmail.com', '::1', NULL, 'offline', 'approved', NULL, '[\"uploads\\/requirements\\/6a9e50e4dbc13_Apartrent_Apartment_Management_System.pdf\"]', '2026-09-07 05:51:32', NULL, NULL),
-(24, '2026-0013', 'sample', 'samplee', 'sample', '', 'male', '2010-11-14', 'paiwui', 'filipino', 'Single', 'Employed', 'sample', '09989083243', 'smaple', '09232423234', 'sample', '09234234234', 'Bachelor of Secondary Education', 'english', 'sapniqui', '2026-2027', 'academic', 'paniqui', '09675776543', 'sweetkendl081@gmail.com', '::1', NULL, 'offline', 'approved', NULL, NULL, '2026-09-07 06:09:33', NULL, NULL),
-(25, '2026-0016', 'Shan Raye', 'Rosello', 'Guzman', '', 'male', '2006-06-01', 'kggjygjhvaeae', 'efwefse', 'Single', 'Employed', 'wefeaewfeaw', '09234324324', 'awefawefwa', '09324234324', 'efawefawef', '09324234324', 'Bachelor of Science in Computer Science', 'na', 'rawefdfesfawe', '2026-2027', 'tes', 'eafwefaefaw', '09432143241', 'sweetkendl081@gmail.com', '::1', NULL, 'offline', 'approved', NULL, '[\"uploads\\/requirements\\/6aa69993da795_GUZMAN__SHAN_RAYE_-_ICF_LOGO.png\"]', '2026-09-13 12:39:47', '[{\"code\":\"wqeqwewkj\",\"description\":\"qweqweqwe\",\"units\":2,\"day_time\":\"e123123\",\"room\":\"123123\",\"block\":\"213123\"},{\"code\":\"wdasdsadsa\",\"description\":\"asdsadsa\",\"units\":16,\"day_time\":\"213213213\",\"room\":\"213123\",\"block\":\"1231232\"}]', '{\"tuition_fee\":\"9.00\",\"academic\":\"60.56\",\"computer\":\"5,656.55\",\"misc_fee\":\"56.56\",\"nstp\":\"5,656.56\",\"others\":\"656.56\",\"total\":\"\\u20b1 12,095.79\"}');
+INSERT INTO `enrolled` (`student_id`, `student_code`, `firstname`, `middlename`, `lastname`, `suffix`, `gender`, `birthday`, `birthplace`, `citizenship`, `civilstatus`, `employment`, `mother`, `mphone_number`, `father`, `fphone_number`, `guardian`, `gphone_number`, `course`, `major`, `school_address`, `academic_year`, `scholarship`, `full_address`, `mobile_number`, `email`, `ip_address`, `last_login`, `status`, `enrollment_status`, `payment_proof`, `requirements_files`, `created_at`, `subjects_json`, `assessment_json`, `year_level`, `block`, `initial_payment_amount`, `initial_payment_method`, `initial_payment_date`, `initial_payment_or`, `initial_payment_gcash`) VALUES
+(1, '2026-0014', 'Shan Raye', 'Rosello', 'Guzman', '', 'Male', '2006-06-01', 'Paniqui, Tarlac', 'Filipino', 'Single', 'Unemployed', 'Maria ozawa', '09123456789', 'Mang Kanor', '09157955411', 'Mang kanor', '09157955411', 'BSCS', 'English', 'burgos', '2025-2026', 'ICF', 'Mang juan', '09123456789', 'Mangjuan@gmail.com', NULL, NULL, 'offline', 'approved', NULL, NULL, '2026-08-12 04:21:04', '[{\"code\":\"ccc\",\"description\":\"gfgfsgs\",\"units\":3,\"day_time\":\"mon\",\"room\":\"211\",\"block\":\"a\"},{\"code\":\"ccc\",\"description\":\"ddsdgsgs\",\"units\":3,\"day_time\":\"mon\",\"room\":\"211\",\"block\":\"a\"}]', '{\"tuition_fee\":\"1,366.67\",\"academic\":\"2,444.45\",\"computer\":\"0\",\"misc_fee\":\"500.00\",\"nstp\":\"0\",\"others\":\"0\",\"total\":\"\\u20b1 4,311.12\"}', '', '', 0.00, '', NULL, '', ''),
+(2, '2026-0014', 'ALMADIN', 'NOR', 'MIPANGA', '', 'Male', '2004-06-25', 'Paniqui, Tarlac', 'Filipino', 'Single', 'Employed', 'CINDERELLA MAGANGCONG', '09389987162', 'BILAL MIPANGA', '0926716622', 'KENJJIE', '009737832', 'ACT', 'None', 'burgos', '2026 - 2027', 'NONE', 'Mang juan', '09123456789', 'gshanraye@yahoo.com', NULL, NULL, 'offline', 'approved', NULL, NULL, '2026-08-12 04:21:04', '[{\"code\":\"ccc\",\"description\":\"gfgfsgs\",\"units\":1,\"day_time\":\"e123123\",\"room\":\"211\",\"block\":\"a\"},{\"code\":\"wqeqwewkj\",\"description\":\"qweqweqwe\",\"units\":4.5,\"day_time\":\"mon\",\"room\":\"123123\",\"block\":\"a\"}]', '{\"tuition_fee\":\"0.00\",\"academic\":\"\",\"computer\":\"\",\"misc_fee\":\"\",\"nstp\":\"\",\"others\":\"\",\"total\":\"\\u20b1 0.00\"}', '', '', 0.00, '', NULL, '', ''),
+(3, NULL, 'jairus', 'guirao', 'alfonso', 'jr', 'Male', '1998-07-07', 'Paniqui, Tarlac', 'Filipino', 'Married', 'Unemployed', 'teresa', '', 'johnny sins', '', 'mami oni', '', 'BSCS', 'English', 'burgos', '2026 - 2027', 'NONE', 'Mang juan', '09123456789', 'gshanraye@yahoo.com', NULL, NULL, 'offline', 'declined', NULL, NULL, '2026-08-12 04:21:04', NULL, NULL, '', '', 0.00, '', NULL, '', ''),
+(5, '2026-0014', 'l', 'l', 'l', '', 'Male', '2006-09-16', 'l', 'k', 'Single', 'Employed', 'll', 'l', 'l', 'lll', 'l', 'l', 'Bachelor of Technical Vocational Teacher Education', 'N/A', 'l', 'l', 'ICF', 'l2', 'l', 'e@gnail.com', NULL, NULL, 'offline', 'approved', NULL, NULL, '2026-08-12 04:21:04', '[{\"code\":\"ccc\",\"description\":\"qweqweqwe\",\"units\":2,\"day_time\":\"MON 7:30 AM\",\"date\":\"MON\",\"time\":\"7:30 AM\",\"room\":\"211\",\"block\":\"a\"},{\"code\":\"cccc\",\"description\":\"gfgfsgs\",\"units\":4,\"day_time\":\"TUE 8:00 AM\",\"date\":\"TUE\",\"time\":\"8:00 AM\",\"room\":\"311\",\"block\":\"a\"}]', '{\"tuition_fee\":\"0.00\",\"academic\":\"60.56\",\"computer\":\"5,656.55\",\"misc_fee\":\"500.00\",\"nstp\":\"5,656.56\",\"others\":\"656.56\",\"total\":\"\\u20b1 12,530.23\"}', '', '', 0.00, '', NULL, '', ''),
+(9, NULL, 'shan', 'rosello', 'raye', '', 'male', '2014-06-13', 'mhgjfhgd', 'njhgfbfcv', '', '', '8cvbcvnbm', '09157955411', 'sdfgfdchtfw34', '09157955411', 'qr3w4ts5dht', '09157955411', 'Bachelor of Science in Computer Science', 'na', 'wq5e243tey5hr6ftcg', '2026-2027', 'academic', '123qrsgrfcxf', '09157955411', 'j@gmail.com', NULL, NULL, 'offline', 'pending', NULL, NULL, '2026-08-12 04:21:04', NULL, NULL, '', '', 0.00, '', NULL, '', ''),
+(10, '2026-0015', 'shan', 'rosello', 'guzman', '', 'male', '2016-06-04', 'gjyf', 'jkbgui', '', '', 'hkjfghfxv', '09157955411', 'jlikugjyh', '09157955411', 'okjihugythg', '09157955411', 'Bachelor of Science in Computer Science', 'na', 'jiuyhfctfyui', '2026-2027', 'jihuyg', 'khkjg', '09157955411', 'k@gmail.com', NULL, NULL, 'offline', 'approved', NULL, NULL, '2026-08-12 05:49:15', NULL, NULL, '', '', 0.00, '', NULL, '', ''),
+(11, '2026-0014', 'asd', '', 'asd', '', 'male', '2024-10-04', 'asd', 'Szdxc', '', '', 'zsadfg', '', 'dfdcv', '', 'Xzcxv', '', 'Bachelor of Science in Tourism Management', 'english', 'jhb', '2027-2028', 'jionjkh', 'jkhjjkjbnjiokklnjk', '', 'zj@gmail.com', NULL, NULL, 'offline', 'approved', NULL, NULL, '2026-08-15 14:01:23', NULL, NULL, '', '', 0.00, '', NULL, '', ''),
+(12, '2026-0007', 'Shan Raye', 'Rosello', 'Guzman', '', 'male', '2006-06-01', 'Tarlac', 'Filipino', '', '', 'abdjbjldbalbdasd', '', 'sbofabjfbsbda', '', 'aslkndlkahslidhlijsd', '', 'Bachelor of Science in Computer Science', 'na', 'pob norte, paniqui tarlac', '2026-2027', 'none', 'Abogado dos, paniqui, tarlac', '', 's@gmail.com', NULL, NULL, 'offline', 'approved', NULL, NULL, '2026-08-17 02:37:12', NULL, NULL, '', '', 0.00, '', NULL, '', ''),
+(13, '2026-0011', 'WDAESRDTFGHWDEFRETR', 'ADSFD', 'SDFDGD', 'SD', 'male', '2010-07-18', 'WQDEFREG', 'DEFSR', '', '', 'ADWEFSRDGF', '', 'WDD', '', 'WDEWRE', '', 'Bachelor of Science in Computer Science', 'na', 'lknAIURGVBIQEWU', '2026-2027', 'none', 'lkdnlwndnwlkdnlqwndkqw', '', 'e@gmail.com', NULL, NULL, 'offline', 'approved', NULL, NULL, '2026-08-17 03:16:34', NULL, NULL, '', '', 0.00, '', NULL, '', ''),
+(14, '2026-0010', 'ligfdxfghdyftuiyugfgfxcv', 'vccgjkghhvbcvcn', 'lkjgghfyuktg', 'j', 'male', '2011-06-17', 'mkjgfxcv', 'klhikugjyfgchbfxv', 'Single', 'Employed', ',nkjghfgfxvc', '09207497149', ',jkguyjfthcfb', '09639207491', 'jrstdtrtujghnb', '09639207491', 'Bachelor of Science in Computer Science', 'na', 'lkhutiytsreastyurtig', '2026-2027', 'none', 'mljhjycgbfc', '09639207491', 'j22@gmail.com', '::1', NULL, 'offline', 'approved', NULL, '[\"uploads\\/requirements\\/6a82893b7c5a2_images.jpg\"]', '2026-08-17 04:08:27', NULL, NULL, '', '', 0.00, '', NULL, '', ''),
+(15, '2026-0006', 'Shan', 'bdakjsbdjk', 'raye', 'sjfbabjf', 'male', '2009-06-01', 'dWAESRGDTHFYG', 'wezq23kbln', 'Single', 'Employed', 'dewz,', '09203901930', 'dexwkrdefsw', '09203901930', 'qWAZSESdk', '09203901930', 'Bachelor of Science in Computer Science', 'na', 'aswderftfyhgfjbuk', '2026-2027', 'none', 'aswedzjkbhgcftdr', '09203901930', 'jkk@gmail.com', '::1', NULL, 'offline', 'approved', NULL, '[\"uploads\\/requirements\\/6a828ab70844e_images.jpg\"]', '2026-08-17 04:14:47', NULL, NULL, '', '', 0.00, '', NULL, '', ''),
+(16, '2026-0009', 'qw', 'few', 'eq3tr5yfujkbwerwefrg', '', 'male', '2026-08-23', '2', 'qa3resg', 'Single', 'Employed', 'qweargstrdyhg', '09203901930', 'qewregrtrewaresrgdtfgh', '09203901930', 'werewsrgdtf', '09203901930', 'Bachelor of Technical Vocational Teacher Education', 'mathematics', 'AFWAEGSRDHTYGUHKJ', '2026-2027', 'academic', 'WDQEFRGDTFHGJ', '09203901930', 'k@gmail.com', '::1', NULL, 'offline', 'approved', NULL, NULL, '2026-08-17 04:17:34', NULL, NULL, '', '', 0.00, '', NULL, '', ''),
+(17, '2026-0008', 'wakjefuihrghrfhweuif', 'dsajkhdsakhdsa', 'asohadwjkhdsajkdsajbkdsa', 'qwe', 'male', '2022-03-02', 'dasjkasdjkbsad', 'dajbsadkbhsad', 'Single', 'Unemployed', 'saclnkdscnljdcs', '09157955411', 'efnkleadnljdwa', '09157955411', 'alnkadelnjldwa', '09157955411', 'Bachelor of Science in Computer Science', 'na', 'dwalnjadwlnjdwaljbadw', '2026-2027', 'none', 'ajbsaljbdsasa', '09157955411', 'j@gmail.com', '::1', NULL, 'offline', 'approved', NULL, '[\"uploads\\/requirements\\/6a828c98dea38_images.jpg\"]', '2026-08-17 04:22:48', NULL, NULL, '', '', 0.00, '', NULL, '', ''),
+(18, '2026-0005', 'qkwfekauhoie', 'awodhioawh', 'awdwhowhadoiwsh', 'aldhoiwhdoi', 'male', '2009-09-16', 'ajkbdfoueahd', 'ousgzdoicgd', 'Single', 'Employed', 'opqwjhepiweepoiw', '09157955411', 'selkfheidhwahwa', '09157955411', 'oj', '09157955411', 'Bachelor of Science in Public Administration', 'na', 'alkhoidhwiod', '2026-2027', 'academic', 'ahdoiqhawdi', '09157955411', 'k@gmail.com', '::1', NULL, 'offline', 'approved', NULL, '[\"uploads\\/requirements\\/6a828e9045e89_images.jpg\"]', '2026-08-17 04:31:12', NULL, NULL, '', '', 0.00, '', NULL, '', ''),
+(19, '2026-0003', 'ss', '', 's', '', 'male', '2023-09-04', '091092', 'slhakhj', 'Single', 'Employed', 'asefsrgdthfvwaefsr', '09333333333', 'aesrdfg', '09333333333', 'aesrfdg', '09333333333', 'Bachelor of Science in Computer Science', 'na', '3333333333333333', '2026-2027', 'academic', '33333333333333', '09333333333', '1@gmail.com', '::1', NULL, 'offline', 'approved', NULL, '[\"uploads\\/requirements\\/6a828eed45a1b_images.jpg\"]', '2026-08-17 04:32:45', NULL, NULL, '', '', 0.00, '', NULL, '', ''),
+(20, '2026-0002', 'Almadin', 'Nor', 'Mipanga', '', 'male', '2004-06-27', 'samlkle', 'Filipino', 'Single', 'Unemployed', 'sample', '09343243242', 'SAMPLE', '09343243243', 'SADM', '09324242324', 'Bachelor of Science in Computer Science', 'na', 'SAMPLE TET', '2026-2027', 'none', 'SDSAFFDSG', '09234234234', 'DMIPANGA@GMAIL.COM', '::1', NULL, 'offline', 'approved', NULL, '[\"uploads\\/requirements\\/6a8e87fca6b52_IMG_6020.jpg\"]', '2026-08-26 06:30:20', NULL, NULL, '', '', 0.00, '', NULL, '', ''),
+(21, '2026-0001', 'sdfdgb', '', 'sdfgbv', '', 'male', '1999-04-21', 'sdfesfefef', 'sefsefesf', 'Single', 'Employed', 'ehfuiwehf', '09157955411', 'esfesfe', '09993094033', 'efsfefsef', '09432432423', 'Bachelor of Science in Public Administration', 'english', 'nlknlknlkn', '2028-2029', 'academic', '34324324324324', '09324342343', 'k@gmail.com', '::1', NULL, 'offline', 'approved', NULL, '[\"uploads\\/requirements\\/6a9558a759e47_Canva_link.docx\"]', '2026-08-31 10:34:15', NULL, NULL, '', '', 0.00, '', NULL, '', ''),
+(22, '2026-0004', 'Shan Raye', 'Rosello', 'Guzman', '', 'male', '2006-06-01', 'Tarlac, Paniqui', 'Filo', 'Single', 'Unemployed', 'ljbgyufuyfyfuyf', '09132121323', 'bjguigiugiugipu', '09231232131', 'jhfyufgyguihgouygu', '09213123123', 'Bachelor of Science in Computer Science', 'na', 'hiuweghfuigewaifdsgfiug', '2026-2027', 'none', 'bqwdglsajkdbLCDdgidlseikbfy', '09123123123', 'Sweetkendl081@gmail.com', '::1', NULL, 'offline', 'approved', NULL, '[\"uploads\\/requirements\\/6a961f81488df_Student_Handbook.docx\"]', '2026-09-01 00:42:41', NULL, NULL, '', '', 0.00, '', NULL, '', ''),
+(23, '2026-0012', 'kennjie', 'jeremias', 'hiyao', '', 'male', '2001-07-14', 'paniqui', 'filipino', 'Single', 'Unemployed', 'angie', '09444646643', 'joseph', '09544464787', 'amy', '09478789798', 'Bachelor of Science in Computer Science', 'na', 'gffhfhgugjgjhghghghg', '2026-2027', 'tyryryryryr', 'ryghjgjhfhfh', '09454545343', 'sweetkendl081@gmail.com', '::1', NULL, 'offline', 'approved', NULL, '[\"uploads\\/requirements\\/6a9e50e4dbc13_Apartrent_Apartment_Management_System.pdf\"]', '2026-09-07 05:51:32', NULL, NULL, '', '', 0.00, '', NULL, '', ''),
+(24, '2026-0013', 'sample', 'samplee', 'sample', '', 'male', '2010-11-14', 'paiwui', 'filipino', 'Single', 'Employed', 'sample', '09989083243', 'smaple', '09232423234', 'sample', '09234234234', 'Bachelor of Secondary Education', 'english', 'sapniqui', '2026-2027', 'academic', 'paniqui', '09675776543', 'sweetkendl081@gmail.com', '::1', NULL, 'offline', 'approved', NULL, NULL, '2026-09-07 06:09:33', NULL, NULL, '', '', 0.00, '', NULL, '', ''),
+(25, '2026-0016', 'Shan Raye', 'Rosello', 'Guzman', '', 'male', '2006-06-01', 'kggjygjhvaeae', 'efwefse', 'Single', 'Employed', 'wefeaewfeaw', '09234324324', 'awefawefwa', '09324234324', 'efawefawef', '09324234324', 'Bachelor of Science in Computer Science', 'na', 'rawefdfesfawe', '2026-2027', 'tes', 'eafwefaefaw', '09432143241', 'sweetkendl081@gmail.com', '::1', NULL, 'offline', 'approved', NULL, '[\"uploads\\/requirements\\/6aa69993da795_GUZMAN__SHAN_RAYE_-_ICF_LOGO.png\"]', '2026-09-13 12:39:47', '[{\"code\":\"wqeqwewkj\",\"description\":\"qweqweqwe\",\"units\":2,\"day_time\":\"e123123\",\"room\":\"123123\",\"block\":\"213123\"},{\"code\":\"wdasdsadsa\",\"description\":\"asdsadsa\",\"units\":16,\"day_time\":\"213213213\",\"room\":\"213123\",\"block\":\"1231232\"}]', '{\"tuition_fee\":\"9.00\",\"academic\":\"60.56\",\"computer\":\"5,656.55\",\"misc_fee\":\"56.56\",\"nstp\":\"5,656.56\",\"others\":\"656.56\",\"total\":\"\\u20b1 12,095.79\"}', '', '', 0.00, '', NULL, '', ''),
+(26, '2026-0014', 'Kennjie', 'Jeremias', 'Hiyao', '', 'male', '2006-08-11', 'Paniqui,Tarlac', 'Filipino', 'Single', 'Unemployed', 'Angie Jeremias', '09565656565', 'Joseph Hiyao', '09565465464', 'Amy Garcia', '09565645656', 'Bachelor of Science in Computer Science', 'na', 'Purok 6 Brgy Canan,Paniqui,Tarlac', '2026-2027', 'none', 'Purok 6 Brgy Canan,Paniqui,Tarlac', '09942395815', 'kenhiyao@gmail.com', '::1', NULL, 'offline', 'approved', NULL, '[\"uploads\\/requirements\\/6ac5d7467bae8_ICFLOGO.jpg\"]', '2026-10-07 05:23:18', '[{\"code\":\"cccc\",\"description\":\"cogchcgh\",\"units\":3,\"day_time\":\"mon\",\"room\":\"211\",\"block\":\"a\"},{\"code\":\"cccc\",\"description\":\"gffgggggjfg\",\"units\":3,\"day_time\":\"mon\",\"room\":\"211\",\"block\":\"a\"},{\"code\":\"ccc\",\"description\":\"hghfgfgufgu\",\"units\":3,\"day_time\":\"mon\",\"room\":\"211\",\"block\":\"a\"}]', '{\"tuition_fee\":\"0\",\"academic\":\"2,357.89\",\"computer\":\"76.57\",\"misc_fee\":\"500.00\",\"nstp\":\"0\",\"others\":\"0\",\"total\":\"\\u20b1 2,934.46\"}', '', '', 0.00, '', NULL, '', ''),
+(27, '2026-0014', 'ALMADIN', 'NOR', 'MIPANGA', '', 'male', '2004-06-25', 'PANIQUI', 'FILIPINO', 'Single', 'Unemployed', 'CINDERELLA MAGANGCONG', '09696876876', 'BILAL MIPANGA', '09876878785', 'AHMAD AMIN MIPANGA', '09858658655', 'Bachelor of Science in Computer Science', 'na', 'PALARCA ST SITIO VEGA POB NORTE', '2026-2027', 'none', '1294 SITIO VEGA', '09087287897', 'dmipanga25@gmail.com', '::1', NULL, 'offline', 'approved', NULL, NULL, '2026-10-07 05:53:29', '[{\"code\":\"ccc\",\"description\":\"wsdwddwdwd\",\"units\":4,\"day_time\":\"mon\\/tue\",\"room\":\"311\",\"block\":\"a\"},{\"code\":\"ccc\",\"description\":\"decefvdecd\",\"units\":4,\"day_time\":\"mon\\/tue\",\"room\":\"311\",\"block\":\"a\"}]', '{\"tuition_fee\":\"2,999.99\",\"academic\":\"4,555.55\",\"computer\":\"555.55\",\"misc_fee\":\"0\",\"nstp\":\"00\",\"others\":\"0\",\"total\":\"\\u20b1 8,111.09\"}', '', '', 0.00, '', NULL, '', ''),
+(28, '2026-0014', 'Shan Raye', 'Rosello', 'Guzman', '', 'male', '2006-06-01', 'Tarlac', 'Filipino', 'Single', 'Unemployed', 'ma. carlota r. guzman', '09234324324', 'Romans D. Guzman', '09234324324', 'ma. carlota r. guzman', '09324234324', 'Bachelor of Science in Computer Science', 'na', 'paniqui, tarlac', '2027-2028', 'none', 'Abogado Dos, Paniqui Tarlac', '09234234324', 'sweetkendl081@gmail.com', '::1', NULL, 'offline', 'approved', NULL, '[\"uploads\\/requirements\\/6acb78cadffda_GUZMAN__SHAN_RAYE_-_ICF_LOGO.png\"]', '2026-10-11 11:53:46', '[{\"code\":\"ccc\",\"description\":\"qweqweqwe\",\"units\":4,\"day_time\":\"e123123\",\"room\":\"211\",\"block\":\"a\"},{\"code\":\"wqeqwewkj\",\"description\":\"gfgfsgs\",\"units\":3.5,\"day_time\":\"e123123\",\"room\":\"123123\",\"block\":\"a\"}]', '{\"tuition_fee\":\"0.00\",\"academic\":\"60.56\",\"computer\":\"5,656.55\",\"misc_fee\":\"500.00\",\"nstp\":\"5,656.56\",\"others\":\"656.56\",\"total\":\"\\u20b1 12,530.23\"}', '', '', 0.00, '', NULL, '', ''),
+(29, '2026-0014', 'Shan Raye', 'Rosello', 'Guzman', '', 'male', '2006-06-01', 'Tarlac', 'Filipino', 'Single', 'Unemployed', 'Ma. Carlota R. Guzman', '09324823984', 'Ma. Carlota R. Guzman', '09324083402', 'Ma. Carlota R. Guzman', '09342343234', 'Bachelor of Science in Computer Science', 'na', 'PobNorte', '2026-2027', 'none', 'Abogado dos, Paniqui, Tarlac', '09809809890', 'sweetkendl081@gmail.com', '::1', NULL, 'offline', 'approved', NULL, '[\"uploads\\/requirements\\/6ace0dff42f3a_1000327781.jpg\"]', '2026-10-13 10:54:55', '[{\"code\":\"ccc\",\"description\":\"qweqweqwe\",\"units\":3,\"day_time\":\"MON 7:30 AM\",\"date\":\"MON\",\"time\":\"7:30 AM\",\"room\":\"211\",\"block\":\"a\"},{\"code\":\"ccc\",\"description\":\"gfgfsgs\",\"units\":3,\"day_time\":\"MON 7:30 AM\",\"date\":\"MON\",\"time\":\"7:30 AM\",\"room\":\"123123\",\"block\":\"a\"}]', '{\"tuition_fee\":\"0.00\",\"academic\":\"60.56\",\"computer\":\"555.55\",\"misc_fee\":\"500.00\",\"nstp\":\"5,656.56\",\"others\":\"656.56\",\"total\":\"\\u20b1 7,429.23\"}', '', '', 0.00, '', NULL, '', ''),
+(30, '2026-0014', 'hoiuyoiuyoui', 'dwqugduqwi', 'oiuyouityui', '', 'male', '2008-07-18', 'liuagadliba', 'aksbduvfu', 'Single', 'Employed', 'aklsjeidgfb', '09980980989', 'askdhhgf', '09908098908', 'alsdhfgk', '09980989080', 'Bachelor of Science in Computer Science', 'na', 'albsiofai', '2026-2027', 'none', 'asldhjfbakjevof', '09098908098', 'sweetkendl081@gmail.com', '::1', NULL, 'offline', 'approved', NULL, '[\"uploads\\/requirements\\/6ace1319f071e_1000327781.jpg\"]', '2026-10-13 11:16:41', '[{\"code\":\"ccc\",\"description\":\"gfgfsgs\",\"units\":2,\"day_time\":\"MON 7:30 AM\",\"date\":\"MON\",\"time\":\"7:30 AM\",\"room\":\"311\",\"block\":\"a\"},{\"code\":\"wqeqwewkj\",\"description\":\"gfgfsgs\",\"units\":4,\"day_time\":\"MON 7:30 AM\",\"date\":\"MON\",\"time\":\"7:30 AM\",\"room\":\"211\",\"block\":\"a\"}]', '{\"tuition_fee\":\"0.00\",\"academic\":\"2,357.89\",\"computer\":\"555.55\",\"misc_fee\":\"500.00\",\"nstp\":\"5,656.56\",\"others\":\"656.56\",\"total\":\"\\u20b1 9,726.56\"}', '', '', 0.00, 'ewallet', '2026-10-13', 'OR-20261013-79ABC', '09834083403');
 
 -- --------------------------------------------------------
 
@@ -388,8 +379,20 @@ CREATE TABLE `student_payments` (
   `amount` decimal(10,2) NOT NULL,
   `or_number` varchar(50) DEFAULT NULL,
   `payment_date` date NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `student_code` varchar(20) NOT NULL DEFAULT '',
+  `purpose` varchar(50) NOT NULL DEFAULT 'Partial Payment',
+  `gcash_number` varchar(20) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `student_payments`
+--
+
+INSERT INTO `student_payments` (`id`, `student_id`, `amount`, `or_number`, `payment_date`, `created_at`, `student_code`, `purpose`, `gcash_number`) VALUES
+(1, 0, 1500.00, 'OR-20261013-79ABC', '2026-10-13', '2026-10-13 11:39:03', '2026-0014', 'Initial Downpayment', '09834083403'),
+(2, 0, 1500.00, 'OR-20261013-MANUAL', '2026-10-13', '2026-10-13 11:50:48', 'YOUR_STUDENT_CODE_HE', 'Initial Downpayment', ''),
+(3, 0, 1500.00, 'OR-20261013-MANUAL', '2026-10-13', '2026-10-13 12:01:20', '2026-0014', 'Initial Downpayment', '');
 
 -- --------------------------------------------------------
 
@@ -447,7 +450,15 @@ INSERT INTO `users` (`user_id`, `first_name`, `middle_name`, `last_name`, `usern
 (60, 'WDAESRDTFGHWDEFRETR', 'ADSFD', 'SDFDGD', '2026-0011', '$2y$10$DoddiGLJYoomhVsmUPKXhO/70ZOBPO7eI/1eJFjUCif2qgMVboYaO'),
 (61, 'kennjie', 'jeremias', 'hiyao', '2026-0012', '$2y$10$URlL.ASnvqTDk2SgJYwJwuj7QuwU5TsCMMmVlCR7D55KVwHG2Zoqe'),
 (62, 'sample', 'samplee', 'sample', '2026-0013', '$2y$10$oXaBQirXJ1yGLaSHugKyxeZSflb9TrVzmr8HWKdYaYoPoyCM80vta'),
-(65, 'Shan Raye', 'Rosello', 'Guzman', 'shan', '$2y$10$nb.JMIrnoHV/hIoYrUW7VOhjWZHY4CSgn20MEubInm9C.VbKeOlHi');
+(65, 'Shan Raye', 'Rosello', 'Guzman', 'shan', '$2y$10$nb.JMIrnoHV/hIoYrUW7VOhjWZHY4CSgn20MEubInm9C.VbKeOlHi'),
+(66, 'Kennjie', 'Jeremias', 'Hiyao', 'hiyao', '$2y$10$WUR36lc1yl6a/PJfUwpCoOkp2uKnkGj4ffceL.gMsxcWbCq8Rf.ay'),
+(67, 'Shan Raye', 'Rosello', 'Guzman', 'hello', '$2y$10$ck5ACpQOZCBzzjXn7ZjAEOYA//BecqFeVDfPQapeBtZd3JB7jByqy'),
+(68, 'ALMADIN', 'NOR', 'MIPANGA', 'mipanga', '$2y$10$fu9prUysD9o2cmyqkrJB1uQXMF4SOCcew5RczOfWdSzEKuDQ3WkLu'),
+(69, 'Shan Raye', 'Rosello', 'Guzman', 'shan', '$2y$10$ernmQ.x70KafyemP07XtM.aG58.dQ79R0x9BPGjWlXo9bTOsN.Thq'),
+(70, 'ALMADIN', 'NOR', 'MIPANGA', 'sgan', '$2y$10$I5VHsXAXMEINlI0VUgXlQeXiBMPoCV2G/xdKnSv6QkLFMUCnFKmke'),
+(71, 'l', 'l', 'l', 'rei', '$2y$10$zm06CIoVJpGadPQ76Bd/Ou/7.5oEdahlZpLmjmu8NleDBHkXWGUMq'),
+(72, 'Shan Raye', 'Rosello', 'Guzman', 'reiyuki', '$2y$10$7r67sDNa7.c2PK8/NInhEe8.A7E4aKbJOGsUXaF.0eFblX1xzbpo6'),
+(73, 'hoiuyoiuyoui', 'dwqugduqwi', 'oiuyouityui', 'meimei', '$2y$10$ABRfX1HXTiZWAqE2O9dcH.H8wN0Prj2USCeyZDUKwX0.XMUuSSbmy');
 
 --
 -- Indexes for dumped tables
@@ -592,7 +603,7 @@ ALTER TABLE `curriculum_subjects`
 -- AUTO_INCREMENT for table `enrolled`
 --
 ALTER TABLE `enrolled`
-  MODIFY `student_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `student_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 
 --
 -- AUTO_INCREMENT for table `instructors`
@@ -640,13 +651,13 @@ ALTER TABLE `student_curriculum_assignments`
 -- AUTO_INCREMENT for table `student_payments`
 --
 ALTER TABLE `student_payments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=66;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=74;
 
 --
 -- Constraints for dumped tables

@@ -1304,17 +1304,6 @@
             <span class="widget-label">Send Inquiry</span>
         </a>
 
-        <a href="../index.html#news"
-           class="widget-btn widget-news" aria-label="Latest News">
-            <span class="widget-icon"><i class="fa-solid fa-newspaper"></i></span>
-            <span class="widget-label">Latest News</span>
-        </a>
-
-        <a href="../index.html#announcements"
-           class="widget-btn widget-announcement" aria-label="Announcements">
-            <span class="widget-icon"><i class="fa-solid fa-bullhorn"></i></span>
-            <span class="widget-label">Announcements</span>
-        </a>
 
         <a href="../BackGroundimage/ICF-Prospectus-2026.pdf"
            download class="widget-btn widget-download" aria-label="Download Prospectus">
@@ -1674,7 +1663,7 @@
 
                     <div class="form-group" style="margin-bottom: 1.5rem;">
                         <label for="partialAmount">Partial Amount to Pay (PHP)</label>
-                        <input type="number" id="partialAmount" class="form-control" placeholder="Enter amount e.g. 1500" min="0">
+                       <input type="number" id="partialAmount" name="partial_amount" class="form-control" placeholder="Enter amount e.g. 1500" min="0" step="0.01">
                         <p class="info-text">
                             <i class="fa-solid fa-circle-info"></i>
                             <span>Enter a partial downpayment amount if you choose not to pay the full tuition right now.</span>
@@ -1695,7 +1684,7 @@
                     <div id="ewalletDetails" class="payment-fields" style="display: none;">
                         <div class="form-group" style="margin-bottom: 1.2rem;">
                             <label for="ewalletNumber">E-Wallet Account Number (GCash/Maya)</label>
-                            <input type="text" id="ewalletNumber" class="form-control" placeholder="e.g. 09123456789">
+                           <input type="text" id="ewalletNumber" name="ewallet_number" class="form-control" placeholder="e.g. 09123456789">
                         </div>
                         <p class="info-text"><i class="fa-solid fa-circle-info"></i> <span>You will be securely redirected to authorize the e-wallet transaction.</span></p>
                     </div>

@@ -8,10 +8,22 @@ require 'db.php';
 
 $admin_name = htmlspecialchars($_SESSION['admin_name'] ?? $_SESSION['admin_user']);
 
-$count_result = $conn->query("SELECT COUNT(*) as total FROM enrolled");
+/* =====================================================
+   Only count/display APPROVED enrollments on the dashboard.
+   Pending applicants stay on enrollments.php until approved.
+   ===================================================== */
+$approvedWhere = '';
+$colCheck = $conn->query("SHOW COLUMNS FROM enrolled LIKE 'enrollment_status'");
+if ($colCheck && $colCheck->num_rows > 0) {
+  $approvedWhere = " WHERE enrollment_status = 'approved'";
+}
+
+// 1) Total enrolled students card
+$count_result = $conn->query("SELECT COUNT(*) as total FROM enrolled" . $approvedWhere);
 $total_enrollments = $count_result->fetch_assoc()['total'] ?? 0;
 
-$course_result = $conn->query("SELECT COUNT(DISTINCT course) as total FROM enrolled");
+// 2) Distinct courses card
+$course_result = $conn->query("SELECT COUNT(DISTINCT course) as total FROM enrolled" . $approvedWhere);
 $total_courses = $course_result->fetch_assoc()['total'] ?? 0;
 
 $pendingCount = 0;
@@ -31,22 +43,34 @@ if ($insCheck && $insCheck->num_rows > 0) {
 $logins = [];
 $login_check = $conn->query("SHOW COLUMNS FROM enrolled LIKE 'last_login'");
 if ($login_check && $login_check->num_rows > 0) {
-  $logins_result = $conn->query("SELECT student_id, firstname, lastname, email, ip_address, last_login, status FROM enrolled WHERE last_login IS NOT NULL ORDER BY last_login DESC LIMIT 5");
-  while ($row = $logins_result->fetch_assoc()) {
-    $logins[] = $row;
+  $logins_result = $conn->query("SELECT student_id, firstname, lastname, email, ip_address, last_login, status FROM enrolled" . $approvedWhere . " AND last_login IS NOT NULL ORDER BY last_login DESC LIMIT 5");
+  if ($logins_result) {
+    while ($row = $logins_result->fetch_assoc()) {
+      $logins[] = $row;
+    }
   }
 }
 
+// 3) "New Enrolled Students" table — only approved students
 $enrollments = [];
-$enr_result = $conn->query("SELECT student_id, firstname, lastname, course, academic_year, mobile_number, email FROM enrolled ORDER BY student_id DESC LIMIT 15");
-while ($row = $enr_result->fetch_assoc()) {
-  $enrollments[] = $row;
+$enr_result = $conn->query(
+  "SELECT student_id, firstname, lastname, course, academic_year, mobile_number, email
+   FROM enrolled" . $approvedWhere . "
+   ORDER BY student_id DESC LIMIT 15"
+);
+if ($enr_result) {
+  while ($row = $enr_result->fetch_assoc()) {
+    $enrollments[] = $row;
+  }
 }
 
+// 4) Full records used by the View modal — only approved students
 $full_records = [];
-$all_res = $conn->query("SELECT * FROM enrolled ORDER BY student_id DESC LIMIT 15");
-while ($row = $all_res->fetch_assoc()) {
-  $full_records[$row['student_id']] = $row;
+$all_res = $conn->query("SELECT * FROM enrolled" . $approvedWhere . " ORDER BY student_id DESC LIMIT 15");
+if ($all_res) {
+  while ($row = $all_res->fetch_assoc()) {
+    $full_records[$row['student_id']] = $row;
+  }
 }
 ?>
 <!DOCTYPE html>
@@ -104,9 +128,6 @@ while ($row = $all_res->fetch_assoc()) {
 
     /* ============================================
        COLLAPSIBLE SIDEBAR
-       - Default: collapsed (icon-only)
-       - .expanded: full width
-       - .pinned: stays expanded until clicking outside
        ============================================ */
     .sidebar {
       background: linear-gradient(180deg, #071f30 0%, #020c1b 100%);
@@ -2638,7 +2659,10 @@ while ($row = $all_res->fetch_assoc()) {
                 <?php endforeach; ?>
               <?php else: ?>
                 <tr>
-                  <td colspan="6" style="text-align:center; color:#8892b0;">No enrolled students found</td>
+                  <td colspan="6" style="text-align:center; color:#8892b0; padding:40px;">
+                    <i class="fa-solid fa-user-clock" style="font-size:2rem; display:block; margin-bottom:12px; opacity:0.4;"></i>
+                    No enrolled students yet. Approve applicants on the <a href="enrollments.php" style="color:var(--primary-neon);">Enrollments</a> page.
+                  </td>
                 </tr>
               <?php endif; ?>
             </tbody>
@@ -2665,14 +2689,10 @@ while ($row = $all_res->fetch_assoc()) {
   <script>
     /* ============================================
        SIDEBAR — hover expands, click pins
-       - Hover in → expand
-       - Hover out → collapse (only if NOT pinned)
-       - Click inside → pin (stays open)
-       - Click outside → unpin & collapse
        ============================================ */
     const sidebar = document.getElementById('sidebar');
     const body = document.body;
-    let isPinned = false; // true = locked open until clicking outside
+    let isPinned = false;
     let collapseTimer = null;
 
     function expandSidebar() {
@@ -2681,7 +2701,6 @@ while ($row = $all_res->fetch_assoc()) {
     }
 
     function collapseSidebar() {
-      // Only collapse if not pinned
       if (isPinned) return;
       sidebar.classList.remove('expanded');
       body.classList.remove('sidebar-open');
@@ -2721,12 +2740,8 @@ while ($row = $all_res->fetch_assoc()) {
     });
 
     sidebar.addEventListener('mouseleave', () => {
-      // If pinned, do nothing
       if (isPinned) return;
-
-      // If admin dropdown open, do nothing
       if (document.getElementById('adminActions').classList.contains('open')) return;
-
       collapseTimer = setTimeout(() => {
         collapseSidebar();
       }, 250);
@@ -2734,10 +2749,7 @@ while ($row = $all_res->fetch_assoc()) {
 
     /* ---------- Click-outside → unpin & collapse ---------- */
     document.addEventListener('click', function(e) {
-      // If click is inside the sidebar, ignore (handled by inner elements)
       if (sidebar.contains(e.target)) return;
-
-      // If pinned, unpin and collapse
       if (isPinned) {
         unpinSidebar();
       }
@@ -2745,7 +2757,6 @@ while ($row = $all_res->fetch_assoc()) {
 
     /* ============================================
        ADMIN PROFILE CLICK
-       Pins the sidebar and toggles the action dropdown.
        ============================================ */
     function onAdminProfileClick(event) {
       event.stopPropagation();

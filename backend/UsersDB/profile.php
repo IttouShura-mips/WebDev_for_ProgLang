@@ -1,7 +1,6 @@
 <?php
 session_start();
 
-// Redirect to login if not authenticated
 if (!isset($_SESSION['student_name']) || !isset($_SESSION['username'])) {
     header("Location: login.html");
     exit();
@@ -18,47 +17,98 @@ $dbpass   = '';
 try {
     $conn = new PDO("mysql:host=$host;dbname=$db_name;charset=utf8mb4", $dbuser, $dbpass);
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     die("Database connection failed: " . $e->getMessage());
 }
 
-// =====================================================
-// FETCH LOGGED-IN STUDENT (from users table)
-// =====================================================
 $username = $_SESSION['username'];
 
+// =====================================================
+// ENSURE users.student_code EXISTS
+// =====================================================
 try {
-    $stmt = $conn->prepare("SELECT user_id, first_name, middle_name, last_name, username FROM users WHERE username = :username LIMIT 1");
-    $stmt->execute([':username' => $username]);
-    $student = $stmt->fetch(PDO::FETCH_ASSOC);
+    $conn->exec("ALTER TABLE users ADD COLUMN IF NOT EXISTS student_code VARCHAR(20) DEFAULT NULL");
+} catch (PDOException $e) {
+    // column probably already exists
+}
 
-    if (!$student) {
+// =====================================================
+// FETCH LOGGED-IN STUDENT
+// =====================================================
+$student = null;
+try {
+    $stmt = $conn->prepare("SELECT user_id, first_name, middle_name, last_name, username, student_code
+                            FROM users
+                            WHERE username = :username
+                            LIMIT 1");
+    $stmt->execute([':username' => $username]);
+    $student = $stmt->fetch();
+} catch (PDOException $e) {
+    error_log("[profile.php] users lookup failed: " . $e->getMessage());
+}
+
+if (!$student) {
+    if (empty($_SESSION['student_name'])) {
         session_destroy();
         header("Location: login.html");
         exit();
     }
-} catch (PDOException $e) {
-    die("Error fetching profile: " . $e->getMessage());
+    $parts = preg_split('/\s+/', trim($_SESSION['student_name']));
+    $student = [
+        'user_id'      => 0,
+        'first_name'   => $parts[0] ?? '',
+        'middle_name'  => count($parts) > 2 ? implode(' ', array_slice($parts, 1, -1)) : '',
+        'last_name'    => count($parts) > 1 ? end($parts) : '',
+        'username'     => $username,
+        'student_code' => null,
+    ];
 }
 
 // =====================================================
-// FETCH MATCHING ENROLLED RECORD
-// Priority: match by student_code == username first,
-// then fall back to full name match.
+// SELF-HEAL: If this user has no student_code, try to
+// find their enrolled row by name and copy the code over.
 // =====================================================
-$enrolled = null;
-try {
-    // Ensure new columns/tables exist (safe no-op if already present)
-    $conn->exec("ALTER TABLE enrolled ADD COLUMN IF NOT EXISTS student_code VARCHAR(20) DEFAULT NULL AFTER student_id");
-    $conn->exec("ALTER TABLE enrolled ADD COLUMN IF NOT EXISTS subjects_json LONGTEXT DEFAULT NULL");
-    $conn->exec("ALTER TABLE enrolled ADD COLUMN IF NOT EXISTS assessment_json LONGTEXT DEFAULT NULL");
-    $conn->exec("ALTER TABLE enrolled ADD COLUMN IF NOT EXISTS initial_payment_amount DECIMAL(12,2) NOT NULL DEFAULT 0");
-    $conn->exec("ALTER TABLE enrolled ADD COLUMN IF NOT EXISTS initial_payment_method VARCHAR(50) DEFAULT ''");
-    $conn->exec("ALTER TABLE enrolled ADD COLUMN IF NOT EXISTS initial_payment_date   DATE DEFAULT NULL");
-    $conn->exec("ALTER TABLE enrolled ADD COLUMN IF NOT EXISTS initial_payment_or     VARCHAR(30) DEFAULT ''");
-    $conn->exec("ALTER TABLE enrolled ADD COLUMN IF NOT EXISTS initial_payment_gcash  VARCHAR(30) DEFAULT ''");
+if (empty($student['student_code']) && !empty($student['first_name']) && !empty($student['last_name'])) {
+    try {
+        $stmt = $conn->prepare("SELECT student_code FROM enrolled
+                                WHERE firstname = :fn AND lastname = :ln
+                                  AND student_code IS NOT NULL AND student_code <> ''
+                                ORDER BY student_id DESC LIMIT 1");
+        $stmt->execute([
+            ':fn' => $student['first_name'],
+            ':ln' => $student['last_name'],
+        ]);
+        $row = $stmt->fetch();
+        if ($row && !empty($row['student_code'])) {
+            $student['student_code'] = $row['student_code'];
+            // Persist it so we don't have to heal again next time
+            $conn->prepare("UPDATE users SET student_code = :code WHERE username = :u")
+                 ->execute([':code' => $row['student_code'], ':u' => $username]);
+        }
+    } catch (PDOException $e) {
+        error_log("[profile.php] self-heal failed: " . $e->getMessage());
+    }
+}
 
-    // student_payments table (auto-create)
+// =====================================================
+// ENSURE SCHEMA (each ALTER isolated)
+// =====================================================
+$alterStmts = [
+    "ALTER TABLE enrolled ADD COLUMN IF NOT EXISTS student_code VARCHAR(20) DEFAULT NULL",
+    "ALTER TABLE enrolled ADD COLUMN IF NOT EXISTS subjects_json LONGTEXT DEFAULT NULL",
+    "ALTER TABLE enrolled ADD COLUMN IF NOT EXISTS assessment_json LONGTEXT DEFAULT NULL",
+    "ALTER TABLE enrolled ADD COLUMN IF NOT EXISTS initial_payment_amount DECIMAL(12,2) NOT NULL DEFAULT 0",
+    "ALTER TABLE enrolled ADD COLUMN IF NOT EXISTS initial_payment_method VARCHAR(50) DEFAULT ''",
+    "ALTER TABLE enrolled ADD COLUMN IF NOT EXISTS initial_payment_date   DATE DEFAULT NULL",
+    "ALTER TABLE enrolled ADD COLUMN IF NOT EXISTS initial_payment_or     VARCHAR(30) DEFAULT ''",
+    "ALTER TABLE enrolled ADD COLUMN IF NOT EXISTS initial_payment_gcash  VARCHAR(30) DEFAULT ''",
+];
+foreach ($alterStmts as $sql) {
+    try { $conn->exec($sql); } catch (PDOException $e) { /* ignore */ }
+}
+
+try {
     $conn->exec("CREATE TABLE IF NOT EXISTS student_payments (
         id INT AUTO_INCREMENT PRIMARY KEY,
         student_code VARCHAR(20) NOT NULL,
@@ -68,33 +118,37 @@ try {
         amount DECIMAL(12,2) NOT NULL,
         gcash_number VARCHAR(20) DEFAULT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        INDEX (student_code)
-    )");
+        INDEX idx_student_code (student_code)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+} catch (PDOException $e) { /* ignore */ }
 
-    // First attempt: username happens to equal student_code
-    $stmt = $conn->prepare("SELECT * FROM enrolled WHERE student_code = :code LIMIT 1");
-    $stmt->execute([':code' => $username]);
-    $enrolled = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    // Second attempt: match by full name (this is what most students hit)
-    if (!$enrolled && !empty($_SESSION['student_name'])) {
-        $stmt = $conn->prepare("SELECT * FROM enrolled WHERE CONCAT(firstname,' ',lastname) = :nm ORDER BY student_id DESC LIMIT 1");
-        $stmt->execute([':nm' => $_SESSION['student_name']]);
-        $enrolled = $stmt->fetch(PDO::FETCH_ASSOC);
+// =====================================================
+// FETCH ENROLLED ROW — by student_code only
+// =====================================================
+$enrolled = null;
+try {
+    // Preferred: users.student_code
+    if (!empty($student['student_code'])) {
+        $stmt = $conn->prepare("SELECT * FROM enrolled WHERE student_code = :code LIMIT 1");
+        $stmt->execute([':code' => $student['student_code']]);
+        $enrolled = $stmt->fetch() ?: null;
     }
 
-    // Third attempt: match by first + last name from users table
-    if (!$enrolled && !empty($student['first_name']) && !empty($student['last_name'])) {
-        $stmt = $conn->prepare("SELECT * FROM enrolled
-                                WHERE firstname = :fn AND lastname = :ln
-                                ORDER BY student_id DESC LIMIT 1");
-        $stmt->execute([
-            ':fn' => $student['first_name'],
-            ':ln' => $student['last_name']
-        ]);
-        $enrolled = $stmt->fetch(PDO::FETCH_ASSOC);
+    // Username happens to be the student_code
+    if (!$enrolled) {
+        $stmt = $conn->prepare("SELECT * FROM enrolled WHERE student_code = :code LIMIT 1");
+        $stmt->execute([':code' => $username]);
+        $enrolled = $stmt->fetch() ?: null;
+    }
+
+    // Email fallback (stable ID)
+    if (!$enrolled && !empty($student['email'])) {
+        $stmt = $conn->prepare("SELECT * FROM enrolled WHERE email = :em ORDER BY student_id DESC LIMIT 1");
+        $stmt->execute([':em' => $student['email']]);
+        $enrolled = $stmt->fetch() ?: null;
     }
 } catch (PDOException $e) {
+    error_log("[profile.php] enrolled lookup failed: " . $e->getMessage());
     $enrolled = null;
 }
 
@@ -103,9 +157,9 @@ try {
 // =====================================================
 $subjects   = [];
 $assessment = [];
-$totalUnits = 0;
-$bridging   = 0;
-$nstpUnits  = 0;
+$totalUnits = 0.0;
+$bridging   = 0.0;
+$nstpUnits  = 0.0;
 
 if ($enrolled) {
     if (!empty($enrolled['subjects_json'])) {
@@ -119,21 +173,21 @@ if ($enrolled) {
     foreach ($subjects as $s) {
         $u = (float)($s['units'] ?? 0);
         $totalUnits += $u;
-        if (stripos($s['code'] ?? '', 'BRIDGING') !== false) $bridging += $u;
-        if (stripos($s['code'] ?? '', 'NSTP') !== false)     $nstpUnits += $u;
+        $code = strtoupper($s['code'] ?? '');
+        if (strpos($code, 'BRIDGING') !== false) $bridging += $u;
+        if (strpos($code, 'NSTP') !== false)     $nstpUnits += $u;
     }
 }
 
 // =====================================================
 // PAYMENTS
-// CRITICAL: student_payments is keyed by enrolled.student_code,
-// which is DIFFERENT from the login username.
 // =====================================================
 $paymentCode = '';
 if ($enrolled && !empty($enrolled['student_code'])) {
     $paymentCode = trim($enrolled['student_code']);
+} elseif (!empty($student['student_code'])) {
+    $paymentCode = trim($student['student_code']);
 } else {
-    // Fallback: try username, then the display name
     $paymentCode = $username;
 }
 
@@ -147,20 +201,17 @@ if ($paymentCode !== '') {
                                 WHERE student_code = :code
                                 ORDER BY payment_date ASC, id ASC");
         $stmt->execute([':code' => $paymentCode]);
-        $payments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $payments = $stmt->fetchAll();
         foreach ($payments as $p) {
             $totalPaid += (float)$p['amount'];
         }
     } catch (PDOException $e) {
+        error_log("[profile.php] payments lookup failed: " . $e->getMessage());
         $payments = [];
     }
 }
 
-// -----------------------------------------------------
-// Fallback: if nothing is in student_payments yet, and the
-// enrolled row still has an untransferred downpayment in
-// its initial_payment_* columns, surface that instead.
-// -----------------------------------------------------
+// Fallback: untransferred downpayment from enrolled row
 if (count($payments) === 0
     && $enrolled
     && isset($enrolled['initial_payment_amount'])
@@ -177,13 +228,11 @@ if (count($payments) === 0
 }
 
 // =====================================================
-// ASSESSMENT TOTAL / BALANCE
+// ASSESSMENT TOTALS
 // =====================================================
-function parseMoney($v)
-{
+function parseMoney($v) {
     if ($v === null || $v === '') return 0.0;
-    $clean = preg_replace('/[^0-9.\-]/', '', (string)$v);
-    return (float)$clean;
+    return (float)preg_replace('/[^0-9.\-]/', '', (string)$v);
 }
 
 $assessTuition  = $assessment['tuition_fee'] ?? 0;
@@ -196,43 +245,28 @@ $assessOthers   = $assessment['others']      ?? 0;
 $totalAssessment = parseMoney($assessment['total'] ?? 0);
 if ($totalAssessment <= 0) {
     $totalAssessment = parseMoney($assessTuition) + parseMoney($assessAcademic) + parseMoney($assessComputer)
-        + parseMoney($assessMisc)    + parseMoney($assessNSTP)    + parseMoney($assessOthers);
+                     + parseMoney($assessMisc)    + parseMoney($assessNSTP)    + parseMoney($assessOthers);
 }
 $remainingBalance = max(0, $totalAssessment - $totalPaid);
 
 // =====================================================
 // DISPLAY VALUES
 // =====================================================
-$full_name     = htmlspecialchars(trim($student['first_name'] . ' ' . $student['middle_name'] . ' ' . $student['last_name']));
-$lastFirst     = strtoupper(htmlspecialchars($student['last_name'] . ', ' . $student['first_name'] . ' ' . $student['middle_name']));
-$first_name    = htmlspecialchars($student['first_name']);
-$middle_name   = htmlspecialchars($student['middle_name']);
-$last_name     = htmlspecialchars($student['last_name']);
-$username_disp = htmlspecialchars($student['username']);
-$user_id       = htmlspecialchars($student['user_id']);
-$initial       = strtoupper(substr($student['first_name'], 0, 1));
-
-// Enrolled-derived
+$full_name     = htmlspecialchars(trim(($student['first_name'] ?? '') . ' ' . ($student['middle_name'] ?? '') . ' ' . ($student['last_name'] ?? '')));
+$lastFirst     = strtoupper(htmlspecialchars(($student['last_name'] ?? '') . ', ' . ($student['first_name'] ?? '') . ' ' . ($student['middle_name'] ?? '')));
+$username_disp = htmlspecialchars($student['username'] ?? $username);
 $course       = htmlspecialchars($enrolled['course'] ?? 'N/A');
 $major        = htmlspecialchars($enrolled['major'] ?? '');
 $academicYear = htmlspecialchars($enrolled['academic_year'] ?? '2026-2027');
 $yearLevel    = '3rd Year';
 $datePrinted  = date('F j, Y');
 
-// The displayed ID on the COR should be the student_code when available
 $studentIdDisplay = !empty($enrolled['student_code'])
     ? htmlspecialchars($enrolled['student_code'])
-    : htmlspecialchars($student['username']);
+    : htmlspecialchars($student['username'] ?? $username);
 
-function money($n)
-{
+function money($n) {
     return '₱ ' . number_format((float)$n, 2);
-}
-
-$courseAcronym = '';
-if (!empty($enrolled['course'])) {
-    $courseAcronym = implode('', array_map(fn($w) => $w[0] ?? '', preg_split('/\s+/', $enrolled['course'])));
-    $courseAcronym = strtoupper(preg_replace('/[^A-Z]/', '', $courseAcronym));
 }
 ?>
 <!DOCTYPE html>
@@ -258,12 +292,9 @@ if (!empty($enrolled['course'])) {
             --purple-accent: #8b5cf6;
             --border-radius: 12px;
             --transition-smooth: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            --transition-slow: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
             --neon-glow: 0 0 15px rgba(13, 245, 227, 0.3);
         }
-
         * { box-sizing: border-box; margin: 0; padding: 0; }
-
         body {
             font-family: 'Inter', sans-serif;
             background:
@@ -277,7 +308,6 @@ if (!empty($enrolled['course'])) {
             overflow-x: hidden;
             position: relative;
         }
-
         body::before {
             content: '';
             position: fixed;
@@ -293,100 +323,53 @@ if (!empty($enrolled['course'])) {
         }
 
         .navbar {
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            position: sticky; top: 0; z-index: 100;
             background: rgba(10, 25, 47, 0.85);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border-bottom: 1px solid var(--border-teal);
             padding: 14px 5%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 16px;
-            flex-wrap: wrap;
-            transition: var(--transition-smooth);
+            display: flex; justify-content: space-between; align-items: center;
+            gap: 16px; flex-wrap: wrap;
         }
-
         .navbar-brand {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            text-decoration: none;
-            color: inherit;
+            display: flex; align-items: center; gap: 14px;
+            text-decoration: none; color: inherit;
         }
-
         .navbar-brand .logo-box {
-            width: 46px;
-            height: 46px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            width: 46px; height: 46px;
+            display: flex; align-items: center; justify-content: center;
             background: rgba(13, 245, 227, 0.06);
             border: 1px solid rgba(13, 245, 227, 0.2);
-            border-radius: 12px;
-            padding: 6px;
+            border-radius: 12px; padding: 6px;
             filter: drop-shadow(0 0 10px rgba(13, 245, 227, 0.25));
             transition: var(--transition-smooth);
         }
-
         .navbar-brand:hover .logo-box {
             transform: scale(1.05);
             filter: drop-shadow(0 0 16px rgba(13, 245, 227, 0.5));
         }
-
-        .navbar-brand .logo-box img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
-        .navbar-brand .brand-text {
-            display: flex;
-            flex-direction: column;
-            line-height: 1.1;
-        }
-
+        .navbar-brand .logo-box img { width: 100%; height: 100%; object-fit: contain; }
+        .navbar-brand .brand-text { display: flex; flex-direction: column; line-height: 1.1; }
         .navbar-brand .brand-text h1 {
-            font-size: 1.15rem;
-            font-weight: 800;
-            color: var(--primary-neon);
-            letter-spacing: 0.5px;
+            font-size: 1.15rem; font-weight: 800;
+            color: var(--primary-neon); letter-spacing: 0.5px;
         }
-
         .navbar-brand .brand-text span {
-            font-size: 0.62rem;
-            font-weight: 600;
-            color: var(--text-muted-teal);
-            letter-spacing: 1.4px;
-            text-transform: uppercase;
-            margin-top: 4px;
+            font-size: 0.62rem; font-weight: 600;
+            color: var(--text-muted-teal); letter-spacing: 1.4px;
+            text-transform: uppercase; margin-top: 4px;
         }
-
-        .navbar-actions {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
+        .navbar-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
         .user-pill {
             background: rgba(2, 12, 27, 0.8);
             border: 1px solid var(--border-teal);
-            padding: 8px 16px;
-            border-radius: 50px;
-            font-size: 0.8rem;
-            color: var(--text-muted-teal);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 600;
+            padding: 8px 16px; border-radius: 50px;
+            font-size: 0.8rem; color: var(--text-muted-teal);
+            display: flex; align-items: center; gap: 8px; font-weight: 600;
             transition: var(--transition-smooth);
-            text-decoration: none;
-            cursor: pointer;
+            text-decoration: none; cursor: pointer;
         }
-
         .user-pill:hover {
             border-color: rgba(13, 245, 227, 0.6);
             color: var(--primary-neon);
@@ -394,44 +377,16 @@ if (!empty($enrolled['course'])) {
             box-shadow: 0 0 15px rgba(13, 245, 227, 0.25);
             transform: translateY(-2px);
         }
-
-        .user-pill i {
-            color: var(--primary-neon);
-            font-size: 0.75rem;
-            transition: var(--transition-smooth);
-        }
-
-        .user-pill:hover i {
-            transform: scale(1.15);
-        }
-
-        .user-pill .settings-hint {
-            font-size: 0.68rem;
-            color: var(--text-muted-teal);
-            margin-left: 4px;
-        }
-
-        .user-pill:hover .settings-hint {
-            color: var(--primary-neon);
-        }
-
+        .user-pill i { color: var(--primary-neon); font-size: 0.75rem; }
         .btn-logout {
             background: transparent;
             border: 1px solid rgba(255, 107, 107, 0.5);
-            color: #ff6b6b;
-            padding: 8px 18px;
-            border-radius: 50px;
-            text-decoration: none;
-            font-size: 0.8rem;
-            font-weight: 600;
+            color: #ff6b6b; padding: 8px 18px; border-radius: 50px;
+            text-decoration: none; font-size: 0.8rem; font-weight: 600;
             transition: var(--transition-smooth);
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-family: inherit;
-            cursor: pointer;
+            display: inline-flex; align-items: center; gap: 6px;
+            font-family: inherit; cursor: pointer;
         }
-
         .btn-logout:hover {
             background: rgba(255, 107, 107, 0.12);
             border-color: #ff6b6b;
@@ -441,1012 +396,399 @@ if (!empty($enrolled['course'])) {
 
         .hero-banner {
             padding: 3.5rem 5% 3rem;
-            text-align: center;
-            position: relative;
-            z-index: 1;
+            text-align: center; position: relative; z-index: 1;
             background: linear-gradient(180deg, rgba(13, 245, 227, 0.04) 0%, transparent 100%);
             border-bottom: 1px solid var(--border-teal);
         }
-
         .hero-banner .eyebrow {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.7rem;
-            font-weight: 700;
-            letter-spacing: 2px;
-            text-transform: uppercase;
+            display: inline-flex; align-items: center; gap: 8px;
+            font-size: 0.7rem; font-weight: 700;
+            letter-spacing: 2px; text-transform: uppercase;
             color: var(--primary-neon);
             background: rgba(13, 245, 227, 0.08);
             border: 1px solid rgba(13, 245, 227, 0.2);
-            padding: 6px 14px;
-            border-radius: 20px;
+            padding: 6px 14px; border-radius: 20px;
             margin-bottom: 14px;
-            box-shadow: 0 0 15px rgba(13, 245, 227, 0.1);
         }
-
         .hero-banner h1 {
-            font-size: 2.2rem;
-            font-weight: 800;
+            font-size: 2.2rem; font-weight: 800;
             color: var(--text-high-contrast);
-            letter-spacing: -0.5px;
-            line-height: 1.1;
+            letter-spacing: -0.5px; line-height: 1.1;
             margin-bottom: 10px;
         }
-
         .hero-banner h1 .accent {
             background: linear-gradient(135deg, #0df5e3 30%, #00a89d 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-
         .hero-banner p {
-            font-size: 0.92rem;
-            color: var(--text-muted-teal);
-            max-width: 620px;
-            margin: 0 auto;
-            line-height: 1.6;
+            font-size: 0.92rem; color: var(--text-muted-teal);
+            max-width: 620px; margin: 0 auto; line-height: 1.6;
         }
 
         .main-content {
-            flex: 1;
-            padding: 2.5rem 5% 3rem;
-            position: relative;
-            z-index: 1;
+            flex: 1; padding: 2.5rem 5% 3rem;
+            position: relative; z-index: 1;
         }
-
-        .cor-wrapper {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
+        .cor-wrapper { max-width: 1200px; margin: 0 auto; }
         .cor-card {
             background: linear-gradient(160deg, var(--bg-card) 0%, #06152b 100%);
             border: 1px solid var(--border-teal);
-            border-radius: 20px;
-            padding: 2.5rem;
+            border-radius: 20px; padding: 2.5rem;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-            position: relative;
-            overflow: hidden;
-            transition: var(--transition-smooth);
+            position: relative; overflow: hidden;
         }
-
         .cor-card::before {
             content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 3px;
+            position: absolute; top: 0; left: 0; right: 0; height: 3px;
             background: linear-gradient(90deg, var(--primary-neon), #00b4d8, var(--purple-accent));
-            transform: scaleX(0);
-            transform-origin: left;
+            transform: scaleX(0); transform-origin: left;
             transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
-
         .cor-card:hover::before { transform: scaleX(1); }
 
-        .cor-card:hover {
-            border-color: rgba(13, 245, 227, 0.4);
-            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.6), 0 0 40px rgba(13, 245, 227, 0.12);
-        }
-
         .cor-header {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            margin-bottom: 2rem;
-            padding-bottom: 1.5rem;
+            display: flex; flex-direction: column;
+            align-items: center; text-align: center;
+            margin-bottom: 2rem; padding-bottom: 1.5rem;
             border-bottom: 2px solid var(--border-teal);
-            position: relative;
         }
-
         .cor-header-top {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 16px;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
+            display: flex; align-items: center; justify-content: center;
+            gap: 16px; margin-bottom: 12px; flex-wrap: wrap;
         }
-
         .cor-logo {
-            width: 76px;
-            height: 76px;
-            object-fit: contain;
+            width: 76px; height: 76px; object-fit: contain;
             filter: drop-shadow(0 0 20px rgba(13, 245, 227, 0.3));
-            transition: var(--transition-smooth);
         }
-
-        .cor-logo:hover {
-            transform: scale(1.05);
-            filter: drop-shadow(0 0 30px rgba(13, 245, 227, 0.5));
-        }
-
-        .cor-header-text {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
         .cor-school-name {
-            font-size: 1.6rem;
-            font-weight: 800;
+            font-size: 1.6rem; font-weight: 800;
             color: var(--text-high-contrast);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            line-height: 1.2;
+            text-transform: uppercase; letter-spacing: 1px; line-height: 1.2;
         }
-
         .cor-address {
-            font-size: 0.78rem;
-            color: var(--text-muted-teal);
-            margin-top: 6px;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
+            font-size: 0.78rem; color: var(--text-muted-teal);
+            margin-top: 6px; display: inline-flex; align-items: center; gap: 6px;
         }
-
-        .cor-address i {
-            color: var(--primary-neon);
-            font-size: 0.72rem;
-        }
-
+        .cor-address i { color: var(--primary-neon); font-size: 0.72rem; }
         .cor-title {
-            font-size: 1.05rem;
-            font-weight: 800;
+            font-size: 1.05rem; font-weight: 800;
             color: var(--primary-neon);
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            margin-top: 12px;
-            padding: 8px 20px;
+            text-transform: uppercase; letter-spacing: 3px;
+            margin-top: 12px; padding: 8px 20px;
             background: rgba(13, 245, 227, 0.06);
             border: 1px solid rgba(13, 245, 227, 0.2);
-            border-radius: 30px;
-            display: inline-block;
+            border-radius: 30px; display: inline-block;
         }
-
         .cor-session {
-            font-size: 0.82rem;
-            color: var(--text-muted-teal);
-            margin-top: 10px;
-            font-style: italic;
+            font-size: 0.82rem; color: var(--text-muted-teal);
+            margin-top: 10px; font-style: italic;
         }
 
         .student-info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-            margin-bottom: 1.5rem;
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 1.5rem; margin-bottom: 1.5rem;
             background: rgba(2, 12, 27, 0.6);
             border: 1px solid var(--border-teal);
-            border-radius: 14px;
-            padding: 1.5rem;
-            position: relative;
-            overflow: hidden;
-            transition: var(--transition-smooth);
+            border-radius: 14px; padding: 1.5rem;
         }
-
-        .student-info-grid:hover {
-            border-color: rgba(13, 245, 227, 0.3);
-            background: rgba(2, 12, 27, 0.8);
+        .student-info-left, .student-info-right {
+            display: flex; flex-direction: column; gap: 12px;
         }
-
-        .student-info-left,
-        .student-info-right {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .student-info-right {
-            align-items: flex-end;
-            text-align: right;
-        }
-
-        .info-line {
-            font-size: 0.88rem;
-            color: var(--text-muted-teal);
-            line-height: 1.5;
-        }
-
+        .student-info-right { align-items: flex-end; text-align: right; }
+        .info-line { font-size: 0.88rem; color: var(--text-muted-teal); line-height: 1.5; }
         .info-line strong {
-            color: var(--text-high-contrast);
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
+            color: var(--text-high-contrast); font-weight: 600;
+            display: inline-flex; align-items: center; gap: 6px;
         }
-
-        .info-line strong i {
-            color: var(--primary-neon);
-            font-size: 0.8rem;
-            width: 16px;
-            text-align: center;
-        }
-
+        .info-line strong i { color: var(--primary-neon); font-size: 0.8rem; width: 16px; }
         .info-line .highlight {
-            color: var(--primary-neon);
-            font-weight: 700;
-            padding: 3px 10px;
-            background: rgba(13, 245, 227, 0.08);
+            color: var(--primary-neon); font-weight: 700;
+            padding: 3px 10px; background: rgba(13, 245, 227, 0.08);
             border: 1px solid rgba(13, 245, 227, 0.2);
-            border-radius: 20px;
-            font-size: 0.82rem;
+            border-radius: 20px; font-size: 0.82rem;
         }
 
         .section-title {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 1.2rem;
-            padding-bottom: 0.75rem;
+            display: flex; align-items: center; gap: 12px;
+            margin-bottom: 1.2rem; padding-bottom: 0.75rem;
             border-bottom: 1px solid var(--border-teal);
         }
-
         .section-title .icon-box {
-            width: 38px;
-            height: 38px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            width: 38px; height: 38px;
+            display: flex; align-items: center; justify-content: center;
             background: linear-gradient(135deg, rgba(13, 245, 227, 0.15), rgba(13, 245, 227, 0.05));
             border: 1px solid rgba(13, 245, 227, 0.25);
-            border-radius: 10px;
-            color: var(--primary-neon);
-            font-size: 0.95rem;
-            transition: var(--transition-smooth);
+            border-radius: 10px; color: var(--primary-neon); font-size: 0.95rem;
         }
-
-        .section-title:hover .icon-box {
-            background: var(--primary-neon);
-            color: var(--bg-deep-abyss);
-            box-shadow: var(--neon-glow);
-            transform: scale(1.05) rotate(-4deg);
-        }
-
         .section-title h2 {
-            font-size: 1.05rem;
-            font-weight: 700;
-            color: var(--text-high-contrast);
-            letter-spacing: -0.2px;
+            font-size: 1.05rem; font-weight: 700;
+            color: var(--text-high-contrast); letter-spacing: -0.2px;
         }
 
         .course-table-wrap {
             background: rgba(2, 12, 27, 0.6);
             border: 1px solid var(--border-teal);
-            border-radius: 14px;
-            overflow: hidden;
+            border-radius: 14px; overflow: hidden;
             margin-bottom: 1.5rem;
-            transition: var(--transition-smooth);
         }
-
-        .course-table-wrap:hover {
-            border-color: rgba(13, 245, 227, 0.3);
-        }
-
-        .course-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.82rem;
-        }
-
+        .course-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
         .course-table th {
             background: rgba(13, 245, 227, 0.06);
-            color: var(--primary-neon);
-            font-weight: 700;
-            padding: 12px 14px;
-            text-align: left;
+            color: var(--primary-neon); font-weight: 700;
+            padding: 12px 14px; text-align: left;
             border-bottom: 1px solid var(--border-teal);
-            font-size: 0.72rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px;
         }
-
         .course-table td {
             padding: 12px 14px;
             border-bottom: 1px solid var(--border-teal);
-            color: var(--text-high-contrast);
-            font-size: 0.85rem;
+            color: var(--text-high-contrast); font-size: 0.85rem;
         }
-
-        .course-table tr:last-child td {
-            border-bottom: none;
-        }
-
-        .course-table tbody tr {
-            transition: var(--transition-smooth);
-        }
-
-        .course-table tbody tr:hover {
-            background: rgba(13, 245, 227, 0.04);
-        }
-
+        .course-table tr:last-child td { border-bottom: none; }
         .course-table .total-row td {
             background: rgba(13, 245, 227, 0.08);
-            font-weight: 800;
-            color: var(--primary-neon);
+            font-weight: 800; color: var(--primary-neon);
             border-top: 2px solid rgba(13, 245, 227, 0.3);
-            font-size: 0.85rem;
         }
-
         .course-table .empty-row td {
-            text-align: center;
-            color: var(--text-muted-teal);
-            font-style: italic;
-            padding: 30px 14px;
+            text-align: center; color: var(--text-muted-teal);
+            font-style: italic; padding: 30px 14px;
         }
 
         .payment-assessment-wrap {
-            display: grid;
-            grid-template-columns: 1.2fr 0.8fr;
-            gap: 1.5rem;
-            margin-bottom: 1.5rem;
+            display: grid; grid-template-columns: 1.2fr 0.8fr;
+            gap: 1.5rem; margin-bottom: 1.5rem;
         }
-
         .payment-assess-card {
             background: rgba(2, 12, 27, 0.6);
             border: 1px solid var(--border-teal);
-            border-radius: 14px;
-            overflow: hidden;
-            transition: var(--transition-smooth);
-            position: relative;
+            border-radius: 14px; overflow: hidden;
         }
-
-        .payment-assess-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, var(--primary-neon), transparent);
-            transform: scaleX(0);
-            transform-origin: left;
-            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .payment-assess-card:hover::before { transform: scaleX(1); }
-
-        .payment-assess-card:hover {
-            border-color: rgba(13, 245, 227, 0.4);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), 0 0 25px rgba(13, 245, 227, 0.1);
-        }
-
         .card-header {
             background: rgba(13, 245, 227, 0.06);
-            padding: 12px 18px;
-            font-size: 0.78rem;
-            font-weight: 800;
-            color: var(--primary-neon);
-            text-transform: uppercase;
+            padding: 12px 18px; font-size: 0.78rem; font-weight: 800;
+            color: var(--primary-neon); text-transform: uppercase;
             letter-spacing: 1.5px;
             border-bottom: 1px solid var(--border-teal);
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            display: flex; align-items: center; gap: 10px;
         }
-
-        .card-header i {
-            font-size: 0.85rem;
-        }
-
-        .table-container {
-            padding: 0;
-            overflow-x: auto;
-        }
-
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.82rem;
-        }
-
-        .data-table th,
-        .data-table td {
-            padding: 10px 18px;
-            text-align: left;
+        .table-container { padding: 0; overflow-x: auto; }
+        .data-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+        .data-table th, .data-table td {
+            padding: 10px 18px; text-align: left;
             border-bottom: 1px solid var(--border-teal);
         }
-
         .data-table th {
-            color: var(--text-muted-teal);
-            font-weight: 700;
-            font-size: 0.68rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            color: var(--text-muted-teal); font-weight: 700;
+            font-size: 0.68rem; text-transform: uppercase; letter-spacing: 1px;
         }
-
-        .data-table td {
-            color: var(--text-high-contrast);
-            font-size: 0.85rem;
-        }
-
-        .data-table tbody tr {
-            transition: var(--transition-smooth);
-        }
-
-        .data-table tbody tr:hover {
-            background: rgba(13, 245, 227, 0.03);
-        }
-
-        .data-table tr:last-child td {
-            border-bottom: none;
-        }
-
-        .data-table .assessment-item td:last-child {
-            text-align: right;
-            font-weight: 600;
-        }
-
+        .data-table td { color: var(--text-high-contrast); font-size: 0.85rem; }
+        .data-table .assessment-item td:last-child { text-align: right; font-weight: 600; }
         .data-table .assessment-total td {
             background: rgba(13, 245, 227, 0.08);
-            font-weight: 800;
-            color: var(--primary-neon);
+            font-weight: 800; color: var(--primary-neon);
             font-size: 0.9rem;
             border-top: 2px solid rgba(13, 245, 227, 0.3);
         }
-
-        .data-table .assessment-total td:last-child {
-            text-align: right;
-            font-size: 1rem;
-        }
-
+        .data-table .assessment-total td:last-child { text-align: right; font-size: 1rem; }
         .data-table .assessment-remaining td {
             background: rgba(139, 92, 246, 0.08);
-            color: var(--text-high-contrast);
-            font-weight: 800;
-            font-size: 0.9rem;
+            font-weight: 800; font-size: 0.9rem;
             border-top: 2px solid rgba(139, 92, 246, 0.3);
         }
-
         .data-table .assessment-remaining td:last-child {
-            text-align: right;
-            font-size: 1.05rem;
-            color: var(--purple-accent);
+            text-align: right; font-size: 1.05rem; color: var(--purple-accent);
         }
-
         .data-table .empty-row td {
-            text-align: center;
-            color: var(--text-muted-teal);
-            font-style: italic;
-            padding: 24px;
+            text-align: center; color: var(--text-muted-teal);
+            font-style: italic; padding: 24px;
         }
 
-        .pay-btn-wrap {
-            padding: 15px 18px;
-        }
-
+        .pay-btn-wrap { padding: 15px 18px; }
         .btn-pay-tuition {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            width: 100%;
-            padding: 14px;
+            display: flex; align-items: center; justify-content: center;
+            gap: 10px; width: 100%; padding: 14px;
             background: linear-gradient(135deg, var(--primary-neon), #00cbb9);
             color: var(--bg-deep-abyss);
-            border: none;
-            border-radius: 50px;
-            font-weight: 800;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: var(--transition-smooth);
-            text-align: center;
+            border: none; border-radius: 50px;
+            font-weight: 800; font-size: 0.9rem;
+            cursor: pointer; transition: var(--transition-smooth);
+            font-family: inherit; letter-spacing: 0.3px;
             box-shadow: 0 4px 15px rgba(13, 245, 227, 0.3);
-            font-family: inherit;
-            letter-spacing: 0.3px;
         }
-
         .btn-pay-tuition:hover:not(:disabled) {
             transform: translateY(-3px);
             box-shadow: 0 0 30px rgba(13, 245, 227, 0.6), 0 10px 25px rgba(0, 0, 0, 0.4);
         }
-
-        .btn-pay-tuition:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
+        .btn-pay-tuition:disabled { opacity: 0.5; cursor: not-allowed; }
 
         .signature-box {
-            margin-top: 1.5rem;
-            padding: 1.75rem;
+            margin-top: 1.5rem; padding: 1.75rem;
             background: rgba(2, 12, 27, 0.5);
             border: 1px dashed rgba(13, 245, 227, 0.25);
             border-radius: 14px;
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 1.5rem;
-            align-items: end;
-            text-align: center;
+            display: grid; grid-template-columns: 1fr 1fr 1fr;
+            gap: 1.5rem; align-items: end; text-align: center;
         }
-
-        .sig-item {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            align-items: center;
-        }
-
-        .sig-line {
-            width: 100%;
-            max-width: 180px;
-            border-bottom: 1px solid var(--text-muted-teal);
-            margin: 0 auto 6px auto;
-        }
-
-        .sig-item strong {
-            color: var(--text-high-contrast);
-            font-size: 0.8rem;
-            font-weight: 700;
-            letter-spacing: 0.3px;
-        }
-
-        .sig-item span {
-            color: var(--text-muted-teal);
-            font-size: 0.72rem;
-        }
-
+        .sig-item { display: flex; flex-direction: column; gap: 6px; align-items: center; }
+        .sig-line { width: 100%; max-width: 180px; border-bottom: 1px solid var(--text-muted-teal); margin: 0 auto 6px auto; }
+        .sig-item strong { color: var(--text-high-contrast); font-size: 0.8rem; font-weight: 700; }
+        .sig-item span { color: var(--text-muted-teal); font-size: 0.72rem; }
         .student-copy {
-            font-size: 0.72rem;
-            color: var(--text-muted-teal);
-            margin-top: 1rem;
-            text-align: center;
-            font-style: italic;
+            font-size: 0.72rem; color: var(--text-muted-teal);
+            margin-top: 1rem; text-align: center; font-style: italic;
         }
 
         .contact-section {
             margin-top: 2.5rem;
             background: rgba(2, 12, 27, 0.6);
             border: 1px solid var(--border-teal);
-            border-radius: 16px;
-            padding: 2rem;
-            transition: var(--transition-smooth);
+            border-radius: 16px; padding: 2rem;
         }
-
-        .contact-section:hover {
-            border-color: rgba(13, 245, 227, 0.3);
-        }
-
-        .contact-header {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            margin-bottom: 1.5rem;
-        }
-
+        .contact-header { display: flex; align-items: center; gap: 14px; margin-bottom: 1.5rem; }
         .contact-header .icon-circle {
-            width: 48px;
-            height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            width: 48px; height: 48px;
+            display: flex; align-items: center; justify-content: center;
             background: linear-gradient(135deg, rgba(13, 245, 227, 0.15), rgba(13, 245, 227, 0.05));
             border: 1px solid rgba(13, 245, 227, 0.25);
-            border-radius: 50%;
-            color: var(--primary-neon);
-            font-size: 1.1rem;
-            transition: var(--transition-smooth);
+            border-radius: 50%; color: var(--primary-neon); font-size: 1.1rem;
         }
-
-        .contact-section:hover .contact-header .icon-circle {
-            background: var(--primary-neon);
-            color: var(--bg-deep-abyss);
-            box-shadow: var(--neon-glow);
-            transform: scale(1.08) rotate(-4deg);
-        }
-
         .contact-header h2 {
-            font-size: 1.15rem;
-            font-weight: 800;
-            color: var(--text-high-contrast);
-            letter-spacing: -0.3px;
+            font-size: 1.15rem; font-weight: 800;
+            color: var(--text-high-contrast); letter-spacing: -0.3px;
         }
-
-        .contact-header p {
-            font-size: 0.8rem;
-            color: var(--text-muted-teal);
-            margin-top: 3px;
-        }
-
-        .contact-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.25rem;
-        }
-
+        .contact-header p { font-size: 0.8rem; color: var(--text-muted-teal); margin-top: 3px; }
+        .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
         .contact-card {
             background: var(--bg-card);
             border: 1px solid var(--border-teal);
-            border-radius: 14px;
-            padding: 1.5rem;
-            display: flex;
-            gap: 14px;
-            align-items: flex-start;
-            transition: var(--transition-smooth);
-            position: relative;
-            overflow: hidden;
+            border-radius: 14px; padding: 1.5rem;
+            display: flex; gap: 14px; align-items: flex-start;
         }
-
-        .contact-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; bottom: 0;
-            width: 3px;
-            background: linear-gradient(180deg, var(--primary-neon), transparent);
-            transform: scaleY(0);
-            transform-origin: top;
-            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .contact-card:hover::before { transform: scaleY(1); }
-
-        .contact-card:hover {
-            border-color: rgba(13, 245, 227, 0.35);
-            transform: translateY(-4px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.35);
-        }
-
         .contact-card .icon-box {
             background: rgba(13, 245, 227, 0.1);
             border: 1px solid rgba(13, 245, 227, 0.25);
-            border-radius: 12px;
-            width: 48px;
-            height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            border-radius: 12px; width: 48px; height: 48px;
+            display: flex; align-items: center; justify-content: center;
             flex-shrink: 0;
-            transition: var(--transition-smooth);
         }
-
-        .contact-card:hover .icon-box {
-            background: var(--primary-neon);
-            color: var(--bg-deep-abyss);
-            box-shadow: var(--neon-glow);
-            transform: scale(1.08) rotate(-4deg);
-        }
-
-        .contact-card .icon-box i {
-            font-size: 1.05rem;
-            color: var(--primary-neon);
-            transition: var(--transition-smooth);
-        }
-
-        .contact-card:hover .icon-box i {
-            color: var(--bg-deep-abyss);
-        }
-
+        .contact-card .icon-box i { font-size: 1.05rem; color: var(--primary-neon); }
         .contact-card .contact-info h4 {
-            font-size: 0.95rem;
-            font-weight: 700;
-            color: var(--text-high-contrast);
-            margin-bottom: 6px;
+            font-size: 0.95rem; font-weight: 700;
+            color: var(--text-high-contrast); margin-bottom: 6px;
         }
-
         .contact-card .contact-info p {
-            font-size: 0.82rem;
-            color: var(--text-muted-teal);
-            margin-bottom: 12px;
-            line-height: 1.55;
+            font-size: 0.82rem; color: var(--text-muted-teal);
+            margin-bottom: 12px; line-height: 1.55;
         }
-
         .btn-contact {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
+            display: inline-flex; align-items: center; gap: 8px;
             background: linear-gradient(135deg, var(--primary-neon), #00cbb9);
-            color: var(--bg-deep-abyss);
-            border: none;
-            padding: 9px 18px;
-            border-radius: 50px;
-            font-weight: 700;
-            font-size: 0.78rem;
-            cursor: pointer;
-            transition: var(--transition-smooth);
-            text-decoration: none;
-            font-family: inherit;
-            letter-spacing: 0.3px;
-            box-shadow: 0 3px 10px rgba(13, 245, 227, 0.2);
+            color: var(--bg-deep-abyss); border: none;
+            padding: 9px 18px; border-radius: 50px;
+            font-weight: 700; font-size: 0.78rem;
+            cursor: pointer; font-family: inherit;
         }
 
-        .btn-contact:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0 20px rgba(13, 245, 227, 0.5), 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .btn-contact i { font-size: 0.72rem; }
-
-        .modal-overlay,
-        .inquiry-modal-overlay,
-        .alert-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
+        .modal-overlay, .inquiry-modal-overlay, .alert-overlay {
+            display: none; position: fixed; inset: 0;
             background: rgba(2, 12, 27, 0.9);
             backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
+            z-index: 1000; justify-content: center; align-items: center;
             padding: 20px;
         }
-
-        .modal-overlay.active,
-        .inquiry-modal-overlay.active,
-        .alert-overlay.active {
-            display: flex;
-        }
-
+        .modal-overlay.active, .inquiry-modal-overlay.active, .alert-overlay.active { display: flex; }
         .inquiry-modal-overlay { z-index: 3000; }
         .alert-overlay { z-index: 2000; }
 
-        .modal-box,
-        .inquiry-modal-box,
-        .alert-box {
+        .modal-box, .inquiry-modal-box, .alert-box {
             background: linear-gradient(180deg, var(--bg-card) 0%, #06152b 100%);
             border: 1px solid var(--primary-neon);
-            border-radius: 20px;
-            padding: 2rem;
-            max-width: 460px;
-            width: 100%;
-            box-shadow: 0 0 40px rgba(13, 245, 227, 0.25), 0 25px 60px rgba(0, 0, 0, 0.8);
-            position: relative;
-            animation: modalFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-            color: var(--text-high-contrast);
+            border-radius: 20px; padding: 2rem;
+            max-width: 460px; width: 100%;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
+            position: relative; color: var(--text-high-contrast);
         }
+        .inquiry-modal-box { max-width: 520px; max-height: 90vh; overflow-y: auto; border-color: var(--border-teal); }
+        .alert-box { max-width: 420px; text-align: center; border-color: var(--border-teal); }
+        .alert-box.success { border-color: #10b981; }
+        .alert-box.warning { border-color: #fbbf24; }
 
-        .inquiry-modal-box {
-            max-width: 520px;
-            max-height: 90vh;
-            overflow-y: auto;
-            border-color: var(--border-teal);
-            padding: 2.2rem;
+        .modal-close, .inquiry-close-btn {
+            position: absolute; top: 14px; right: 14px;
+            background: transparent; border: none;
+            color: var(--text-muted-teal); font-size: 1.4rem;
+            cursor: pointer; width: 36px; height: 36px;
+            border-radius: 50%; display: flex;
+            align-items: center; justify-content: center;
         }
+        .modal-close:hover, .inquiry-close-btn:hover { color: #ff6b6b; }
 
-        .alert-box {
-            max-width: 420px;
-            text-align: center;
-            border-color: var(--border-teal);
+        .modal-title {
+            font-size: 1.25rem; font-weight: 800;
+            color: var(--primary-neon); margin-bottom: 1.25rem;
+            display: flex; align-items: center; gap: 10px;
         }
+        .inquiry-modal-header { margin-bottom: 1.25rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-teal); }
+        .inquiry-modal-header h2 { font-size: 1.35rem; color: var(--text-high-contrast); margin-bottom: 6px; }
+        .inquiry-modal-header p { font-size: 0.82rem; color: var(--text-muted-teal); }
 
-        .alert-box.success {
-            border-color: #10b981;
-            box-shadow: 0 0 40px rgba(16, 185, 129, 0.3), 0 25px 60px rgba(0, 0, 0, 0.8);
+        .form-group, .inquiry-form-group { margin-bottom: 1rem; }
+        .form-group label, .inquiry-form-group label {
+            display: block; font-size: 0.72rem;
+            color: var(--text-muted-teal); margin-bottom: 8px;
+            text-transform: uppercase; letter-spacing: 1.2px; font-weight: 700;
         }
-
-        .alert-box.warning {
-            border-color: #fbbf24;
-            box-shadow: 0 0 40px rgba(251, 191, 36, 0.3), 0 25px 60px rgba(0, 0, 0, 0.8);
-        }
-
-        @keyframes modalFadeIn {
-            from { opacity: 0; transform: translateY(-20px) scale(0.96); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        .modal-close,
-        .inquiry-close-btn {
-            position: absolute;
-            top: 14px;
-            right: 14px;
-            background: transparent;
-            border: none;
-            color: var(--text-muted-teal);
-            font-size: 1.4rem;
-            cursor: pointer;
-            transition: var(--transition-smooth);
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-close:hover,
-        .inquiry-close-btn:hover {
-            color: #ff6b6b;
-            background: rgba(255, 107, 107, 0.1);
-            transform: rotate(90deg);
-        }
-
-        .modal-title,
-        .inquiry-modal-header h2 {
-            font-size: 1.25rem;
-            font-weight: 800;
-            color: var(--primary-neon);
-            margin-bottom: 1.25rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            letter-spacing: -0.3px;
-        }
-
-        .inquiry-modal-header {
-            margin-bottom: 1.25rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--border-teal);
-        }
-
-        .inquiry-modal-header h2 {
-            color: var(--text-high-contrast);
-            font-size: 1.35rem;
-            margin-bottom: 6px;
-        }
-
-        .inquiry-modal-header p {
-            font-size: 0.82rem;
-            color: var(--text-muted-teal);
-        }
-
-        .form-group,
-        .inquiry-form-group {
-            margin-bottom: 1rem;
-        }
-
-        .form-group label,
-        .inquiry-form-group label {
-            display: block;
-            font-size: 0.72rem;
-            color: var(--text-muted-teal);
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 1.2px;
-            font-weight: 700;
-        }
-
-        .form-group select,
-        .form-group input,
-        .form-group textarea,
-        .inquiry-form-group input,
-        .inquiry-form-group textarea {
-            width: 100%;
-            padding: 12px 16px;
+        .form-group select, .form-group input, .form-group textarea,
+        .inquiry-form-group input, .inquiry-form-group textarea {
+            width: 100%; padding: 12px 16px;
             background: rgba(2, 12, 27, 0.8);
             border: 1px solid var(--border-teal);
-            border-radius: 12px;
-            color: var(--text-high-contrast);
-            font-size: 0.88rem;
-            font-family: 'Inter', sans-serif;
+            border-radius: 12px; color: var(--text-high-contrast);
+            font-size: 0.88rem; font-family: 'Inter', sans-serif;
             outline: none;
-            transition: var(--transition-smooth);
         }
-
-        .form-group textarea,
-        .inquiry-form-group textarea {
-            resize: vertical;
-            min-height: 120px;
-            border-radius: 14px;
-        }
-
-        .form-group select:focus,
-        .form-group input:focus,
-        .form-group textarea:focus,
-        .inquiry-form-group input:focus,
+        .form-group select:focus, .form-group input:focus,
+        .form-group textarea:focus, .inquiry-form-group input:focus,
         .inquiry-form-group textarea:focus {
             border-color: var(--primary-neon);
-            box-shadow: 0 0 0 4px rgba(13, 245, 227, 0.08), 0 0 12px rgba(13, 245, 227, 0.2);
-            background: rgba(2, 12, 27, 0.95);
+            box-shadow: 0 0 0 4px rgba(13, 245, 227, 0.08);
         }
 
-        .btn-pay-confirm,
-        .btn-send-inquiry {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            width: 100%;
-            padding: 14px;
+        .btn-pay-confirm, .btn-send-inquiry {
+            display: flex; align-items: center; justify-content: center;
+            gap: 10px; width: 100%; padding: 14px;
             background: linear-gradient(135deg, var(--primary-neon), #00cbb9);
-            color: var(--bg-deep-abyss);
-            border: none;
-            border-radius: 50px;
-            font-weight: 800;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: var(--transition-smooth);
-            margin-top: 1rem;
-            font-family: inherit;
-            letter-spacing: 0.3px;
-            box-shadow: 0 4px 15px rgba(13, 245, 227, 0.3);
+            color: var(--bg-deep-abyss); border: none;
+            border-radius: 50px; font-weight: 800; font-size: 0.9rem;
+            cursor: pointer; font-family: inherit; margin-top: 1rem;
         }
 
-        .btn-pay-confirm:hover:not(:disabled),
-        .btn-send-inquiry:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0 25px rgba(13, 245, 227, 0.55);
-        }
-
-        .btn-pay-confirm:disabled {
-            opacity: 0.65;
-            cursor: not-allowed;
-        }
-
-        .alert-icon {
-            font-size: 3.2rem;
-            margin-bottom: 1rem;
-            display: inline-block;
-        }
-
-        .alert-box.success .alert-icon { color: #10b981; text-shadow: 0 0 25px rgba(16, 185, 129, 0.5); }
-        .alert-box.warning .alert-icon { color: #fbbf24; text-shadow: 0 0 25px rgba(251, 191, 36, 0.5); }
-
-        .alert-title {
-            font-size: 1.25rem;
-            font-weight: 800;
-            color: var(--text-high-contrast);
-            margin-bottom: 0.75rem;
-        }
-
-        .alert-message {
-            font-size: 0.88rem;
-            color: var(--text-muted-teal);
-            line-height: 1.7;
-            margin-bottom: 1.5rem;
-            white-space: pre-line;
-        }
-
+        .alert-icon { font-size: 3.2rem; margin-bottom: 1rem; display: inline-block; }
+        .alert-box.success .alert-icon { color: #10b981; }
+        .alert-box.warning .alert-icon { color: #fbbf24; }
+        .alert-title { font-size: 1.25rem; font-weight: 800; margin-bottom: 0.75rem; }
+        .alert-message { font-size: 0.88rem; color: var(--text-muted-teal); line-height: 1.7; margin-bottom: 1.5rem; }
         .alert-close-btn {
-            padding: 11px 36px;
-            border: none;
-            border-radius: 50px;
-            font-weight: 800;
-            font-size: 0.88rem;
-            cursor: pointer;
+            padding: 11px 36px; border: none; border-radius: 50px;
+            font-weight: 800; font-size: 0.88rem; cursor: pointer;
             font-family: inherit;
-            transition: var(--transition-smooth);
-            letter-spacing: 0.3px;
         }
-
-        .alert-box.success .alert-close-btn {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: var(--bg-deep-abyss);
-        }
-
-        .alert-box.warning .alert-close-btn {
-            background: linear-gradient(135deg, #fbbf24, #f59e0b);
-            color: var(--bg-deep-abyss);
-        }
-
-        .alert-close-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); }
-
-        @media (max-width: 900px) {
-            .cor-school-name { font-size: 1.3rem; }
-            .hero-banner h1 { font-size: 1.7rem; }
-        }
+        .alert-box.success .alert-close-btn { background: linear-gradient(135deg, #10b981, #059669); color: var(--bg-deep-abyss); }
+        .alert-box.warning .alert-close-btn { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: var(--bg-deep-abyss); }
 
         @media (max-width: 820px) {
             .payment-assessment-wrap { grid-template-columns: 1fr; }
-            .signature-box { grid-template-columns: 1fr; gap: 1rem; }
+            .signature-box { grid-template-columns: 1fr; }
             .student-info-grid { grid-template-columns: 1fr; }
             .student-info-right { align-items: flex-start; text-align: left; }
             .contact-grid { grid-template-columns: 1fr; }
         }
-
-        @media (max-width: 700px) {
-            .navbar { padding: 12px 4%; }
-            .cor-card { padding: 1.75rem 1.25rem; }
-            .cor-school-name { font-size: 1.1rem; }
-            .hero-banner { padding: 2.5rem 4% 2rem; }
-            .hero-banner h1 { font-size: 1.4rem; }
-            .course-table { font-size: 0.75rem; }
-            .course-table th, .course-table td { padding: 9px 10px; }
-            .cor-title { font-size: 0.85rem; letter-spacing: 2px; }
-        }
-
         @media (max-width: 480px) {
-            .navbar-brand .brand-text h1 { font-size: 0.95rem; }
-            .navbar-brand .brand-text span { font-size: 0.55rem; letter-spacing: 1px; }
-            .navbar-brand .logo-box { width: 40px; height: 40px; }
-            .user-pill { font-size: 0.72rem; padding: 6px 12px; }
-            .btn-logout { font-size: 0.72rem; padding: 6px 14px; }
-            .cor-header-top { flex-direction: column; }
-            .cor-logo { width: 60px; height: 60px; }
             .cor-card { padding: 1.25rem 1rem; }
             .hero-banner h1 { font-size: 1.2rem; }
-            .section-title h2 { font-size: 0.9rem; }
-            .contact-card { padding: 1rem; }
-            .modal-box, .inquiry-modal-box, .alert-box { padding: 1.5rem; }
         }
     </style>
 </head>
@@ -1558,7 +900,7 @@ if (!empty($enrolled['course'])) {
                                 <tr class="total-row">
                                     <td colspan="2" style="text-align:right; padding-right:20px;">TOTAL UNITS</td>
                                     <td><?php echo number_format($totalUnits, 1); ?></td>
-                                    <td colspan="4" style="text-align:left;">Bridging: <?php echo number_format($bridging, 1); ?> &nbsp;|&nbsp; NSTP: <?php echo number_format($nstpUnits, 1); ?></td>
+                                    <td colspan="4" style="text-align:left;">Bridging: <?php echo number_format($bridging, 1); ?> | NSTP: <?php echo number_format($nstpUnits, 1); ?></td>
                                 </tr>
                             <?php else: ?>
                                 <tr class="empty-row">
@@ -1570,11 +912,10 @@ if (!empty($enrolled['course'])) {
                 </div>
 
                 <div class="payment-assessment-wrap">
-
                     <div class="payment-assess-card">
                         <div class="card-header"><i class="fas fa-receipt"></i> Payment Details</div>
                         <div class="table-container">
-                            <table class="data-table" id="paymentTable">
+                            <table class="data-table">
                                 <thead>
                                     <tr>
                                         <th style="width: 40px;">#</th>
@@ -1594,9 +935,7 @@ if (!empty($enrolled['course'])) {
                                             </tr>
                                         <?php endforeach; ?>
                                     <?php else: ?>
-                                        <tr class="empty-row">
-                                            <td colspan="4"><i class="fas fa-info-circle"></i> No payments recorded yet.</td>
-                                        </tr>
+                                        <tr class="empty-row"><td colspan="4"><i class="fas fa-info-circle"></i> No payments recorded yet.</td></tr>
                                     <?php endif; ?>
                                     <tr>
                                         <td colspan="3" style="text-align: right; font-weight: 700; color: var(--primary-neon); background: rgba(13,245,227,0.08); border-top: 2px solid rgba(13,245,227,0.3);">TOTAL PAID:</td>
@@ -1612,38 +951,14 @@ if (!empty($enrolled['course'])) {
                         <div class="table-container">
                             <table class="data-table">
                                 <tbody>
-                                    <tr class="assessment-item">
-                                        <td>Tuition Fee:</td>
-                                        <td><?php echo money(parseMoney($assessTuition)); ?></td>
-                                    </tr>
-                                    <tr class="assessment-item">
-                                        <td>Academic:</td>
-                                        <td><?php echo money(parseMoney($assessAcademic)); ?></td>
-                                    </tr>
-                                    <tr class="assessment-item">
-                                        <td>Computer:</td>
-                                        <td><?php echo money(parseMoney($assessComputer)); ?></td>
-                                    </tr>
-                                    <tr class="assessment-item">
-                                        <td>Misc. Fee:</td>
-                                        <td><?php echo money(parseMoney($assessMisc)); ?></td>
-                                    </tr>
-                                    <tr class="assessment-item">
-                                        <td>NSTP:</td>
-                                        <td><?php echo money(parseMoney($assessNSTP)); ?></td>
-                                    </tr>
-                                    <tr class="assessment-item">
-                                        <td>Others:</td>
-                                        <td><?php echo money(parseMoney($assessOthers)); ?></td>
-                                    </tr>
-                                    <tr class="assessment-total">
-                                        <td>TOTAL:</td>
-                                        <td><?php echo money($totalAssessment); ?></td>
-                                    </tr>
-                                    <tr class="assessment-remaining">
-                                        <td>Balance:</td>
-                                        <td id="remainingBalance"><?php echo money($remainingBalance); ?></td>
-                                    </tr>
+                                    <tr class="assessment-item"><td>Tuition Fee:</td><td><?php echo money(parseMoney($assessTuition)); ?></td></tr>
+                                    <tr class="assessment-item"><td>Academic:</td><td><?php echo money(parseMoney($assessAcademic)); ?></td></tr>
+                                    <tr class="assessment-item"><td>Computer:</td><td><?php echo money(parseMoney($assessComputer)); ?></td></tr>
+                                    <tr class="assessment-item"><td>Misc. Fee:</td><td><?php echo money(parseMoney($assessMisc)); ?></td></tr>
+                                    <tr class="assessment-item"><td>NSTP:</td><td><?php echo money(parseMoney($assessNSTP)); ?></td></tr>
+                                    <tr class="assessment-item"><td>Others:</td><td><?php echo money(parseMoney($assessOthers)); ?></td></tr>
+                                    <tr class="assessment-total"><td>TOTAL:</td><td><?php echo money($totalAssessment); ?></td></tr>
+                                    <tr class="assessment-remaining"><td>Balance:</td><td id="remainingBalance"><?php echo money($remainingBalance); ?></td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -1715,28 +1030,12 @@ if (!empty($enrolled['course'])) {
                 <h2>Inquire Us</h2>
                 <p>Send an official message directly to our administrative team.</p>
             </div>
-
             <form id="inquiryForm" onsubmit="submitInquiry(event)">
-                <div class="inquiry-form-group">
-                    <label>Full Name</label>
-                    <input type="text" id="inqFullName" value="<?php echo $full_name; ?>" required />
-                </div>
-                <div class="inquiry-form-group">
-                    <label>Email Address</label>
-                    <input type="email" id="inqEmail" value="<?php echo htmlspecialchars($enrolled['email'] ?? ''); ?>" required />
-                </div>
-                <div class="inquiry-form-group">
-                    <label>Subject</label>
-                    <input type="text" id="inqSubject" placeholder="e.g. Admission Inquiry / Prospectus Request" required />
-                </div>
-                <div class="inquiry-form-group">
-                    <label>Concern</label>
-                    <textarea id="inqMessage" placeholder="Please describe your message or concern here..." required></textarea>
-                </div>
-
-                <button type="submit" class="btn-send-inquiry">
-                    <i class="fas fa-paper-plane"></i> Send Message
-                </button>
+                <div class="inquiry-form-group"><label>Full Name</label><input type="text" id="inqFullName" value="<?php echo $full_name; ?>" required /></div>
+                <div class="inquiry-form-group"><label>Email Address</label><input type="email" id="inqEmail" value="<?php echo htmlspecialchars($enrolled['email'] ?? ($student['email'] ?? '')); ?>" required /></div>
+                <div class="inquiry-form-group"><label>Subject</label><input type="text" id="inqSubject" placeholder="e.g. Admission Inquiry / Prospectus Request" required /></div>
+                <div class="inquiry-form-group"><label>Concern</label><textarea id="inqMessage" placeholder="Please describe your message or concern here..." required></textarea></div>
+                <button type="submit" class="btn-send-inquiry"><i class="fas fa-paper-plane"></i> Send Message</button>
             </form>
         </div>
     </div>
@@ -1745,7 +1044,6 @@ if (!empty($enrolled['course'])) {
         <div class="modal-box">
             <button class="modal-close" onclick="closePaymentModal()">&times;</button>
             <div class="modal-title"><i class="fas fa-mobile-alt"></i> Pay via GCash</div>
-
             <div class="form-group">
                 <label>Payment Purpose</label>
                 <select id="paymentPurpose">
@@ -1753,17 +1051,14 @@ if (!empty($enrolled['course'])) {
                     <option value="Full Payment">Full Payment</option>
                 </select>
             </div>
-
             <div class="form-group">
                 <label>Amount (₱)</label>
                 <input type="number" id="paymentAmount" placeholder="Enter amount" min="500" step="100">
             </div>
-
             <div class="form-group">
                 <label>GCash Mobile Number</label>
-                <input type="tel" id="gcashNumber" placeholder="0917-123-4567" maxlength="13" pattern="[0-9]{4}-[0-9]{3}-[0-9]{4}" oninput="formatGCashNumber(this)">
+                <input type="tel" id="gcashNumber" placeholder="0917-123-4567" maxlength="13" oninput="formatGCashNumber(this)">
             </div>
-
             <button class="btn-pay-confirm" id="confirmPayBtn" onclick="processPayment()">
                 <i class="fas fa-check-circle"></i> Confirm Payment
             </button>
@@ -1782,38 +1077,21 @@ if (!empty($enrolled['course'])) {
     <script>
         let totalPaid = <?php echo json_encode(round($totalPaid, 2)); ?>;
         let remainingBalance = <?php echo json_encode(round($remainingBalance, 2)); ?>;
-        let paymentCounter = <?php echo json_encode(count($payments) + 1); ?>;
         const studentCode = <?php echo json_encode($paymentCode); ?>;
-        const currentDate = new Date().toLocaleDateString('en-US', {
-            month: 'short',
-            day: '2-digit',
-            year: 'numeric'
-        });
 
         function showAlert(type, title, message) {
-            const alertModal = document.getElementById('alertModal');
-            const alertBox = document.getElementById('alertBox');
-            const alertIcon = document.getElementById('alertIcon');
-            const alertTitle = document.getElementById('alertTitle');
-            const alertMessage = document.getElementById('alertMessage');
-
-            alertBox.classList.remove('success', 'warning');
-            if (type === 'success') {
-                alertBox.classList.add('success');
-                alertIcon.innerHTML = '<i class="fas fa-check-circle"></i>';
-            } else {
-                alertBox.classList.add('warning');
-                alertIcon.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
-            }
-
-            alertTitle.textContent = title;
-            alertMessage.textContent = message;
-            alertModal.classList.add('active');
+            const modal = document.getElementById('alertModal');
+            const box = document.getElementById('alertBox');
+            const icon = document.getElementById('alertIcon');
+            const ttl = document.getElementById('alertTitle');
+            const msg = document.getElementById('alertMessage');
+            box.classList.remove('success', 'warning');
+            if (type === 'success') { box.classList.add('success'); icon.innerHTML = '<i class="fas fa-check-circle"></i>'; }
+            else { box.classList.add('warning'); icon.innerHTML = '<i class="fas fa-exclamation-triangle"></i>'; }
+            ttl.textContent = title; msg.textContent = message;
+            modal.classList.add('active');
         }
-
-        function closeAlert() {
-            document.getElementById('alertModal').classList.remove('active');
-        }
+        function closeAlert() { document.getElementById('alertModal').classList.remove('active'); }
 
         function formatGCashNumber(input) {
             let value = input.value.replace(/\D/g, '');
@@ -1826,46 +1104,29 @@ if (!empty($enrolled['course'])) {
         }
 
         function openPaymentModal() {
-            if (remainingBalance <= 0) {
-                showAlert('success', 'Fully Paid', 'You have no remaining balance.');
-                return;
-            }
+            if (remainingBalance <= 0) { showAlert('success', 'Fully Paid', 'You have no remaining balance.'); return; }
             document.getElementById('paymentAmount').value = '';
-            document.getElementById('paymentAmount').placeholder = 'Max: ₱ ' + remainingBalance.toLocaleString('en-US', {
-                minimumFractionDigits: 2
-            });
+            document.getElementById('paymentAmount').placeholder = 'Max: ₱ ' + remainingBalance.toLocaleString('en-US', {minimumFractionDigits: 2});
             document.getElementById('gcashNumber').value = '';
             document.getElementById('paymentModal').classList.add('active');
         }
-
-        function closePaymentModal() {
-            document.getElementById('paymentModal').classList.remove('active');
-        }
+        function closePaymentModal() { document.getElementById('paymentModal').classList.remove('active'); }
 
         async function processPayment() {
             const purpose = document.getElementById('paymentPurpose').value;
             const amountInput = document.getElementById('paymentAmount').value;
             const gcashNum = document.getElementById('gcashNumber').value;
 
-            if (!amountInput || amountInput < 500) {
-                showAlert('warning', 'Invalid Amount', 'Please enter a valid amount (minimum ₱500).');
-                return;
-            }
-            const gcashRegex = /^[0-9]{4}-[0-9]{3}-[0-9]{4}$/;
-            if (!gcashRegex.test(gcashNum)) {
-                showAlert('warning', 'Invalid Mobile Number', 'Please enter a valid GCash number in the format: 0917-123-4567');
-                return;
-            }
+            if (!amountInput || amountInput < 500) { showAlert('warning', 'Invalid Amount', 'Please enter a valid amount (minimum ₱500).'); return; }
+            const re = /^[0-9]{4}-[0-9]{3}-[0-9]{4}$/;
+            if (!re.test(gcashNum)) { showAlert('warning', 'Invalid Mobile Number', 'Format: 0917-123-4567'); return; }
 
             let amount = parseFloat(amountInput);
             if (purpose === 'Full Payment') amount = remainingBalance;
-            if (amount > remainingBalance) {
-                showAlert('warning', 'Insufficient Balance', 'Amount exceeds the remaining balance. Please enter a valid amount.');
-                return;
-            }
+            if (amount > remainingBalance) { showAlert('warning', 'Insufficient Balance', 'Amount exceeds remaining balance.'); return; }
 
             const btn = document.getElementById('confirmPayBtn');
-            const originalHtml = btn.innerHTML;
+            const orig = btn.innerHTML;
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing…';
 
@@ -1877,36 +1138,22 @@ if (!empty($enrolled['course'])) {
                 fd.append('purpose', purpose);
                 fd.append('gcash_number', gcashNum);
 
-                const res = await fetch('profile.php', {
-                    method: 'POST',
-                    body: fd
-                });
+                const res = await fetch('profile.php', { method: 'POST', body: fd });
                 const data = await res.json();
 
-                if (!data.success) {
-                    showAlert('warning', 'Payment Failed', data.message || 'Something went wrong.');
-                    btn.disabled = false;
-                    btn.innerHTML = originalHtml;
-                    return;
-                }
+                if (!data.success) { showAlert('warning', 'Payment Failed', data.message || 'Something went wrong.'); btn.disabled = false; btn.innerHTML = orig; return; }
 
                 totalPaid += amount;
                 remainingBalance -= amount;
-
-                document.getElementById('totalPaid').textContent = '₱ ' + totalPaid.toLocaleString('en-US', {
-                    minimumFractionDigits: 2
-                });
-                document.getElementById('remainingBalance').textContent = '₱ ' + remainingBalance.toLocaleString('en-US', {
-                    minimumFractionDigits: 2
-                });
-
+                document.getElementById('totalPaid').textContent = '₱ ' + totalPaid.toLocaleString('en-US', {minimumFractionDigits: 2});
+                document.getElementById('remainingBalance').textContent = '₱ ' + remainingBalance.toLocaleString('en-US', {minimumFractionDigits: 2});
                 closePaymentModal();
-                showAlert('success', 'Payment Successful', 'Your payment of ₱ ' + amount.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' has been recorded successfully.');
+                showAlert('success', 'Payment Successful', 'Your payment of ₱ ' + amount.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' has been recorded.');
             } catch (err) {
                 console.error(err);
-                showAlert('warning', 'Network Error', 'Something went wrong while processing your payment.');
+                showAlert('warning', 'Network Error', 'Something went wrong.');
                 btn.disabled = false;
-                btn.innerHTML = originalHtml;
+                btn.innerHTML = orig;
             }
         }
     </script>
